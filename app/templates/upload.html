@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload MCQ | Modern Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        /* Import Google Fonts for cleaner typography */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* animated grain / noise overlay for premium texture */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            background: rgba(22, 22, 35, 0.75);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* subtle glow on hover */
+        .container:hover {
+            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, #FFFFFF, #c0b9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "📚";
+            font-size: 1.9rem;
+            background: none;
+            -webkit-background-clip: unset;
+            color: #c1b3ff;
+        }
+
+        .subhead {
+            text-align: center;
+            color: #a7a9c0;
+            font-size: 0.8rem;
+            margin-bottom: 1.8rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 6px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e4ff;
+            margin-top: 1.2rem;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        label::before {
+            content: "✨";
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Different icons per label using pseudo class nth-of-type */
+        label:nth-of-type(1)::before { content: "📖"; }
+        label:nth-of-type(2)::before { content: "📑"; }
+        label:nth-of-type(3)::before { content: "🎯"; }
+        label:nth-of-type(4)::before { content: "🔖"; }
+        label:nth-of-type(5)::before { content: "📝"; }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(10, 10, 20, 0.6);
+            color: #f0f0ff;
+            outline: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b9b3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: 'Menlo', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            background: rgba(8, 8, 16, 0.7);
+        }
+
+        select:hover, textarea:hover {
+            border-color: rgba(130, 110, 255, 0.7);
+            background: rgba(20, 18, 38, 0.8);
+        }
+
+        select:focus, textarea:focus {
+            border-color: #7c6eff;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.3);
+            background: #14122b;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px 0;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(95deg, #5f4bdb, #8b6ef0);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 20px -6px rgba(90, 60, 200, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(95deg, #6e58f0, #9c80ff);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 26px -8px rgba(100, 70, 230, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .success {
+            color: #b3ffcf;
+            background: rgba(39, 174, 96, 0.18);
+            padding: 12px 16px;
+            border-radius: 60px;
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(70, 230, 130, 0.3);
+            letter-spacing: 0.2px;
+        }
+
+        .error {
+            color: #ffb4b4;
+            background: rgba(220, 53, 69, 0.18);
+            padding: 12px 16px;
+            border-radius: 60px;
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 80, 80, 0.3);
+        }
+
+        /* custom placeholder style */
+        textarea::placeholder {
+            color: #6d6c8a;
+            font-weight: 400;
+            font-family: 'Inter', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* subtle spinner while loading? not needed, but adds micro-interaction */
+        select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* responsive + mobile improvements */
+        @media (max-width: 550px) {
+            .container {
+                padding: 1.5rem 1.2rem;
+                border-radius: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h2::before {
+                font-size: 1.5rem;
+            }
+
+            button {
+                padding: 12px 0;
+                font-size: 0.9rem;
+            }
+
+            label {
+                font-size: 0.78rem;
+            }
+
+            select, textarea {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* custom card inner spacing */
+        .form-group {
+            margin-bottom: 0.2rem;
+        }
+
+        /* add micro-animation for select dropdowns */
+        select, textarea, button {
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* subtle glass scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e2a;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #6b5bce;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Upload MCQs</h2>
+    <div style="text-align: center;">
+        <div class="subhead">JSON based · smart upload</div>
+    </div>
+
+    {% if success %}
+    <p class="success">✓ {{ success }}</p>
+    {% endif %}
+
+    {% if error %}
+    <p class="error">⚠ {{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Subject -->
+        <label>Subject</label>
+        <select id="subject">
+            <option value="">Select Subject</option>
+            {% for s in subjects %}
+            <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Chapter -->
+        <label>Chapter</label>
+        <select id="chapter">
+            <option value="">-- first select subject --</option>
+        </select>
+
+        <!-- Lesson -->
+        <label>Lesson</label>
+        <select id="lesson">
+            <option value="">-- first select chapter --</option>
+        </select>
+
+        <!-- SubLesson -->
+        <label>Sub Lesson</label>
+        <select id="sub_lesson" name="sub_lesson">
+            <option value="">-- first select lesson --</option>
+        </select>
+
+        <!-- JSON -->
+        <label>Paste JSON</label>
+        <textarea name="json_data" rows="8" placeholder='Example: [{"question": "What is Django?", "options": ["A", "B", "C"], "answer": "A"}]'></textarea>
+
+        <button type="submit">
+            <span>🚀</span> Upload MCQs
+        </button>
+    </form>
+</div>
+
+<script>
+/* Load Chapters */
+document.getElementById("subject").addEventListener("change", function() {
+    let subjectId = this.value;
+    let chapterSelect = document.getElementById("chapter");
+    let lessonSelect = document.getElementById("lesson");
+    let subLessonSelect = document.getElementById("sub_lesson");
+    
+    // reset downstream selects
+    lessonSelect.innerHTML = '<option value="">-- first select chapter --</option>';
+    subLessonSelect.innerHTML = '<option value="">-- first select lesson --</option>';
+    
+    if (!subjectId) {
+        chapterSelect.innerHTML = '<option value="">Select Subject first</option>';
+        return;
+    }
+    
+    fetch(`/get-chapters/${subjectId}/`)
+    .then(res => res.json())
+    .then(data => {
+        chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+        if (data.length === 0) {
+            chapterSelect.innerHTML += '<option disabled>No chapters available</option>';
+        }
+        data.forEach(c => {
+            chapterSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    })
+    .catch(err => {
+        console.warn("Error fetching chapters", err);
+        chapterSelect.innerHTML = '<option value="">Error loading chapters</option>';
+    });
+});
+
+/* Load Lessons */
+document.getElementById("chapter").addEventListener("change", function() {
+    let chapterId = this.value;
+    let lessonSelect = document.getElementById("lesson");
+    let subLessonSelect = document.getElementById("sub_lesson");
+    
+    subLessonSelect.innerHTML = '<option value="">-- first select lesson --</option>';
+    
+    if (!chapterId) {
+        lessonSelect.innerHTML = '<option value="">-- first select chapter --</option>';
+        return;
+    }
+    
+    fetch(`/get-lessons/${chapterId}/`)
+    .then(res => res.json())
+    .then(data => {
+        lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
+        if (data.length === 0) {
+            lessonSelect.innerHTML += '<option disabled>No lessons found</option>';
+        }
+        data.forEach(l => {
+            lessonSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
+        });
+    })
+    .catch(err => {
+        console.warn("Lessons fetch error", err);
+        lessonSelect.innerHTML = '<option value="">Failed to load lessons</option>';
+    });
+});
+
+/* Load SubLessons */
+document.getElementById("lesson").addEventListener("change", function() {
+    let lessonId = this.value;
+    let subSelect = document.getElementById("sub_lesson");
+    
+    if (!lessonId) {
+        subSelect.innerHTML = '<option value="">-- first select lesson --</option>';
+        return;
+    }
+    
+    fetch(`/get-sub-lessons/${lessonId}/`)
+    .then(res => res.json())
+    .then(data => {
+        subSelect.innerHTML = '<option value="">Select SubLesson</option>';
+        if (data.length === 0) {
+            subSelect.innerHTML += '<option disabled>No sub-lessons available</option>';
+        }
+        data.forEach(s => {
+            subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        });
+    })
+    .catch(err => {
+        console.warn("SubLessons error", err);
+        subSelect.innerHTML = '<option value="">Error loading sub lessons</option>';
+    });
+});
+
+// Optional: if any pre-selected values (e.g., form errors) we keep behavior intact.
+// Also ensure that if subject is pre-filled from backend, we trigger loading? 
+// but original logic doesn't require that, but we add for consistency: 
+// when page loads, if subject has a value, trigger its change event manually (if needed)
+document.addEventListener("DOMContentLoaded", function() {
+    let subjectEl = document.getElementById("subject");
+    if (subjectEl && subjectEl.value) {
+        // trigger change event to populate chapters dynamically
+        let changeEvent = new Event('change', { bubbles: true });
+        subjectEl.dispatchEvent(changeEvent);
+    }
+    
+    // additional check: if chapter already pre-filled (due to form re-render)
+    let chapterEl = document.getElementById("chapter");
+    if (chapterEl && chapterEl.value && subjectEl.value) {
+        let chapEvent = new Event('change', { bubbles: true });
+        chapterEl.dispatchEvent(chapEvent);
+    }
+    
+    let lessonEl = document.getElementById("lesson");
+    if (lessonEl && lessonEl.value && chapterEl && chapterEl.value) {
+        let lessonEvent = new Event('change', { bubbles: true });
+        lessonEl.dispatchEvent(lessonEvent);
+    }
+});
+</script>
+
+</body>
+</html>

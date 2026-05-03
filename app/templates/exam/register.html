@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>রেজিস্ট্রেশন | Live MCQ™</title>
+    <meta name="description" content="Live MCQ™-এ রেজিস্ট্রেশন করুন এবং চাকরির প্রস্তুতি শুরু করুন।">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Poppins:wght@500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .bg-fluid-gradient {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255, 255, 255, 0) 35%),
+                        radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255, 255, 255, 0) 45%),
+                        radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255, 255, 255, 0) 9%);
+        }
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-figtree bg-fluid-gradient">
+    {% include 'header.html' %}
+    <div class=" flex items-center justify-center px-4 py-20">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Dark-Logo.png" alt="Live MCQ" class="h-12 mx-auto mb-4">
+                <h2 class="text-2xl font-bold text-headline">নতুন অ্যাকাউন্ট</h2>
+                <p class="text-body text-sm mt-2">রেজিস্ট্রেশন করে পরীক্ষা শুরু করুন</p>
+            </div>
+            
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-headline mb-2">ইউজারনেম</label>
+                    <input type="text" id="username" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:border-primary">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-headline mb-2">ইমেইল</label>
+                    <input type="email" id="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:border-primary">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-headline mb-2">পাসওয়ার্ড</label>
+                    <div class="relative">
+                        <input type="password" id="password" required class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:border-primary">
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-headline mb-2">পাসওয়ার্ড নিশ্চিত করুন</label>
+                    <div class="relative">
+                        <input type="password" id="confirm_password" required class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:border-primary">
+                        <button type="button" id="toggleConfirmPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="errorMsg" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-xl text-sm"></div>
+                
+                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-full font-semibold transition">
+                    রেজিস্ট্রেশন করুন
+                </button>
+            </form>
+            
+            <p class="text-center text-sm text-body mt-6">
+                ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="{% url 'login_page' %}" class="text-primary font-semibold hover:underline">লগইন করুন</a>
+            </p>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+    
+    <script>
+        $('#registerForm').submit(function(e) {
+            e.preventDefault();
+            
+            if ($('#password').val() !== $('#confirm_password').val()) {
+                $('#errorMsg').text('পাসওয়ার্ড মিলছে না').removeClass('hidden');
+                setTimeout(() => $('#errorMsg').addClass('hidden'), 3000);
+                return;
+            }
+            
+            $.ajax({
+                url: '/api/register/',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: $('#username').val(),
+                    email: $('#email').val(),
+                    password: $('#password').val(),
+                    confirm_password: $('#confirm_password').val()
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = '/';
+                    }
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    $('#errorMsg').text(response.message || 'রেজিস্ট্রেশন failed').removeClass('hidden');
+                    setTimeout(() => $('#errorMsg').addClass('hidden'), 3000);
+                }
+            });
+        });
+
+        // Toggle password visibility
+        $('#togglePassword').click(function() {
+            const passwordInput = $('#password');
+            const icon = $(this).find('i');
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+        // Toggle confirm password visibility
+        $('#toggleConfirmPassword').click(function() {
+            const confirmPasswordInput = $('#confirm_password');
+            const icon = $(this).find('i');
+            if (confirmPasswordInput.attr('type') === 'password') {
+                confirmPasswordInput.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                confirmPasswordInput.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>

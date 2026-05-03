@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>সাধারণ জিজ্ঞাসা | Live MCQ™</title>
+    <meta name="description" content="Live MCQ™ নিয়ে আপনার সকল প্রশ্নের উত্তর। প্যাকেজ, লাইভ পরীক্ষা, লগইন, পেমেন্ট ও প্রস্তুতি সংক্রান্ত সকল তথ্য জানুন এখানে।">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Figtree', sans-serif;
+            color: #546078;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Figtree', sans-serif;
+            color: #1C1C1D;
+        }
+        /* Animated underline for highlighted text */
+        .highlighted-text {
+            position: relative;
+            display: inline-block;
+        }
+        .highlighted-text svg {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 106%;
+            height: 40%;
+            overflow: visible;
+        }
+        .highlighted-text svg path {
+            stroke: #FF6600;
+            stroke-width: 8;
+            fill: none;
+            stroke-dasharray: 1500;
+            animation: drawLine 1.5s cubic-bezier(0.29, 1.11, 0.74, 1.04) forwards;
+        }
+        @keyframes drawLine {
+            from { stroke-dasharray: 0 1500; }
+            to { stroke-dasharray: 1500 1500; }
+        }
+        /* Accordion styles */
+        .accordion-item {
+            transition: all 0.3s ease;
+        }
+        .accordion-item .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            padding: 0 1.25rem 0 1.25rem;
+            transition: max-height 0.3s ease, opacity 0.3s ease, visibility 0.3s ease, padding 0.3s ease;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 800px;
+            opacity: 1;
+            visibility: visible;
+            padding: 0 1.25rem 1.25rem 1.25rem;
+        }
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        /* Contact card hover effect */
+        .contact-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .contact-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+        /* Animated background gradient */
+        .animated-bg {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255,255,255,0) 35%),
+                        radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255,255,255,0) 45%),
+                        radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255,255,255,0) 9%);
+            background-size: 200% 200%;
+            animation: gradientShift 14s linear infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 50% 80%; opacity: 1; }
+            50% { background-position: 55% 50%; opacity: 0.6; }
+            100% { background-position: 50% 80%; opacity: 1; }
+        }
+        /* Fluid canvas effect */
+        .fluid-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(51, 51, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 102, 0, 0.2), transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(42, 44, 141, 0.4), transparent 50%);
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fluidShift 15s linear infinite;
+        }
+        @keyframes fluidShift {
+            0% { background-position: 10% 10%; }
+            50% { background-position: 60% 70%; }
+            100% { background-position: 10% 10%; }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3333FF;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    
+    {% include 'header.html' %}
+
+    <section class="relative overflow-hidden bg-secondary pt-16 pb-20 lg:pt-20 lg:pb-28">
+        <div class="absolute inset-0 fluid-overlay"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 text-sm text-white/80 mb-6">
+                <a href="/" class="hover:text-white transition"><i class="fas fa-home mr-1"></i> হোম</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-white">সাধারণ জিজ্ঞাসা</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in-up">
+                সাধারণ জিজ্ঞাসা
+            </h1>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-headline">
+                    এখনো <span class="text-accent relative inline-block highlighted-text">
+                        কনফিউশনে
+                        <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+                            <path d="M5,125.4c30.5-8.1,69.7-16.3,113.2-21.2c43.5-4.9,86.9-6.6,130.1-5.9c43.2,0.7,86.4,2.7,129.2,6.4c42.8,3.7,85.3,8.7,127.4,14.9" stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </span> ভুগছেন?
+                </h2>
+                <p class="text-body max-w-2xl mx-auto">
+                    FAQ পেজে আমাদের দেওয়া উত্তরগুলো দেখে আপনি সহজেই আপনার সমস্যার সমাধান পেয়ে যাবেন। যদি কিছু না বুঝতে পারেন, জানাবেন, আমরা সহায়তায় আছি!
+                </p>
+            </div>
+
+            <div class="space-y-5" id="faqAccordion">
+                
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>আমি স্টাডি গ্রুপে যুক্ত হতে চাই। কীভাবে হবো?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>স্টাডি গ্রুপে জয়েন করতে অ্যাপের হোমপেইজে "<strong>Study Group Section</strong>" অপশনে দেখুন।</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>লাইভ পরীক্ষা দিলে ফলাফল কীভাবে দেখে?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>যে বাটনের লাইভ পরীক্ষা দিবেন লাইভ পরীক্ষার পর দিন সকালে ঐ বাটনের অধীনে "<strong>Result</strong>" অপশন থেকে ফলাফল দেখতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>লাইভ পরীক্ষা মিস হলে পরীক্ষাটি কি পরবর্তীতে দেয়া যাবে?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>লাইভ পরীক্ষা মিস হলে, লাইভ পরীক্ষার তারিখের পরের দিন সকালে আর্কাইভে প্রশ্ন জমা হয়। আপনি আর্কাইভ থেকে যত খুশি ততবার পরীক্ষা দিয়ে ফলাফল ও ব্যাখ্যা সহকারে পড়ে নিতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>অ্যাপ থেকে পেমেন্ট করার পর প্যাকেজ চালু হয়েছে কিনা কীভাবে বুঝবো?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>অ্যাপ থেকে পেমেন্ট করার পর অ্যাপ মেনু থেকে "<strong>Profile</strong>" অপশনে গেলেই প্যাকেজের নাম ও মেয়াদ দেখতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>লগইন মাধ্যম ভুলে গেলে আপনাদের অ্যাপে পুনরায় লগইন করার উপায় কী?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>লগইন মাধ্যম ভুলে গেলেও আইডির তথ্য হারানোর কোন ভয় নেই। আপনার পূর্বের আইডির প্রোফাইলে দেয়া মোবাইল নাম্বারটি জানালেও আমাদের সার্ভার থেকে আপনার আইডির লগইন মাধ্যম খুজে বের করা যাবে।</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>অ্যাপ থেকে পেমেন্ট করতে সমস্যা হলে করণীয় কী?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>অ্যাপ থেকে সরাসরি পেমেন্ট করতে সমস্যা হলে আলাদা পার্সোনাল পেমেন্টের নাম্বার দেয়া যাবে, সেন্ড মানি করেও প্যাকেজ একটিভ করতে পারবেন। সেক্ষেত্রে আমাদের অফিসিয়াল ফেইসবুক পেইজ অথবা হোয়াটস্যাপ নম্বরে মেসেজ দিয়ে অথবা সরাসরি কল দিয়ে যোগাযোগ করতে পারবেন। আমাদের যোগাযোগ নাম্বার: <a href="tel:01701-377322" class="text-primary hover:text-accent">01701-377322</a></p>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>আমি চলমান বিসিএস এর প্রস্তুতি নিতে চাই, কোন প্যাকেজটি কিনবো?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>শুধুমাত্র চলমান বিসিএস এর জন্য আপনি আমাদের বার্ষিক প্যাকেজ নিতে পারেন। তবে আপনি যদি চলতি বিসিএস পরীক্ষা দেয়ার পরেও পরবর্তী বিসিএসগুলো সহ অন্যান্য চাকরির জন্য প্রস্তুতি চালিয়ে যেতে চান, তাহলে আমাদের স্বাধীন প্যাকেজ নিতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 8 -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>আমি সম্পূর্ণ নতুন চাকরিপ্রার্থী, কীভাবে শুরু করবো?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed space-y-3">
+                        <p>Live MCQ-তে বেশ কয়েকটি বাটনে নিয়মিত পরীক্ষা হয়। আপনার প্রথমেই সব ফলো করার দরকার নেই। আপনি যদি একদম নতুন হিসাবে প্রস্তুতি শুরু করেন তাহলে –</p>
+                        <p>নতুনদের বিসিএস প্রস্তুতি – ২০০ দিনে সম্পূর্ণ সিলেবাস’ বাটনের পরীক্ষাগুলো প্রথমে ফলো করুন। নতুনদের বিসিএস প্রস্তুতিতে দুটি বাটনে পরীক্ষা হয়।</p>
+                        <p><strong>১.</strong> ডেইলি কুইজ।<br><strong>২.</strong> নতুনদের বিসিএস প্রস্তুতি।</p>
+                        <p>এই দুটি বাটনে সব সময় পরীক্ষা থাকে। প্রথমে দুইদিন দুটি ডেইলি কুইজ হয় এবং তৃতীয় দিন ঐ দুই ডেইলি কুইজের টপিকের উপর ‘<strong>নতুনদের বিসিএস প্রস্তুতি – ২০০ দিনে সম্পূর্ণ সিলেবাস</strong>’ বাটনে পরীক্ষা হয়। অর্থ্যাৎ ৩ দিনে আপনার ১ বার রিভিশনসহ একটা টপিক পড়া হয়ে যাচ্ছে।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 9 -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>আপনাদের কী কী প্যাকেজ আছে ও ফিচারগুলো কী কী?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>আমাদের চারটি রেগুলার প্যাকেজ (১ বছর, ৬ মাস, ৩ মাস ও ১ মাস) থেকে যে কোন একটি প্যাকেজ নিয়েই আপনি বিসিএস প্রিলি, ব্যাংক, জব সল্যুশন, NTRCA এবং প্রাইমারী সহ আমাদের অ্যাপের সকল রুটিনের পরীক্ষার পাশাপাশি স্মার্ট সার্চ, ডায়নামিক প্যানেল সহ অ্যাপের প্রিমিয়াম সেকশনের এক্সেস পাবেন। আর আমাদের লাইভ ইন্টারেক্টিভ ক্লাস ও ভিডিয়ো লেকচারের ব্যাবস্থা রয়েছে যা ১ বছর ও ৬ মাসের প্যাকেজের আওতাধীন।</p>
+                        <p class="mt-2">বিস্তারিত জানতে "<strong>প্যাকেজসমূহ</strong>" পেজ ভিজিট করুন।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 10 -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>প্রিলি ও রিটেনের জন্য কি আলাদা প্যাকেজ নিতে হবে নাকি একটি প্যাকেজ থেকে কোর্স করা যাবে?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>আমাদের প্রিলি ও রিটেন দুটি সম্পূর্ণ আলাদা সার্ভিস ও আলাদা অ্যাপ। তাই রিটেনের জন্য আলাদা প্যাকেজ নিয়ে প্রস্তুতি দিতে পারবেন। উল্লেখ্য, রিটেনের প্রস্তুতির জন্য প্রয়োজনীয় অ্যাপটি গুগল প্লে স্টোর থেকে Live Written লিখে সার্চ দিয়ে ডাউনলোড করে নিতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 11 -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>লাইভ ক্লাসের ব্যবস্থা আছে কি?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>হ্যাঁ, Live MCQ-তে বিভিন্ন বিষয়ের উপর আলাদা আলাদা লাইভ ভিডিও ক্লাস হয়, Video Section-এর রুটিন বাটনে আপকামিং লাইভ ক্লাসগুলোর শিডিউল দেখতে পাবেন। এছাড়া ইতোমধ্যে সম্পন্ন হওয়া অনেকগুলো বিষয়ের ভিডিও লেকচার Video Section-এর নির্দিষ্ট বিষয়ের বাটনে প্রবেশ করে দেখে নিতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 12 - Cut Mark -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>কাট মার্ক কী?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>প্রতিযোগিতামূলক পরীক্ষায় কোন নির্দিষ্ট নাম্বারের ভিত্তিতে পাশ করানো হয় না, আপনার অবস্থান কি তার উপর নির্ভর করে আপনি পাশ না ফেল। যেমন, আগের পরিসংখ্যান বলে বিসিএস প্রিলিতে মোট পরীক্ষার্থীর ৩.৫% – ৫% এর মতো পাশ করানো হয়। অর্থাৎ, পাশ করতে হলে আপনাকে প্রথম ৫% এর মধ্যে থাকা উচিত। আমরাও তাই একই নিয়মে নির্দিষ্ট পার্সেন্ট পরীক্ষার্থীকে পাশ করিয়ে থাকি। অর্থাৎ বিসিএস এর কোন মডেল টেস্টে যদি ১০০০ জন পরীক্ষা দেয় তাহলে আপনাকে ৫০ জনের মধ্যে থাকতে হবে। এবং ৫০তম অবস্থানে যিনি থাকবেন তার প্রাপ্ত নাম্বারই হল কাট মার্ক।</p>
+                        <p class="mt-2"><strong>বিঃদ্রঃ</strong> BJS এবং NTRCA সহ কিছু পরীক্ষায় একটি নির্দিষ্ট নাম্বারকে পাশ মার্ক ধরা হয়। সেক্ষেত্রে, ঐ নাম্বারটিকেই পাশ মার্ক হিসেবে ধরা হবে।</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 13 - Payment Security -->
+                <div class="accordion-item bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                    <button class="accordion-trigger w-full flex justify-between items-center p-5 text-left font-semibold text-headline text-lg hover:text-primary transition-colors focus:outline-none">
+                        <span>পেমেন্টের নিরাপত্তা কতটুকু?</span>
+                        <i class="accordion-icon fas fa-plus text-primary transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-body leading-relaxed">
+                        <p>Live MCQ তে পেমেন্টের জন্য যে মাধ্যমগুলো আছে, তার সবগুলোই সংশ্লিষ্ট ব্যাংকগুলোর অফিসিয়াল গেটওয়ে। আমরা SSLCOMMERZ এর মাধ্যমে পেমেন্ট গ্রহন করি এবং SSLCOMMERZ বাংলাদেশের প্রথম এবং বৃহত্তম পেমেন্ট গেটওয়ে প্রোভাইডার।</p>
+                        <p class="mt-2">Live MCQ গণপ্রজাতন্ত্রী বাংলাদেশ সরকার কর্তৃক রেজিস্ট্রিকৃত এবং কপিরাইট আইন দ্বারা সুরক্ষিত।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section (Same as other pages) -->
+    <section class="py-20 bg-[#F4F4FA]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-headline">
+                    যে কোন <span class="text-accent relative inline-block highlighted-text">
+                        প্রয়োজনে
+                        <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+                            <path d="M5,125.4c30.5-8.1,69.7-16.3,113.2-21.2c43.5-4.9,86.9-6.6,130.1-5.9c43.2,0.7,86.4,2.7,129.2,6.4c42.8,3.7,85.3,8.7,127.4,14.9" stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </span> পাশে আছি
+                </h2>
+                <p class="text-body max-w-2xl mx-auto">
+                    আপনার সরকারি চাকুরী প্রস্তুতির যাত্রা আরেকটু সহজ করতে <strong>Live MCQ™</strong> টিম সর্বত্র আপনার পাশে আছে।
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card text-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-facebook-messenger text-3xl text-[#0084FF]"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">মেসেঞ্জার চ্যাট</h3>
+                    <a href="https://m.me/livemcq" target="_blank" class="inline-block mt-2 text-primary hover:text-accent">ক্লিক করুন →</a>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card text-center">
+                    <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-whatsapp text-3xl text-[#25D366]"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">হোয়াটসঅ্যাপ</h3>
+                    <p class="text-sm text-gray-500">01969-377322</p>
+                    <a href="https://wa.me/8801969377322" target="_blank" class="inline-block mt-2 text-primary hover:text-accent">ক্লিক করুন →</a>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card text-center">
+                    <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-phone-alt text-3xl text-accent"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">ফোনকল</h3>
+                    <p class="text-sm text-gray-500">সকাল ৯টা - রাত ৯টা</p>
+                    <a href="tel:01701377322" class="inline-block mt-2 text-primary hover:text-accent">01701-377322</a>
+                </div>
+            </div>
+
+            <div class="text-center mt-10">
+                <p class="text-body">
+                    ইভেন্ট স্পনসরশিপ দরকার? বিস্তারিত জানতে <a href="#" class="text-accent hover:text-primary transition font-medium">এই পৃষ্ঠাটি দেখুন</a>।
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Same as other pages) -->
+    <footer class="bg-[#F9F9FB] pt-16 pb-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Dark-Logo.png" class="h-10 mb-4" alt="Logo">
+                    <p class="text-sm text-body mb-4">সকল সরকারি-বেসরকারি চাকরির পূর্ণাঙ্গ প্রস্তুতি নিন Live MCQ™ অ্যাপে।</p>
+                    <div class="flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i><span class="font-bold">৪.৬</span><span class="text-sm">(১.৮ মিলিয়ন+ ডাউনলোড)</span></div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">কুইক লিঙ্ক</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">হোম</a></li>
+                        <li><a href="#" class="hover:text-primary">বুক ষ্টোর</a></li>
+                        <li><a href="#" class="hover:text-primary">ফিচারসমূহ</a></li>
+                        <li><a href="#" class="hover:text-primary">প্যাকেজসমূহ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">আরও জানুন</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">সকল পোস্ট</a></li>
+                        <li><a href="#" class="hover:text-primary">সকল মেন্টর</a></li>
+                        <li><a href="#" class="hover:text-primary">আমাদের সম্পর্কে</a></li>
+                        <li><a href="#" class="hover:text-primary">সাধারণ জিজ্ঞাসা</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">যোগাযোগ</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><i class="fas fa-phone-alt mr-2"></i> 01701-377322</li>
+                        <li><i class="fas fa-envelope mr-2"></i> contact@livemcq.com</li>
+                        <li><i class="fab fa-facebook mr-2"></i> facebook.com/livemcq</li>
+                        <li><i class="fab fa-youtube mr-2"></i> youtube.com/@LiveMCQ</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-body">
+                <p>© স্বত্বাধিকার ২০১৭ - ২০২৬ | সর্বস্বত্ব সংরক্ষিত | <span class="text-accent">CrackTech Limited</span> দ্বারা পরিচালিত</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Accordion functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const triggers = document.querySelectorAll('.accordion-trigger');
+            
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    const item = this.closest('.accordion-item');
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close all items
+                    document.querySelectorAll('.accordion-item').forEach(i => {
+                        i.classList.remove('active');
+                    });
+                    
+                    // Open this one if it wasn't active
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

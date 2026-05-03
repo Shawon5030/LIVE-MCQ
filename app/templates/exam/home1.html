@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MCQ পরীক্ষা | Exam Mode</title>
+    <meta name="description" content="বিষয়, অধ্যায়, লেসন ও সাবলেসন নির্বাচন করে নির্ধারিত সময় ও প্রশ্ন সংখ্যা অনুযায়ী পরীক্ষা দিন।">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-hero {
+            background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
+        }
+        .option-selected {
+            background: #EEF2FF !important;
+            border-color: #4F46E5 !important;
+        }
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #E2E8F0;
+            border-top: 2px solid #4F46E5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#F8FAFE]">
+
+    {% include "header.html" %}
+
+    <main class="pb-20">
+        <!-- Hero Section -->
+        <section class="gradient-hero text-white pt-20 mb-8 pb-16 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 600 600%27%3E%3Cpath fill=%27%23FFFFFF%27 d=%27M0 0h600v600H0z%27/%3E%3C/svg%3E')] bg-repeat"></div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">MCQ 📝 পরীক্ষা</h1>
+                        <p class="text-indigo-100 text-base lg:text-lg max-w-xl">বিষয়, অধ্যায়, লেসন ও সাবলেসন নির্বাচন করে নির্ধারিত সময় ও প্রশ্ন সংখ্যা অনুযায়ী পরীক্ষা শুরু করুন।</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                        <div class="text-sm uppercase tracking-[0.2em] text-white/70 mb-2 text-center">পরীক্ষা টাইমার</div>
+                        <div class="text-4xl sm:text-5xl font-bold text-white text-center" id="timerDisplay">00:00</div>
+                        <p class="text-center text-xs text-gray-200 mt-2">টাইমার শুরু হলে সময় গণনা শুরু হবে</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+            <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
+                <!-- Left Panel - Configuration -->
+                <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 border border-indigo-50">
+                    <div class="mb-6">
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-sliders-h text-indigo-600"></i> পরীক্ষার কনফিগারেশন</h2>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-1">বিষয় → অধ্যায় → লেসন → সাবলেসন নির্বাচন করুন</p>
+                    </div>
+                    <div class="space-y-5">
+                        <!-- Subject -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book text-indigo-500 mr-1"></i> বিষয়</label>
+                            <select id="subjectSelect" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                                <option value="">বিষয় নির্বাচন করুন</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Chapters Multi -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-folder-open text-indigo-500 mr-1"></i> অধ্যায় (একাধিক)</label>
+                            <div id="chaptersContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">প্রথমে বিষয় নির্বাচন করুন</div>
+                            </div>
+                        </div>
+
+                        <!-- Lessons Multi -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book-open text-indigo-500 mr-1"></i> লেসন (একাধিক)</label>
+                            <div id="lessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">প্রথমে অধ্যায় নির্বাচন করুন</div>
+                            </div>
+                        </div>
+
+                        <!-- SubLessons Multi -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-layer-group text-indigo-500 mr-1"></i> সাবলেসন (একাধিক)</label>
+                            <div id="subLessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">প্রথমে লেসন নির্বাচন করুন</div>
+                            </div>
+                            <div class="flex justify-between mt-3 gap-2">
+                                <button id="selectAllSubLessons" type="button" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition disabled:opacity-40"><i class="fas fa-check-double mr-1"></i> সব নির্বাচন</button>
+                                <button id="clearAllSubLessons" type="button" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-gray-200 transition disabled:opacity-40"><i class="fas fa-times mr-1"></i> সব বাদ দিন</button>
+                            </div>
+                            <div id="selectedSubLessonsStats" class="mt-2 text-xs text-indigo-600 bg-indigo-50 p-2 rounded-lg hidden">
+                                <i class="fas fa-chart-line mr-1"></i> <span id="totalMcqCount">0</span> টি MCQ উপলব্ধ
+                            </div>
+                        </div>
+
+                        <!-- Time & Questions -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700"><i class="fas fa-clock"></i> সময় (মিনিট)</label>
+                                <input type="number" id="customTime" min="1" max="120" value="10" class="w-full border border-slate-200 rounded-xl px-4 py-3 mt-1 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700"><i class="fas fa-question-circle"></i> প্রশ্ন সংখ্যা</label>
+                                <input type="number" id="questionCount" min="1" max="100" value="10" class="w-full border border-slate-200 rounded-xl px-4 py-3 mt-1 focus:border-indigo-500">
+                                <p class="text-xs text-slate-400 mt-1">(সর্বোচ্চ 100)</p>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl bg-[#f7f8ff] border border-[#e9ebff] p-4">
+                            <p class="text-sm text-body"><span class="font-bold text-headline">নির্দেশনা:</span> সাবলেসন নির্বাচন করার পর <span class="text-primary">শুরু করুন</span> বাটনে ক্লিক করুন।</p>
+                        </div>
+
+                        <button id="startExamBtn" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                            <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Info -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 border border-indigo-50">
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-info-circle text-indigo-500"></i> নির্বাচিত সারাংশ</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 text-xs sm:text-sm">
+                            <div class="flex items-start gap-2"><i class="fas fa-book text-indigo-400 mt-0.5"></i> <div><span class="font-medium">বিষয়:</span> <span id="selectedSubject" class="text-slate-600">--</span></div></div>
+                            <div class="flex items-start gap-2"><i class="fas fa-folder-open text-indigo-400 mt-0.5"></i> <div><span class="font-medium">অধ্যায়:</span> <span id="selectedChapters" class="text-slate-600">--</span></div></div>
+                            <div class="flex items-start gap-2"><i class="fas fa-book-open text-indigo-400 mt-0.5"></i> <div><span class="font-medium">লেসন:</span> <span id="selectedLessons" class="text-slate-600">--</span></div></div>
+                            <div class="flex items-start gap-2"><i class="fas fa-layer-group text-indigo-400 mt-0.5"></i> <div><span class="font-medium">সাবলেসন:</span> <span id="selectedSubLessons" class="text-slate-600">--</span> <span id="subLessonCountBadge" class="text-xs text-indigo-600"></span></div></div>
+                            <div class="flex items-start gap-2"><i class="fas fa-hourglass-half text-indigo-400 mt-0.5"></i> <div><span class="font-medium">সময়:</span> <span id="selectedTime">১০</span> মিনিট</div></div>
+                            <div class="flex items-start gap-2"><i class="fas fa-question text-indigo-400 mt-0.5"></i> <div><span class="font-medium">প্রশ্ন:</span> <span id="selectedQCount">১০</span> টি</div></div>
+                        </div>
+                        <div id="totalAvailableMcqInfo" class="hidden mt-3 text-xs bg-green-50 text-green-700 p-2 rounded-lg">
+                            <i class="fas fa-database"></i> মোট <span id="totalAvailableMcqs">0</span> টি MCQ পাওয়া গেছে
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Panel -->
+            <div id="examPanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden border-t-4 border-indigo-500">
+                <div class="flex flex-wrap justify-between items-center border-b pb-4 mb-5 gap-3">
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-slate-800">✍️ পরীক্ষা চলছে</h3>
+                        <p class="text-slate-500 text-sm mt-1" id="timerLabel">বাকি সময়: <span id="examTimerDisplay" class="font-mono font-bold text-indigo-600 text-xl">00:00</span></p>
+                    </div>
+                    <div class="rounded-full bg-slate-100 px-4 py-2 text-sm">
+                        <i class="fas fa-flag-checkered text-indigo-600"></i>
+                        <span id="answeredCount">0</span>/<span id="totalQuestionsCount">0</span>
+                    </div>
+                </div>
+                <div id="questionContainer" class="space-y-6"></div>
+                <div class="flex flex-wrap gap-3 mt-6 justify-between">
+                    <div class="space-x-2">
+                        <button id="prevBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 sm:px-5 py-2.5 rounded-xl transition disabled:opacity-40"><i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">আগের</span></button>
+                        <button id="nextBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 sm:px-5 py-2.5 rounded-xl transition disabled:opacity-40"><span class="hidden sm:inline">পরবর্তী</span> <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <button id="submitExamBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 sm:px-6 py-2.5 rounded-xl font-semibold shadow-md transition">
+                        <i class="fas fa-paper-plane"></i> পরীক্ষা জমা দিন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Panel -->
+            <div id="resultPanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-5"><i class="fas fa-chart-simple text-indigo-500"></i> পরীক্ষার ফলাফল</h2>
+                <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+                    <div class="bg-green-50 p-4 sm:p-5 rounded-2xl text-center">
+                        <p class="text-2xl sm:text-3xl font-bold text-green-600" id="finalCorrect">0</p>
+                        <p class="text-xs sm:text-sm">সঠিক উত্তর</p>
+                    </div>
+                    <div class="bg-red-50 p-4 sm:p-5 rounded-2xl text-center">
+                        <p class="text-2xl sm:text-3xl font-bold text-red-500" id="finalWrong">0</p>
+                        <p class="text-xs sm:text-sm">ভুল উত্তর</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 sm:p-5 rounded-2xl text-center">
+                        <p class="text-2xl sm:text-3xl font-bold text-gray-500" id="finalSkip">0</p>
+                        <p class="text-xs sm:text-sm">বাদ পড়েছে</p>
+                    </div>
+                </div>
+                <div id="detailedResults" class="max-h-96 overflow-y-auto space-y-3 mb-6 scrollbar-thin"></div>
+                <button id="newExamBtn" class="w-full border border-indigo-300 text-indigo-600 bg-indigo-50 rounded-xl py-3 font-semibold hover:bg-indigo-100 transition">
+                    <i class="fas fa-redo-alt"></i> নতুন পরীক্ষা শুরু করুন
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toastMessage" class="toast-notification hidden">
+        <div class="bg-white rounded-xl shadow-2xl border-l-4 border-indigo-500 p-4 min-w-[280px]">
+            <div class="flex items-center">
+                <i class="fas fa-bell text-indigo-500 mr-3"></i>
+                <p id="toastText" class="text-sm text-slate-700 flex-1"></p>
+                <button onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')"><i class="fas fa-times text-slate-400"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      let selectedChaptersIds = [], selectedLessonsIds = [], selectedSubLessonsIds = [];
+let questionsData = [], userAnswers = [], currentQ = 0;
+let examTimer = null, timeSeconds = 600;
+
+function showToast(msg, err = false) { 
+    let t = $('#toastMessage'); 
+    t.find('.border-l-4').removeClass('border-indigo-500 border-red-500').addClass(err ? 'border-red-500' : 'border-indigo-500'); 
+    t.find('i').removeClass('fa-bell fa-exclamation-triangle').addClass(err ? 'fa-exclamation-triangle' : 'fa-bell'); 
+    $('#toastText').text(msg); 
+    t.removeClass('hidden'); 
+    setTimeout(() => t.addClass('hidden'), 3000); 
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function updateSummary() {
+    $('#selectedSubject').text($('#subjectSelect option:selected').text() || '--');
+    
+    let ch = $('.chapter-checkbox:checked').map((i, el) => $(el).next('span').text()).get().join(', '); 
+    $('#selectedChapters').text(ch || '--');
+    
+    let les = $('.lesson-checkbox:checked').map((i, el) => $(el).next('span').text()).get().join(', '); 
+    $('#selectedLessons').text(les || '--');
+    
+    let subs = $('.sub-lesson-checkbox:checked').map((i, el) => $(el).next('span').text()).get();
+    if (subs.length > 3) $('#selectedSubLessons').text(`${subs.length} টি সাবলেসন`); 
+    else $('#selectedSubLessons').text(subs.join(', ') || '--');
+    $('#subLessonCountBadge').text(subs.length ? `(${subs.length})` : '');
+    
+    // Calculate total available MCQs from selected sub-lessons
+    let totalMcqs = 0;
+    $('.sub-lesson-checkbox:checked').each(function() {
+        let mcqCount = $(this).data('mcq-count') || 0;
+        totalMcqs += mcqCount;
+    });
+    
+    if (totalMcqs > 0) {
+        $('#totalAvailableMcqInfo').removeClass('hidden');
+        $('#totalAvailableMcqs').text(totalMcqs);
+        $('#selectedSubLessonsStats').removeClass('hidden');
+        $('#totalMcqCount').text(totalMcqs);
+    } else {
+        $('#totalAvailableMcqInfo').addClass('hidden');
+        $('#selectedSubLessonsStats').addClass('hidden');
+    }
+    
+    let timeVal = $('#customTime').val() || 10; 
+    let qCount = $('#questionCount').val() || 10;
+    $('#selectedTime').text(timeVal); 
+    $('#selectedQCount').text(qCount);
+    
+    let disabledStart = selectedSubLessonsIds.length === 0;
+    $('#startExamBtn').prop('disabled', disabledStart);
+}
+
+// Load Chapters
+$('#subjectSelect').change(function() {
+    let sid = $(this).val(); 
+    if (!sid) {
+        $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">বিষয় নির্বাচন করুন</div>');
+        $('#lessonsContainer, #subLessonsContainer').html('<div class="text-center py-6 text-slate-400">--</div>'); 
+        updateSummary(); 
+        return;
+    }
+    $('#chaptersContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
+    $.ajax({
+        url: '/api/chapters/',
+        data: { subject_id: sid },
+        success: function(chs) {
+            if (!chs.length) {
+                $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">কোন অধ্যায় নেই</div>');
+                return;
+            }
+            let html = '<div class="space-y-2">';
+            chs.forEach(ch => {
+                html += `<label class="flex items-center gap-2 p-2 hover:bg-indigo-50 rounded-lg cursor-pointer">
+                    <input type="checkbox" value="${ch.id}" class="chapter-checkbox"> 
+                    <span class="text-sm">${escapeHtml(ch.name)}</span>
+                </label>`;
+            });
+            html += '</div>';
+            $('#chaptersContainer').html(html);
+            bindChapters();
+        }
+    });
+});
+
+function bindChapters() { 
+    $('.chapter-checkbox').off('change').on('change', function() { 
+        selectedChaptersIds = $('.chapter-checkbox:checked').map((i, el) => $(el).val()).get(); 
+        if (selectedChaptersIds.length === 0) {
+            $('#lessonsContainer, #subLessonsContainer').html('<div class="text-center py-6 text-slate-400">প্রথমে অধ্যায় নির্বাচন করুন</div>'); 
+            selectedLessonsIds = []; 
+            selectedSubLessonsIds = []; 
+            updateSummary(); 
+            return;
+        } 
+        $('#lessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>'); 
+        $.ajax({
+            url: '/api/lessons/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ chapter_ids: selectedChaptersIds }),
+            success: function(less) { 
+                let grouped = {}; 
+                less.forEach(l => { grouped[l.chapter_id] = grouped[l.chapter_id] || []; grouped[l.chapter_id].push(l); }); 
+                let names = {}; 
+                $('.chapter-checkbox:checked').each(function() { names[$(this).val()] = $(this).next('span').text(); }); 
+                let html = '<div class="space-y-3">'; 
+                for (let cid in grouped) {
+                    html += `<div><div class="font-semibold text-indigo-700 text-xs mb-1"><i class="fas fa-folder-open"></i> ${escapeHtml(names[cid] || 'অধ্যায়')}</div><div class="pl-3 space-y-1">`; 
+                    grouped[cid].forEach(l => {
+                        html += `<label class="flex items-center gap-2 p-1.5 hover:bg-indigo-50 rounded">
+                            <input type="checkbox" value="${l.id}" class="lesson-checkbox"> 
+                            <span class="text-sm">${escapeHtml(l.name)}</span>
+                        </label>`;
+                    }); 
+                    html += `</div></div>`;
+                } 
+                html += '</div>'; 
+                $('#lessonsContainer').html(html); 
+                bindLessons(); 
+            }
+        }); 
+    });
+}
+
+function bindLessons() { 
+    $('.lesson-checkbox').off('change').on('change', function() { 
+        selectedLessonsIds = $('.lesson-checkbox:checked').map((i, el) => $(el).val()).get(); 
+        if (!selectedLessonsIds.length) {
+            $('#subLessonsContainer').html('<div class="text-center py-6 text-slate-400">লেসন নির্বাচন করুন</div>');
+            selectedSubLessonsIds = [];
+            updateSummary();
+            return;
+        } 
+        $('#subLessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>'); 
+        $.ajax({
+            url: '/api/sub-lessons/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ lesson_ids: selectedLessonsIds }),
+            success: function(subs) { 
+                let grouped = {}; 
+                subs.forEach(s => { 
+                    grouped[s.lesson_id] = grouped[s.lesson_id] || []; 
+                    grouped[s.lesson_id].push(s); 
+                }); 
+                let lnames = {}; 
+                $('.lesson-checkbox:checked').each(function() { 
+                    lnames[$(this).val()] = $(this).next('span').text(); 
+                }); 
+                let html = '<div class="space-y-3">'; 
+                for (let lid in grouped) {
+                    html += `<div>
+                        <div class="font-semibold text-indigo-700 text-xs mb-1">
+                            <i class="fas fa-book-open"></i> ${escapeHtml(lnames[lid] || 'লেসন')}
+                        </div>
+                        <div class="pl-3 space-y-1">`; 
+                    
+                    grouped[lid].forEach(s => {
+                        let mcqCount = s.mcq_count || 0;
+                        // ✅ IMPORTANT: Store mcq_count as data attribute
+                        html += `<label class="flex items-center justify-between p-2 hover:bg-indigo-50 rounded cursor-pointer">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" 
+                                       value="${s.id}" 
+                                       class="sub-lesson-checkbox"
+                                       data-mcq-count="${mcqCount}">
+                                <span class="text-sm">${escapeHtml(s.name)}</span>
+                            </div>
+                            <span class="text-xs text-indigo-600 font-semibold">📊 ${mcqCount} MCQ</span>
+                        </label>`;
+                    }); 
+                    html += `</div></div>`;
+                } 
+                html += '</div>'; 
+                $('#subLessonsContainer').html(html); 
+                bindSubLessons(); 
+                updateSummary();  // Update summary after loading
+            }
+        }); 
+    });
+}
+
+function bindSubLessons() { 
+    $('.sub-lesson-checkbox').off('change').on('change', function() { 
+        selectedSubLessonsIds = $('.sub-lesson-checkbox:checked').map((i, el) => $(el).val()).get(); 
+        updateSummary(); 
+        $('#startExamBtn').prop('disabled', selectedSubLessonsIds.length === 0); 
+    }); 
+    
+    $('#selectAllSubLessons').click(() => { 
+        $('.sub-lesson-checkbox').prop('checked', true).trigger('change'); 
+    }); 
+    
+    $('#clearAllSubLessons').click(() => { 
+        $('.sub-lesson-checkbox').prop('checked', false).trigger('change'); 
+    });
+}
+
+updateSummary(); 
+$('#customTime, #questionCount').on('input', updateSummary);
+
+// Start Exam
+$('#startExamBtn').click(async function() {
+    if (selectedSubLessonsIds.length === 0) { 
+        showToast('দয়া করে অন্তত একটি সাবলেসন নির্বাচন করুন', true); 
+        return; 
+    }
+    
+    let qCount = parseInt($('#questionCount').val());
+    if (isNaN(qCount) || qCount < 1) qCount = 10; 
+    if (qCount > 100) qCount = 100;
+    
+    // Calculate total available MCQs from selected sub-lessons using data attribute
+    let totalAvailable = 0;
+    $('.sub-lesson-checkbox:checked').each(function() {
+        let mcqCount = $(this).data('mcq-count');
+        if (mcqCount) {
+            totalAvailable += parseInt(mcqCount);
+        }
+    });
+    
+    console.log("Selected sub-lessons:", selectedSubLessonsIds);
+    console.log("Total available MCQs:", totalAvailable);
+    console.log("Requested questions:", qCount);
+    
+    if (totalAvailable === 0) {
+        showToast('সাবলেসনে কোন MCQ নেই। দয়া করে অন্য সাবলেসন নির্বাচন করুন।', true);
+        return;
+    }
+    
+    if (qCount > totalAvailable) {
+        showToast(`সতর্কতা: শুধুমাত্র ${totalAvailable} টি MCQ উপলব্ধ। ${qCount} টি চাওয়া হয়েছে!`, true);
+        return;
+    }
+    
+    $('#startExamBtn').html('<div class="loading-spinner"></div> লোডিং...').prop('disabled', true);
+    
+    try {
+        let resp = await fetch('/api/mcqs/', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ sub_lesson_ids: selectedSubLessonsIds, question_count: qCount }) 
+        });
+        let data = await resp.json();
+        
+        if (!data.questions || data.questions.length === 0) { 
+            showToast('কোন প্রশ্ন পাওয়া যায়নি', true); 
+            $('#startExamBtn').html('<i class="fas fa-play"></i> পরীক্ষা শুরু করুন').prop('disabled', false); 
+            return; 
+        }
+        
+        questionsData = data.questions;
+        userAnswers = new Array(questionsData.length).fill(null);
+        currentQ = 0;
+        
+        let timeMin = parseInt($('#customTime').val()) || 10;
+        timeSeconds = timeMin * 60;
+        startExamTimer();
+        
+        $('#resultPanel').addClass('hidden');
+        $('#examPanel').removeClass('hidden');
+        $('#totalQuestionsCount').text(questionsData.length);
+        $('#answeredCount').text('0');
+        renderQuestion();
+        
+        $('html, body').animate({ scrollTop: $('#examPanel').offset().top - 80 }, 400);
+        
+    } catch(e) { 
+        console.error("Error:", e);
+        showToast('সার্ভার ত্রুটি', true); 
+    } finally { 
+        $('#startExamBtn').html('<i class="fas fa-play"></i> পরীক্ষা শুরু করুন').prop('disabled', false); 
+    }
+});
+
+function renderQuestion() {
+    if (!questionsData.length) return;
+    let q = questionsData[currentQ];
+    let selectedIdx = userAnswers[currentQ];
+    let optionsHtml = '';
+    
+    q.options.forEach((opt, idx) => {
+        let isSelected = (selectedIdx === idx);
+        optionsHtml += `<label class="block rounded-xl border p-4 mb-3 cursor-pointer transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300'}">
+            <input type="radio" name="qOption" value="${idx}" class="mr-3" ${isSelected ? 'checked' : ''}>
+            <span class="text-slate-700">${escapeHtml(opt)}</span>
+        </label>`;
+    });
+    
+    $('#questionContainer').html(`<div class="rounded-2xl shadow-sm border p-4 sm:p-6 bg-white">
+        <div class="flex justify-between mb-3">
+            <span class="text-indigo-600 text-sm font-bold">প্রশ্ন ${currentQ + 1}/${questionsData.length}</span>
+        </div>
+        <h3 class="text-base sm:text-xl font-bold text-slate-800 mb-5">${escapeHtml(q.question)}</h3>
+        ${optionsHtml}
+    </div>`);
+    
+    $('input[name="qOption"]').change(function() {
+        let val = parseInt($(this).val());
+        if (userAnswers[currentQ] !== val) {
+            userAnswers[currentQ] = val;
+            let answered = userAnswers.filter(a => a !== null).length;
+            $('#answeredCount').text(answered);
+        }
+    });
+    
+    $('#prevBtn').prop('disabled', currentQ === 0);
+    $('#nextBtn').prop('disabled', currentQ === questionsData.length - 1);
+}
+
+function startExamTimer() { 
+    if (examTimer) clearInterval(examTimer); 
+    $('#examTimerDisplay').text(formatTime(timeSeconds));
+    $('#timerDisplay').text(formatTime(timeSeconds));
+    
+    examTimer = setInterval(() => { 
+        if (timeSeconds <= 0) { 
+            clearInterval(examTimer); 
+            submitExam(); 
+        } else { 
+            timeSeconds--; 
+            $('#examTimerDisplay').text(formatTime(timeSeconds));
+            $('#timerDisplay').text(formatTime(timeSeconds));
+        } 
+    }, 1000); 
+}
+
+function formatTime(sec) { 
+    let m = Math.floor(sec / 60); 
+    let s = sec % 60; 
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; 
+}
+
+async function submitExam() { 
+    if (examTimer) clearInterval(examTimer); 
+    
+    let correct = 0, wrong = 0, skipped = 0;
+    let details = '';
+    
+    questionsData.forEach((q, idx) => { 
+        let ans = userAnswers[idx]; 
+        let isCor = (ans !== null && (ans + 1) === q.correct_answer); 
+        if (ans === null) skipped++; 
+        else if (isCor) correct++; 
+        else wrong++;
+        
+        let statusClass = isCor ? 'border-green-200 bg-green-50' : (ans === null ? 'border-gray-200 bg-gray-50' : 'border-red-200 bg-red-50');
+        let statusIcon = isCor ? '✓' : (ans === null ? '−' : '✗');
+        let userTxt = ans !== null ? q.options[ans] : 'উত্তর দেননি';
+        let corTxt = q.options[q.correct_answer - 1];
+        
+        details += `<div class="rounded-xl p-4 ${statusClass}">
+            <div class="font-semibold">প্রশ্ন ${idx + 1} ${statusIcon}</div>
+            <p class="text-sm mt-1">${escapeHtml(q.question)}</p>
+            <p class="text-xs mt-1">আপনার উত্তর: ${escapeHtml(userTxt)}</p>
+            <p class="text-xs text-green-700 mt-1">সঠিক উত্তর: ${escapeHtml(corTxt)}</p>
+            ${q.explanation ? `<p class="text-xs text-gray-500 mt-1">ব্যাখ্যা: ${escapeHtml(q.explanation)}</p>` : ''}
+        </div>`;
+    });
+    
+    $('#finalCorrect').text(correct);
+    $('#finalWrong').text(wrong);
+    $('#finalSkip').text(skipped);
+    $('#detailedResults').html(details);
+    
+    let total = questionsData.length;
+    let percentage = ((correct / total) * 100).toFixed(1);
+    
+    // Get selected chapters and sub-lessons data for saving
+    let selectedChaptersData = [];
+    $('.chapter-checkbox:checked').each(function() {
+        selectedChaptersData.push({
+            id: $(this).val(),
+            name: $(this).next('span').text()
+        });
+    });
+    
+    let selectedSubLessonsData = [];
+    $('.sub-lesson-checkbox:checked').each(function() {
+        selectedSubLessonsData.push({
+            id: $(this).val(),
+            name: $(this).next('span').text()
+        });
+    });
+    
+    try {
+        await fetch('/api/save-exam-result/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject_id: $('#subjectSelect').val(),
+                time_limit_minutes: parseInt($('#customTime').val()),
+                total_questions: total,
+                correct_answers: correct,
+                wrong_answers: wrong,
+                skipped_answers: skipped,
+                score_percentage: parseFloat(percentage),
+                mcq_ids_order: questionsData.map(q => q.id),
+                user_answers: userAnswers.map(a => a !== null ? a + 1 : null),
+                correct_status: userAnswers.map((a, idx) => a !== null && (a + 1) === questionsData[idx].correct_answer),
+                selected_chapters: selectedChaptersData,
+                selected_sub_lessons: selectedSubLessonsData
+            })
+        });
+        showToast('পরীক্ষার ফলাফল সংরক্ষণ করা হয়েছে');
+    } catch(e) {
+        console.error("Save error:", e);
+        showToast('ফলাফল সংরক্ষণে সমস্যা হয়েছে', true);
+    }
+    
+    $('#examPanel').addClass('hidden');
+    $('#resultPanel').removeClass('hidden');
+    $('html, body').animate({ scrollTop: $('#resultPanel').offset().top - 50 }, 300);
+}
+
+$('#submitExamBtn').click(submitExam);
+$('#newExamBtn').click(() => { location.reload(); });
+$('#prevBtn').click(() => { if (currentQ > 0) { currentQ--; renderQuestion(); } });
+$('#nextBtn').click(() => { if (currentQ < questionsData.length - 1) { currentQ++; renderQuestion(); } });
+
+$(document).ready(() => { 
+    updateSummary(); 
+    console.log("Page loaded, ready for exam");
+});
+    </script>
+
+    <style>
+        .toggle-checkbox:checked { right: 0; border-color: #4F46E5; } 
+        .toggle-checkbox:checked + .toggle-label { background-color: #4F46E5; } 
+        .toggle-checkbox { right: 4px; transition: all 0.2s; }
+    </style>
+
+    {% include "footer.html" %}
+
+
+</body>
+</html>

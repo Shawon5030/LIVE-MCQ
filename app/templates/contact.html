@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>যোগাযোগ | Live MCQ™</title>
+    <meta name="description" content="যে কোন প্রয়োজনে Live MCQ™ টিম আপনার পাশে আছে। মেসেঞ্জার, হোয়াটসঅ্যাপ, ফোনকল, ইমেইল ও সোশ্যাল মিডিয়ার মাধ্যমে যোগাযোগ করুন।">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Figtree', sans-serif;
+            color: #546078;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Figtree', sans-serif;
+            color: #1C1C1D;
+        }
+        /* Animated underline for highlighted text */
+        .highlighted-text {
+            position: relative;
+            display: inline-block;
+        }
+        .highlighted-text svg {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 106%;
+            height: 40%;
+            overflow: visible;
+        }
+        .highlighted-text svg path {
+            stroke: #FF6600;
+            stroke-width: 8;
+            fill: none;
+            stroke-dasharray: 1500;
+            animation: drawLine 1.5s cubic-bezier(0.29, 1.11, 0.74, 1.04) forwards;
+        }
+        @keyframes drawLine {
+            from { stroke-dasharray: 0 1500; }
+            to { stroke-dasharray: 1500 1500; }
+        }
+        /* Contact card hover effect */
+        .contact-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .contact-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+        /* Animated background gradient */
+        .animated-bg {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255,255,255,0) 35%),
+                        radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255,255,255,0) 45%),
+                        radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255,255,255,0) 9%);
+            background-size: 200% 200%;
+            animation: gradientShift 14s linear infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 50% 80%; opacity: 1; }
+            50% { background-position: 55% 50%; opacity: 0.6; }
+            100% { background-position: 50% 80%; opacity: 1; }
+        }
+        /* Fluid canvas effect */
+        .fluid-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(51, 51, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 102, 0, 0.2), transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(42, 44, 141, 0.4), transparent 50%);
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fluidShift 15s linear infinite;
+        }
+        @keyframes fluidShift {
+            0% { background-position: 0% 0%; }
+            33% { background-position: 100% 0%; }
+            66% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        /* Form input styles */
+        .form-input-custom {
+            transition: all 0.3s ease;
+        }
+        .form-input-custom:focus {
+            border-color: #3333FF;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(51, 51, 255, 0.1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3333FF;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    {% include 'header.html' %}
+
+    <section class="relative overflow-hidden bg-secondary pt-16 pb-20 lg:pt-20 lg:pb-28">
+        <div class="absolute inset-0 fluid-overlay"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 text-sm text-white/80 mb-6">
+                <a href="/" class="hover:text-white transition"><i class="fas fa-home mr-1"></i> হোম</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-white">যোগাযোগ</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-on-scroll" data-delay="0.1s">
+                যোগাযোগ
+            </h1>
+        </div>
+    </section>
+
+    <section class="py-20 bg-[#F4F4FA]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Title -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-headline">
+                    যে কোন <span class="text-accent relative inline-block highlighted-text">
+                        প্রয়োজনে
+                        <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+                            <path d="M5,125.4c30.5-8.1,69.7-16.3,113.2-21.2c43.5-4.9,86.9-6.6,130.1-5.9c43.2,0.7,86.4,2.7,129.2,6.4c42.8,3.7,85.3,8.7,127.4,14.9" stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </span> পাশে আছি
+                </h2>
+                <p class="text-body max-w-2xl mx-auto mt-4">
+                    আপনার সরকারি চাকুরী প্রস্তুতির যাত্রা আরেকটু সহজ করতে <strong>Live MCQ™</strong> টিম সর্বত্র আপনার পাশে আছে।
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                
+                <!-- Messenger Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.1s">
+                    <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fab fa-facebook-messenger text-4xl text-[#0084FF]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">মেসেঞ্জার চ্যাট</h3>
+                    <p class="text-body text-sm mb-4">২৪/৭ অনলাইন সাপোর্ট</p>
+                    <a href="https://m.me/livemcq" target="_blank" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        ক্লিক করুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- WhatsApp Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.2s">
+                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fab fa-whatsapp text-4xl text-[#25D366]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">হোয়াটসঅ্যাপ</h3>
+                    <p class="text-body text-sm mb-4">01969-377322</p>
+                    <a href="https://wa.me/8801969377322" target="_blank" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        ক্লিক করুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Phone Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.3s">
+                    <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fas fa-phone-alt text-4xl text-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">ফোনকল</h3>
+                    <p class="text-body text-sm mb-4">সকাল ৯টা - রাত ৯টা</p>
+                    <a href="tel:01701377322" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        01701-377322 <i class="fas fa-phone"></i>
+                    </a>
+                </div>
+
+                <!-- Facebook Page Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.4s">
+                    <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fab fa-facebook text-4xl text-[#1877F2]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">ফেইসবুক পেজ</h3>
+                    <p class="text-body text-sm mb-4">লাইভ আপডেট ও নোটিফিকেশন</p>
+                    <a href="https://www.facebook.com/livemcq" target="_blank" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        ক্লিক করুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Facebook Group Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.5s">
+                    <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fas fa-users text-4xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">ফেইসবুক গ্রুপ</h3>
+                    <p class="text-body text-sm mb-4">পরীক্ষার্থীদের কমিউনিটি</p>
+                    <a href="https://www.facebook.com/groups/livemcqofficial" target="_blank" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        ক্লিক করুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- YouTube Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm contact-card transition-all duration-300 hover:shadow-xl text-center animate-on-scroll" data-delay="0.6s">
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-primary text-3xl mb-5 mx-auto">
+                        <i class="fab fa-youtube text-4xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-headline mb-2">ইউটিউব চ্যানেল</h3>
+                    <p class="text-body text-sm mb-4">ফ্রি ভিডিও লেকচার</p>
+                    <a href="https://www.youtube.com/@LiveMCQ?sub_confirmation=1" target="_blank" class="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full text-sm font-medium transition">
+                        সাবস্ক্রাইব করুন <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sponsorship Note -->
+            <div class="text-center mt-12">
+                <p class="text-body">
+                    ইভেন্ট স্পনসরশিপ দরকার? বিস্তারিত জানতে <a href="#" class="text-accent hover:text-primary transition font-medium">এই পৃষ্ঠাটি দেখুন</a>।
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-cover bg-center" style="background-image: url('https://web.livemcq.com/core/uploads/2025/09/Live-MCQ-Website-BG-4-1.png');">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-center">
+                <!-- Form Card -->
+                <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 md:p-10 animate-on-scroll" data-delay="0.2s">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-headline">যোগাযোগ করুন</h3>
+                        <img src="https://web.livemcq.com/core/uploads/2025/07/cropped-Live-MCQ-Siteicon-1.png" class="w-12 h-12" alt="Live MCQ Icon">
+                    </div>
+                    
+                    <form id="contactForm" class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-headline mb-1 required:after:content-['*'] after:text-red-500 after:ml-0.5">ফার্স্ট নেম</label>
+                                <input type="text" name="firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 form-input-custom" placeholder="আপনার নাম">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-headline mb-1">লাস্ট নেম</label>
+                                <input type="text" name="lastName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 form-input-custom" placeholder="পদবি">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-headline mb-1 required:after:content-['*'] after:text-red-500 after:ml-0.5">ইমেইল</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 form-input-custom" placeholder="আপনার ইমেইল দিন">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-headline mb-1 required:after:content-['*'] after:text-red-500 after:ml-0.5">বার্তা / মন্তব্য</label>
+                            <textarea name="message" rows="5" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 form-input-custom" placeholder="আপনার বার্তা / মন্তব্য লিখুন"></textarea>
+                        </div>
+                        <!-- Simple reCAPTCHA placeholder (visual only, no actual validation) -->
+                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+                            <div class="w-8 h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">✓</div>
+                            <span class="text-xs text-gray-500">I'm not a robot</span>
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='14' fill='%23999'%3EreCAPTCHA%3C/text%3E%3C/svg%3E" class="ml-auto h-6" alt="reCAPTCHA">
+                        </div>
+                        <button type="submit" class="w-full bg-accent hover:bg-primary text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg">
+                            সাবমিট করুন
+                        </button>
+                    </form>
+                    <div id="formMessage" class="mt-4 text-center hidden"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Same as homepage) -->
+    <footer class="bg-[#F9F9FB] pt-16 pb-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Dark-Logo.png" class="h-10 mb-4" alt="Logo">
+                    <p class="text-sm text-body mb-4">সকল সরকারি-বেসরকারি চাকরির পূর্ণাঙ্গ প্রস্তুতি নিন Live MCQ™ অ্যাপে।</p>
+                    <div class="flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i><span class="font-bold">৪.৬</span><span class="text-sm">(১.৮ মিলিয়ন+ ডাউনলোড)</span></div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">কুইক লিঙ্ক</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">হোম</a></li>
+                        <li><a href="#" class="hover:text-primary">বুক ষ্টোর</a></li>
+                        <li><a href="#" class="hover:text-primary">ফিচারসমূহ</a></li>
+                        <li><a href="#" class="hover:text-primary">প্যাকেজসমূহ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">আরও জানুন</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">সকল পোস্ট</a></li>
+                        <li><a href="#" class="hover:text-primary">সকল মেন্টর</a></li>
+                        <li><a href="#" class="hover:text-primary">আমাদের সম্পর্কে</a></li>
+                        <li><a href="#" class="hover:text-primary">সাধারণ জিজ্ঞাসা</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">যোগাযোগ</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><i class="fas fa-phone-alt mr-2"></i> 01701-377322</li>
+                        <li><i class="fas fa-envelope mr-2"></i> contact@livemcq.com</li>
+                        <li><i class="fab fa-facebook mr-2"></i> facebook.com/livemcq</li>
+                        <li><i class="fab fa-youtube mr-2"></i> youtube.com/@LiveMCQ</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-body">
+                <p>© স্বত্বাধিকার ২০১৭ - ২০২৬ | সর্বস্বত্ব সংরক্ষিত | <span class="text-accent">CrackTech Limited</span> দ্বারা পরিচালিত</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple form submission handler (console log + success message)
+        document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> পাঠানো হচ্ছে...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission
+            setTimeout(() => {
+                const messageDiv = document.getElementById('formMessage');
+                messageDiv.innerHTML = '<div class="bg-green-100 text-green-700 p-3 rounded-lg"><i class="fas fa-check-circle mr-2"></i> আপনার বার্তা সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই যোগাযোগ করবো।</div>';
+                messageDiv.classList.remove('hidden');
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Hide message after 5 seconds
+                setTimeout(() => {
+                    messageDiv.classList.add('hidden');
+                }, 5000);
+            }, 1500);
+        });
+
+        // Intersection observer for fade-in animations
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        const animated = new Set();
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !animated.has(entry.target)) {
+                    animated.add(entry.target);
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            el.style.transition = 'opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+            if (el.dataset.delay) {
+                el.style.transitionDelay = el.dataset.delay;
+            }
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

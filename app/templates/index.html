@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Live MCQ™ | সঠিক প্রস্তুতি, সহজ প্রিলি</title>
+    <meta name="description"
+        content="ঘরে বসে বিসিএস, ব্যাংক, প্রাথমিক শিক্ষক নিয়োগ, শিক্ষক নিবন্ধন, ৯ম-২০তম গ্রেডের সরকারি চাকরিসহ প্রায় সকল ধরনের প্রতিযোগিতামূলক চাকরির পূর্ণাঙ্গ প্রস্তুতি।">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'marquee': 'marqueeScroll 20s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        marqueeScroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Poppins:wght@500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .animate-on-scroll.animate-fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bg-fluid-gradient {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255, 255, 255, 0) 35%),
+                radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255, 255, 255, 0) 45%),
+                radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255, 255, 255, 0) 9%);
+        }
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+        .counter-number {
+            font-variant-numeric: tabular-nums;
+        }
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #2A2C8D !important;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .swiper-button-next:after,
+        .swiper-button-prev:after {
+            font-size: 18px !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden font-figtree text-body">
+
+    {% include 'header.html' %}
+    <main>
+        <section class="relative overflow-hidden bg-[#06074a] text-white pt-20 pb-32 lg:pt-32 lg:pb-48">
+            <div class="absolute inset-0 opacity-20 bg-fluid-gradient"></div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:flex lg:items-center lg:gap-12">
+                    <div class="lg:w-1/2 text-center lg:text-left">
+                        <div
+                            class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6 animate-on-scroll"
+                            data-delay="0">
+                            <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Siteicon.svg"
+                                class="w-6 h-6" alt="icon">
+                            <span class="text-sm font-medium">Live MCQ™</span>
+                        </div>
+                        <h1 class="text-4xl text-white sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 font-figtree text-headline animate-on-scroll"
+                            data-delay="100">
+                            ঘরে বসেই <span class="text-accent relative inline-block">চাকরির প্রস্তুতি
+                                <svg class="absolute bottom-0 left-0 w-full h-3 text-accent" viewBox="0 0 500 150"
+                                    preserveAspectRatio="none">
+                                    <path
+                                        d="M5,125.4c30.5-8.1,69.7-16.3,113.2-21.2c43.5-4.9,86.9-6.6,130.1-5.9c43.2,0.7,86.4,2.7,129.2,6.4c42.8,3.7,85.3,8.7,127.4,14.9"
+                                        fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                        </h1>
+                        <p class="text-lg text-gray-200 mb-8 max-w-xl mx-auto lg:mx-0 animate-on-scroll"
+                            data-delay="200">
+                            বিসিএস, ব্যাংক, ATEO, প্রাথমিক শিক্ষক নিয়োগ, শিক্ষক নিবন্ধন সহ প্রায় সকল সরকারি-বেসরকারি
+                            চাকরির পূর্ণাঙ্গ প্রস্তুতি নিন Live MCQ™ অ্যাপে।
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-on-scroll"
+                            data-delay="300">
+                            <a href="#"
+                                class="bg-accent hover:bg-primary text-white px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2">
+                                <i class="fas fa-lock"></i> লগইন করুন
+                            </a>
+                            <div class="flex gap-3 justify-center">
+                                <a href="#"
+                                    class="bg-white/10 backdrop-blur p-2 rounded-full hover:bg-white/20 transition"><img
+                                        src="https://web.livemcq.com/core/uploads/2026/03/Playstore-Icon.webp"
+                                        class="w-8 h-8"></a>
+                                <a href="#"
+                                    class="bg-white/10 backdrop-blur p-2 rounded-full hover:bg-white/20 transition"><img
+                                        src="https://web.livemcq.com/core/uploads/2026/03/App-Store-Icon.png"
+                                        class="w-8 h-8"></a>
+                                <a href="#"
+                                    class="bg-white/10 backdrop-blur p-2 rounded-full hover:bg-white/20 transition"><img
+                                        src="https://web.livemcq.com/core/uploads/2026/03/Windows-Icon.png"
+                                        class="w-8 h-8"></a>
+                                <a href="#"
+                                    class="bg-white/10 backdrop-blur p-2 rounded-full hover:bg-white/20 transition"><img
+                                        src="https://web.livemcq.com/core/uploads/2026/03/Mac-OS-Icon.png"
+                                        class="w-8 h-8"></a>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 justify-center lg:justify-start mt-8 animate-on-scroll"
+                            data-delay="400">
+                            <img src="https://web.livemcq.com/core/uploads/2026/02/Users-1.8M.webp" class="h-10"
+                                alt="users">
+                            <span class="text-sm">১.৮ মিলিয়ন+ অ্যাপ ডাউনলোড</span>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 mt-12 lg:mt-0 flex justify-center animate-on-scroll" data-delay="200">
+                        <img src="https://web.livemcq.com/core/uploads/2025/10/Mobile-Mockup-4-for-header-banner.png"
+                            class="w-64 lg:w-80 drop-shadow-2xl" alt="App Mockup">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-16 bg-white stats-section">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="border-r last:border-r-0 flex flex-col items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <div class="text-3xl font-bold text-headline counter-number" data-target="525000">525K+</div>
+                        <div class="text-body">প্রশ্নের আর্কাইভ</div>
+                    </div>
+                    <div class="border-r last:border-r-0 flex flex-col items-center gap-2 animate-on-scroll" data-delay="100">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+
+                        <div class="text-3xl font-bold text-headline counter-number" data-target="1300">1.3K+</div>
+                        <div class="text-body">ভিডিও লেকচার</div>
+                    </div>
+                    <div class="border-r last:border-r-0 flex flex-col items-center gap-2 animate-on-scroll" data-delay="200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+
+                        <div class="text-3xl font-bold text-headline counter-number" data-target="2200">2.2K+</div>
+                        <div class="text-body">পিডিএফ</div>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 animate-on-scroll" data-delay="300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                        </svg>
+                        <div class="text-3xl font-bold text-headline counter-number" data-target="1800000">1.8M+</div>
+                        <div class=" text-body">ব্যবহারকারী</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What is Live MCQ Section -->
+        <section class="py-20 bg-gray-50 animate-on-scroll" data-delay="0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:flex gap-12">
+                    <div class="lg:w-1/2 mb-10 lg:mb-0">
+                        <h2 class="text-3xl md:text-4xl font-bold text-headline mb-6">
+                            <span class="text-accent">Live MCQ™</span> কী এবং এটি কীভাবে আপনার প্রস্তুতিতে সাহায্য করবে?
+                        </h2>
+                        <p class="text-body leading-relaxed mb-6">
+                            <strong>Live MCQ™</strong> হচ্ছে চাকরির প্রস্তুতি নেয়ার জন্য বাংলাদেশের প্রথম ও সর্ববৃহৎ
+                            অনলাইন প্লাটফর্ম। “সঠিক প্রস্তুতি, সহজ প্রিলি” এই মূলমন্ত্রকে সামনে রেখে ২০১৭ সালের ২৭
+                            ফেব্রুয়ারি আনুষ্ঠানিকভাবে যাত্রা শুরু করে এই প্লাটফর্মটি। এন্ড্রয়েড ফোন ব্যবহারকারীদের জন্য
+                            গুগল প্লে-স্টোর এবং আইফোন ব্যবহারকারীদের জন্য অ্যাপল অ্যাপ-স্টোরে <strong>Live MCQ</strong>
+                            নামে অ্যাপ রয়েছে। এছাড়া উইন্ডোজ ও Mac ব্যবহারকারীদের জন্যও রয়েছে ডেস্কটপ অ্যাপ।
+                        </p>
+                        <div class="space-y-4">
+                            <div
+                                class="flex gap-4 items-start p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                                <i class="fas fa-chart-line text-primary text-2xl"></i>
+                                <div>
+                                    <h4 class="font-bold text-headline">অধ্যবসায় এর বিকল্প নেই</h4>
+                                    <p class="text-sm text-body">চাকরির পরীক্ষায় এগিয়ে থাকতে কঠিন অধ্যবসায় এর বিকল্প
+                                        নেই।</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex gap-4 items-start p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                                <i class="fas fa-trophy text-primary text-2xl"></i>
+                                <div>
+                                    <h4 class="font-bold text-headline">প্রতিযোগিতামূলক পরীক্ষা</h4>
+                                    <p class="text-sm text-body">আপনি যাদের সঙ্গে প্রতিদ্বন্দ্বিতা করবেন ঠিক তাদের সাথেই
+                                        পরীক্ষা দিন।</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex gap-4 items-start p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+                                <i class="fas fa-users text-primary text-2xl"></i>
+                                <div>
+                                    <h4 class="font-bold text-headline">প্রতিদ্বন্দ্বীদের সাথে পরীক্ষা</h4>
+                                    <p class="text-sm text-body">আপনার প্রস্তুতির প্রকৃত অবস্থান জানতে প্রতিযোগীদের সাথে
+                                        প্রতিযোগিতা করুন।</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2">
+                        <img src="https://web.livemcq.com/core/uploads/2025/10/App-Screen-Mockup-Home-Live-MCQ.png"
+                            class="rounded-2xl shadow-xl mx-auto" alt="App Screens">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section with Gradient BG -->
+        <section class="py-20 bg-[#F4F4FA] relative overflow-hidden animate-on-scroll" data-delay="0">
+            <div class="absolute inset-0 opacity-10 bg-center bg-cover"
+                style="background-image: url('https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Gradient-Background.jpg')">
+            </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">গুরুত্বপূর্ণ <span class="text-accent">ফিচার</span> সমূহ
+                    </h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-md hover-lift transition-all">
+                        <i class="lu lu-folder-search text-primary text-4xl mb-4 block"></i>
+                        <h3 class="text-xl font-bold mb-2">স্মার্ট সার্চ</h3>
+                        <p class="text-body">Live MCQ™-এর আর্কাইভ থেকে যেকোনো প্রশ্ন খুঁজে বের করুন সহজেই।</p>
+                        <a href="#" class="text-accent mt-4 inline-block">আরো জানুন →</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md hover-lift transition-all">
+                        <i class="lu lu-file-question text-primary text-4xl mb-4 block"></i>
+                        <h3 class="text-xl font-bold mb-2">তথ্যকল্পদ্রুম</h3>
+                        <p class="text-body">চাকরির পরীক্ষার বিভিন্ন প্রচলিত বিভ্রান্তিমূলক প্রশ্নের অথেনটিক রেফারেন্স
+                            অনুসারে সমাধান।</p>
+                        <a href="#" class="text-accent mt-4 inline-block">আরো জানুন →</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md hover-lift transition-all">
+                        <i class="lu lu-briefcase-business text-primary text-4xl mb-4 block"></i>
+                        <h3 class="text-xl font-bold mb-2">জব সল্যুশন</h3>
+                        <p class="text-body">জব সল্যুশনের প্রশ্নের উপর টপিকভিত্তিক পড়াশোনার সুযোগ।</p>
+                        <a href="#" class="text-accent mt-4 inline-block">আরো জানুন →</a>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <a href="#"
+                        class="inline-flex items-center gap-2 bg-accent hover:bg-primary text-white px-8 py-3 rounded-full font-semibold transition">আরও
+                        ফিচার দেখুন <i class="fas fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Free Offerings Section -->
+        <section class="py-20 bg-white animate-on-scroll" data-delay="0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Live MCQ-তে যা যা পাচ্ছেন— <span
+                        class="text-accent">একদম ফ্রি!</span></h2>
+                <p class="text-body max-w-2xl mx-auto mb-12">প্যাকেজ ছাড়াই বা কোন প্রকার আর্থিক ব্যয় না করে সম্পূর্ণ
+                    ফ্রি-তে নিচের সেবাগুলো নিতে পারবেন যে কেউই।</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">📰 ফ্রি ডেইলি নিউজপিকার</span>
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">📚 ১০০০+ ফ্রি পিডিএফ</span>
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">📝 ফ্রি সাপ্তাহিক মডেল
+                        টেস্ট</span>
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">📰 ফ্রি উইকলি বুলেটিন</span>
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">🎥 ৪০০+ ফ্রি ভিডিও ক্লাস</span>
+                    <span class="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium">💼 ফ্রি ক্যারিয়ার বিষয়ক
+                        পরামর্শ</span>
+                </div>
+                <div class="mt-12">
+                    <img src="https://web.livemcq.com/core/uploads/2025/10/5-Phone-Mockup-Live-MCQ-2.png"
+                        class="mx-auto w-full max-w-3xl" alt="App Screens">
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Pricing Section -->
+        <section class="py-20 bg-white animate-on-scroll" data-delay="0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold"><span class="text-accent">Live MCQ™</span> এর সব প্যাকেজ
+                        এক নজরে</h2>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <!-- Free -->
+                    <div class="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-xl transition">
+                        <h3 class="font-bold text-lg">ফ্রি প্রিমিয়াম</h3>
+                        <p class="text-sm text-gray-500 mb-4">৭ দিন ট্রায়াল</p>
+                        <div class="text-3xl font-bold text-primary mb-4">৳০</div>
+                        <ul class="space-y-2 text-sm mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল প্রিমিয়াম ফিচার</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল পরীক্ষা</li>
+                            <li><i class="fas fa-times-circle text-red-400 mr-2"></i> সকল ভিডিও ক্লাস</li>
+                        </ul>
+                        <a href="#"
+                            class="block text-center border border-gray-300 rounded-full py-2 hover:bg-primary hover:text-white transition">এনরোল
+                            করুন</a>
+                    </div>
+                    <!-- Monthly -->
+                    <div class="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-xl transition">
+                        <h3 class="font-bold text-lg">মাসিক প্রিমিয়াম</h3>
+                        <p class="text-sm text-gray-500 mb-4">৩০ দিন</p>
+                        <div class="text-3xl font-bold text-primary mb-4">৳১৯৯</div>
+                        <ul class="space-y-2 text-sm mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল প্রিমিয়াম ফিচার</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল পরীক্ষা</li>
+                            <li><i class="fas fa-times-circle text-red-400 mr-2"></i> সকল ভিডিও ক্লাস</li>
+                        </ul>
+                        <a href="#"
+                            class="block text-center border border-gray-300 rounded-full py-2 hover:bg-primary hover:text-white transition">এনরোল
+                            করুন</a>
+                    </div>
+                    <!-- 6 Months -->
+                    <div class="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-xl transition">
+                        <h3 class="font-bold text-lg">ষাণ্মাসিক</h3>
+                        <p class="text-sm text-gray-500 mb-4">৬ মাস</p>
+                        <div class="text-3xl font-bold text-primary mb-4">৳৭৯৯ <span
+                                class="text-sm line-through text-gray-400">৳৯৯৯</span></div>
+                        <ul class="space-y-2 text-sm mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল প্রিমিয়াম ফিচার</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল পরীক্ষা</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল ভিডিও ক্লাস</li>
+                        </ul>
+                        <a href="#"
+                            class="block text-center bg-primary text-white rounded-full py-2 hover:bg-secondary transition">এনরোল
+                            করুন</a>
+                    </div>
+                    <!-- Yearly (Popular) -->
+                    <div class="bg-white border-2 border-primary rounded-2xl p-6 shadow-lg relative">
+                        <span
+                            class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-white text-xs px-3 py-1 rounded-full">সর্বাধিক
+                            জনপ্রিয়</span>
+                        <h3 class="font-bold text-lg">বার্ষিক প্রিমিয়াম</h3>
+                        <p class="text-sm text-gray-500 mb-4">১ বছর</p>
+                        <div class="text-3xl font-bold text-primary mb-4">৳১১৯৯ <span
+                                class="text-sm line-through text-gray-400">৳১৪৯৯</span></div>
+                        <ul class="space-y-2 text-sm mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল প্রিমিয়াম ফিচার</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল পরীক্ষা</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল ভিডিও ক্লাস</li>
+                        </ul>
+                        <a href="#"
+                            class="block text-center bg-primary text-white rounded-full py-2 hover:bg-secondary transition">এনরোল
+                            করুন</a>
+                    </div>
+                    <!-- 4 Years -->
+                    <div class="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-xl transition">
+                        <h3 class="font-bold text-lg">স্বাধীন প্রিমিয়াম</h3>
+                        <p class="text-sm text-gray-500 mb-4">৪ বছর</p>
+                        <div class="text-3xl font-bold text-primary mb-4">৳২৯৯৯ <span
+                                class="text-sm line-through text-gray-400">৳৫৯৯৬</span></div>
+                        <ul class="space-y-2 text-sm mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল প্রিমিয়াম ফিচার</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল পরীক্ষা</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> সকল ভিডিও ক্লাস</li>
+                        </ul>
+                        <a href="#"
+                            class="block text-center border border-gray-300 rounded-full py-2 hover:bg-primary hover:text-white transition">এনরোল
+                            করুন</a>
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a href="#"
+                        class="inline-flex items-center gap-2 bg-accent hover:bg-primary text-white px-6 py-3 rounded-full transition">আরও
+                        প্যাকেজ দেখুন <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact / CTA Footer -->
+        <section class="py-16 bg-light animate-on-scroll" data-delay="0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold mb-4">যে কোন প্রয়োজনে পাশে আছি</h2>
+                <p class="text-body mb-8 max-w-xl mx-auto">আপনার সরকারি চাকুরী প্রস্তুতির যাত্রা আরেকটু সহজ করতে Live
+                    MCQ™ টিম সর্বত্র আপনার পাশে আছে।</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#"
+                        class="bg-white shadow-md rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transition"><i
+                            class="fab fa-facebook-messenger text-blue-600 text-xl"></i> মেসেঞ্জার চ্যাট</a>
+                    <a href="#"
+                        class="bg-white shadow-md rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transition"><i
+                            class="fab fa-whatsapp text-green-500 text-xl"></i> হোয়াটসঅ্যাপ</a>
+                    <a href="#"
+                        class="bg-white shadow-md rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transition"><i
+                            class="fas fa-phone-alt text-accent text-xl"></i> ফোনকল</a>
+                    <a href="#"
+                        class="bg-white shadow-md rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transition"><i
+                            class="fab fa-facebook text-blue-700 text-xl"></i> ফেইসবুক পেজ</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#F9F9FB] pt-16 pb-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Dark-Logo.png" class="h-10 mb-4"
+                        alt="Logo">
+                    <p class="text-sm text-body mb-4">সকল সরকারি-বেসরকারি চাকরির পূর্ণাঙ্গ প্রস্তুতি নিন Live MCQ™
+                        অ্যাপে।</p>
+                    <div class="flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i><span
+                            class="font-bold">৪.৬</span><span class="text-sm">(১.৮ মিলিয়ন+ ডাউনলোড)</span></div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">কুইক লিঙ্ক</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">হোম</a></li>
+                        <li><a href="#" class="hover:text-primary">বুক ষ্টোর</a></li>
+                        <li><a href="#" class="hover:text-primary">ফিচারসমূহ</a></li>
+                        <li><a href="" class="hover:text-primary">প্যাকেজসমূহ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">আরও জানুন</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">সকল পোস্ট</a></li>
+                        <li><a href="#" class="hover:text-primary">সকল মেন্টর</a></li>
+                        <li><a href="#" class="hover:text-primary">আমাদের সম্পর্কে</a></li>
+                        <li><a href="#" class="hover:text-primary">সাধারণ জিজ্ঞাসা</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">যোগাযোগ</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><i class="fas fa-phone-alt mr-2"></i> 01701-377322</li>
+                        <li><i class="fas fa-envelope mr-2"></i> contact@livemcq.com</li>
+                        <li><i class="fab fa-facebook mr-2"></i> facebook.com/livemcq</li>
+                        <li><i class="fab fa-youtube mr-2"></i> youtube.com/@LiveMCQ</li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-body">
+                <p>© স্বত্বাধিকার ২০১৭ - ২০২৬ | সর্বস্বত্ব সংরক্ষিত | <span class="text-accent">Career Hub</span>
+                    দ্বারা পরিচালিত</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // Scroll animation observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    const delay = element.dataset.delay || 0;
+                    setTimeout(() => {
+                        element.classList.add('animate-fade-in-up');
+                    }, delay);
+                    observer.unobserve(element);
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements with animate-on-scroll class
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Simple counter animation on scroll
+        const counters = document.querySelectorAll('.counter-number');
+        const speed = 200;
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = parseInt(counter.getAttribute('data-target') || counter.innerText);
+                    const count = parseInt(counter.innerText);
+                    const increment = target / speed;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + increment);
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        // Trigger counters when stats section is in view
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounters();
+                        statsObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            statsObserver.observe(statsSection);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{{ course.title }} | Live MCQ™</title>
+    <meta name="description" content="{{ course.description|truncatechars:150 }}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Poppins:wght@500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .bg-fluid-gradient {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255, 255, 255, 0) 35%),
+                radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255, 255, 255, 0) 45%),
+                radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255, 255, 255, 0) 9%);
+        }
+    </style>
+</head>
+
+<body class="font-figtree bg-fluid-gradient">
+    {% include 'header.html' %}
+
+    <!-- Course Hero Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Course Image -->
+                <div class="animate-fade-in-up">
+                    <div class="relative">
+                        {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.name }}"
+                            class="w-full rounded-2xl shadow-2xl object-cover">
+                        {% else %}
+                        <img src="https://via.placeholder.com/600x400?text={{ course.name|urlencode }}"
+                            alt="{{ course.name }}" class="w-full rounded-2xl shadow-2xl object-cover">
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
+                        {% if course.is_featured %}
+                        <div
+                            class="absolute top-4 left-4 bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            Featured
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Course Info -->
+                <div class="animate-fade-in-up">
+                    <div class="space-y-6">
+                        <div>
+                            <h1 class="text-4xl lg:text-5xl font-bold text-headline leading-tight">{{ course.name }}
+                            </h1>
+                            <p class="text-xl text-body mt-4">{{ course.description|truncatechars:100 }}</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-layer-group text-primary"></i>
+                                <span class="font-semibold text-headline">{{ course.total_subjects }} subjects</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-question-circle text-primary"></i>
+                                <span class="text-body">{{ course.total_questions }} questions</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            {% if course.one_month_price %}
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary">৳{{ course.one_month_price }}</div>
+                                <div class="text-sm text-body">1 Month</div>
+                            </div>
+                            {% endif %}
+                            {% if course.one_year_price %}
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-secondary">৳{{ course.one_year_price }}</div>
+                                <div class="text-sm text-body">1 Year</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="{% url 'payment_page' course.id %}"
+                                class="bg-primary hover:bg-inherit hover:text-primary border-2 border-primary text-white px-8 py-4 rounded-full font-semibold text-center transition-all duration-300 shadow-lg hover:shadow-xl">
+                                Enroll Now
+                            </a>
+                            <button
+                                class="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 rounded-full font-semibold transition-all duration-300">
+                                Add to Wishlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Details -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-3 gap-12">
+                <!-- Main Content -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Description -->
+                    <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                        <h2 class="text-3xl font-bold text-headline mb-6">Course Overview</h2>
+                        <div class="prose prose-lg max-w-none text-body">
+                            {{ course.description|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- What You'll Learn -->
+                    <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                        <h2 class="text-3xl font-bold text-headline mb-6">What You'll Learn</h2>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span class="text-body">Comprehensive MCQ practice questions</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span class="text-body">Detailed explanations for each answer</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span class="text-body">Progress tracking and performance analytics</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                                <span class="text-body">Mobile-friendly practice interface</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Curriculum -->
+                    <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                        <h2 class="text-3xl font-bold text-headline mb-2">Course Curriculum</h2>
+                        <div class="space-y-4">
+                            {% for subject in course.subjects.all %}
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-xl font-semibold text-headline">{{ subject.name }}</h3>
+                                    <span class="text-body">{{ subject.chapters.count }} chapters</span>
+                                </div>
+                                <div class="mt-4 space-y-2">
+                                    {% for chapter in subject.chapters.all|slice:":3" %}
+                                    <div class="flex items-center gap-3 text-body">
+                                        <i class="fas fa-play-circle text-primary"></i>
+                                        <span>{{ chapter.name }}</span>
+                                    </div>
+                                    {% endfor %}
+                                    {% if subject.chapters.count > 3 %}
+                                    <div class="text-primary font-medium">+{{ subject.chapters.count|add:"-3" }} more
+                                        chapters</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                                <h3 class="text-xl font-semibold text-headline">Complete MCQ Preparation</h3>
+                                <p class="text-body mt-2">Comprehensive coverage of all topics with practice questions.
+                                </p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Instructor Info -->
+                    <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-headline mb-4">About This Course</h3>
+                        <div class="flex items-center gap-4">
+                            <img src="https://via.placeholder.com/60x60?text=LiveMCQ" alt="Live MCQ"
+                                class="w-16 h-16 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-semibold text-headline">Live MCQ Team</h4>
+                                <p class="text-body text-sm">Expert educators and MCQ specialists</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Stats -->
+                    <div class="bg-white border-[0.5px] border-gray-100 drop-shadow-xl  rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-headline mb-4">Course Details</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-body">Subjects</span>
+                                <span class="font-semibold text-headline">{{ course.total_subjects }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-body">Questions</span>
+                                <span class="font-semibold text-headline">{{ course.total_questions }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-body">Language</span>
+                                <span class="font-semibold text-headline">Bengali</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-body">Last Updated</span>
+                                <span class="font-semibold text-headline">{{ course.updated_at|date:'M Y' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    {% include 'footer.html' %}
+</body>
+
+</html>

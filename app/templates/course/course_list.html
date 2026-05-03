@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EduTech Pro | Premium Course Marketplace</title>
+    <!-- Tailwind CSS + Google Fonts + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                        cardBg: '#FFFFFF',
+                        gradientStart: '#f8faff',
+                        gradientEnd: '#f0f2fe',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards',
+                        'fade-in': 'fadeIn 0.6s ease forwards',
+                        'float': 'float 4s ease-in-out infinite',
+                        'scale-on-hover': 'scalePop 0.25s ease-out',
+                        'marquee': 'marqueeScroll 22s linear infinite',
+                        'glow-pulse': 'glowPulse 2s infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(32px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        scalePop: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.02)' },
+                        },
+                        glowPulse: {
+                            '0%': { boxShadow: '0 0 0 0 rgba(51, 51, 255, 0.4)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(51, 51, 255, 0)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(51, 51, 255, 0)' },
+                        },
+                        marqueeScroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f9faff 0%, #f1f4fc 100%);
+            font-family: 'Inter', sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Custom glassmorphism & modern scroll */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(0px);
+            border: 1px solid rgba(51, 51, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.15);
+            border-color: rgba(51, 51, 255, 0.2);
+        }
+
+        .course-image {
+            transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .card-img-wrapper {
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .card-img-wrapper:hover .course-image {
+            transform: scale(1.05);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(95deg, #3333FF 0%, #5e5eff 100%);
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 18px -6px rgba(51, 51, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(95deg, #2a2ac4 0%, #4a4aff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px -8px rgba(51, 51, 255, 0.4);
+        }
+
+        .badge-stat {
+            background: #f0f3fe;
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: #3333FF;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-toast {
+            animation: fadeInUp 0.4s ease-out;
+            background: #1C1C1D;
+            border-left: 5px solid #FF6600;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* custom infinite marquee wrapper */
+        .marquee-wrapper {
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+        }
+
+        /* Loading spinner animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        /* Button disabled state */
+        .btn-gradient.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    {% include "header.html" %}
+    <main class="max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-12">
+        
+        <!-- MESSAGES (django style alert) -->
+        <div id="message-container" class="mb-8">
+            <!-- Dynamic Django messages loop - properly styled -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message-toast bg-white rounded-xl shadow-lg p-4 mb-3 border-l-4 {% if message.tags == 'error' %}border-red-500{% elif message.tags == 'success' %}border-green-500{% else %}border-accent{% endif %} flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            {% if message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle text-red-500"></i>
+                            {% elif message.tags == 'success' %}
+                                <i class="fas fa-check-circle text-green-500"></i>
+                            {% else %}
+                                <i class="fas fa-bell text-accent"></i>
+                            {% endif %}
+                            <span class="text-sm font-medium text-headline">{{ message }}</span>
+                        </div>
+                        <i class="fas fa-times text-gray-400 cursor-pointer hover:text-gray-600 close-message"></i>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default promo message when no messages exist -->
+                <div class="message-toast bg-white rounded-xl shadow-lg p-4 mb-3 border-l-4 border-accent flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bell text-accent"></i>
+                        <span class="text-sm font-medium text-headline">🌟 Early bird offer: Enroll in any course and get 20% off! Use code <span class="font-mono bg-gray-100 px-2 py-0.5 rounded">LEARN2025</span></span>
+                    </div>
+                    <i class="fas fa-times text-gray-400 cursor-pointer hover:text-gray-600 close-message"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- HERO SECTION / PAGE TITLE + BREADCRUMBS -->
+        <div class="mb-10 animate-fade-in-up">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <div class="flex items-center gap-2 text-sm text-body/70 mb-2">
+                        <a href="/" class="hover:text-primary transition">Home</a>
+                        <i class="fas fa-chevron-right text-xs"></i>
+                        <span class="text-primary font-medium">All Courses</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-display font-bold tracking-tight text-headline">
+                        Explore <span class="text-primary">premium paths</span>
+                        <span class="block text-xl font-normal text-body mt-2">curated for future leaders & innovators</span>
+                    </h1>
+                </div>
+                <div class="bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-sm border border-gray-200">
+                    <div class="flex items-center gap-4 text-sm">
+                        <span class="flex items-center gap-1"><i class="fas fa-book-open text-primary"></i> <strong id="course-count">0</strong> Courses</span>
+                        <span class="w-px h-4 bg-gray-300"></span>
+                        <span class="flex items-center gap-1"><i class="fas fa-users text-accent"></i> <strong>2.3k+</strong> Learners</span>
+                        <span class="w-px h-4 bg-gray-300"></span>
+                        <span class="flex items-center gap-1"><i class="fas fa-star text-yellow-500"></i> 4.9 Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COURSE GRID - Enhanced Professional Layout with Working Enroll Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr" id="course-grid">
+            
+            {% for course in courses %}
+            <div class="glass-card rounded-2xl overflow-hidden bg-white shadow-lg transition-all duration-300 hover:shadow-2xl flex flex-col h-full" data-course-id="{{ course.id }}" data-course-name="{{ course.name }}">
+                <div class="card-img-wrapper relative">
+                    {% if course.image %}
+                        <img class=" w-full h-56 object-cover" src="{{ course.image.url }}" alt="{{ course.name }}">
+                    {% else %}
+                        <img class="w-full h-56 object-cover" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=400&fit=crop" alt="{{ course.name }}">
+                    {% endif %}
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-bold text-primary shadow-sm"><i class="fas fa-fire"></i> Bestseller</div>
+                </div>
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex justify-between items-start mb-3">
+                        <a href="{% url 'course_detail' course.id %}" class="text-2xl font-display font-bold text-headline leading-tight hover:text-primary transition-colors">{{ course.name }}</a>
+                        <i class="fas fa-heart text-gray-300 hover:text-red-400 cursor-pointer transition wishlist-icon"></i>
+                    </div>
+                    <p class="text-body text-base leading-relaxed mb-4 line-clamp-3">{{ course.description|truncatechars:120 }}</p>
+                    <div class="flex flex-wrap gap-3 mb-5">
+                        <span class="badge-stat"><i class="fas fa-layer-group"></i> {{ course.total_subjects }} Subjects</span>
+                        <span class="badge-stat"><i class="fas fa-question-circle"></i> {{ course.total_questions }} Questions</span>
+                        <span class="badge-stat"><i class="fas fa-clock"></i> 48h content</span>
+                    </div>
+                    <div class="mt-auto flex items-center justify-between border-t pt-5 border-gray-100">
+                        <div class="flex items-center gap-1">
+                            <span class="text-2xl font-bold text-primary">{{ course.one_month_price }} TK</span>
+                            {% if course.three_month_price %}
+                            <span class="text-xs text-body line-through ml-1">{{ course.three_month_price }} TK</span>
+                            {% endif %}
+                        </div>
+                    {% if course.id in course_ids %}
+                        <a  class="btn-gradient inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-green font-semibold text-sm transition-all enroll-btn" data-course-id="{{ course.id }}">
+                            <i class="fas fa-rocket"></i> Enrolled
+                        </a>
+                    {% else %}
+                    <a href="{% url 'payment_page' course.id %}" class="btn-gradient inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all enroll-btn" data-course-id="{{ course.id }}">
+                            <i class="fas fa-rocket"></i> Enroll
+                        </a>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- No courses message -->
+            <div class="col-span-full text-center py-16">
+                <div class="text-6xl mb-4">📚</div>
+                <h3 class="text-2xl font-semibold text-headline mb-2">No Courses Available</h3>
+                <p class="text-body">Check back soon for new courses!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- CTA Section (professional banner) -->
+        <div class="mt-20 mb-12 rounded-3xl bg-gradient-to-r from-primary to-secondary p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-20">
+                <i class="fas fa-chalkboard-user text-9xl"></i>
+            </div>
+            <div class="absolute left-0 bottom-0 opacity-10">
+                <i class="fas fa-graduation-cap text-8xl"></i>
+            </div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h3 class="text-3xl md:text-4xl font-display font-bold">Ready to supercharge your career?</h3>
+                    <p class="text-white/80 text-lg mt-2 max-w-xl">Join 10,000+ learners and get unlimited access to all premium courses + certificates</p>
+                </div>
+                <button class="bg-white text-primary px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition transform hover:scale-105 flex items-center gap-3" id="allAccessBtn">
+                    <i class="fas fa-calendar-check"></i> Get All Access →
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer like testimonial row (optional trust indicators) -->
+        <div class="flex flex-wrap justify-center gap-8 py-6 border-t border-gray-200/80 mt-6 text-center text-body text-sm">
+            <div class="flex items-center gap-2"><i class="fas fa-lock text-primary"></i> Secure Payment</div>
+            <div class="flex items-center gap-2"><i class="fas fa-certificate text-accent"></i> Verified Certificates</div>
+            <div class="flex items-center gap-2"><i class="fas fa-headset"></i> 24/7 Support</div>
+            <div class="flex items-center gap-2"><i class="fas fa-sync-alt"></i> 30-Day Refund</div>
+        </div>
+    </main>
+
+    <!-- JavaScript for Working Enroll Buttons & Interactive Features -->
+    <script>
+        (function() {
+            // Update course count display
+            const courseCards = document.querySelectorAll('.glass-card');
+            const courseCountSpan = document.getElementById('course-count');
+            if (courseCountSpan && courseCards.length) {
+                courseCountSpan.textContent = courseCards.length;
+            }
+
+            // Handle closing of messages
+            document.querySelectorAll('.close-message').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function(e) {
+                    const toast = this.closest('.message-toast');
+                    if(toast) {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(-10px)';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                });
+            });
+
+            // --- WORKING ENROLL BUTTONS ---
+            // This ensures the original Django URLs work properly
+            // We do NOT prevent default on actual anchor tags - they will redirect normally
+            // But we add loading feedback for better UX
+            const enrollButtons = document.querySelectorAll('.enroll-btn');
+            
+            enrollButtons.forEach(btn => {
+                // Remove any existing click listeners by cloning approach? No, we'll add loading indicator
+                // Store original href
+                const originalHref = btn.getAttribute('href');
+                
+                btn.addEventListener('click', function(e) {
+                    // Don't prevent default - let the link work normally
+                    // But show a loading toast to indicate redirection
+                    if (!originalHref || originalHref === '#') {
+                        e.preventDefault();
+                        showNotification('⚠️ Payment page URL not configured yet.', 'error');
+                        return;
+                    }
+                    
+                    // Show loading notification before redirect
+                    const courseCard = this.closest('.glass-card');
+                    const courseName = courseCard ? courseCard.querySelector('h2')?.innerText : 'this course';
+                    
+                    showLoadingNotification(`Redirecting to payment for "${courseName}"...`);
+                    
+                    // Add a small delay to show the notification, then redirect
+                    // This improves UX and prevents rapid multiple clicks
+                    this.style.pointerEvents = 'none';
+                    this.classList.add('disabled');
+                    
+                    setTimeout(() => {
+                        // Perform the actual redirect
+                        window.location.href = originalHref;
+                    }, 300);
+                });
+            });
+
+            // Helper function to show notification
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-6 right-6 bg-headline text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-3 z-50 animate-fade-in-up';
+                const icon = type === 'error' ? '<i class="fas fa-exclamation-triangle text-accent"></i>' : '<i class="fas fa-info-circle text-primary"></i>';
+                notification.innerHTML = `${icon} <span class="font-medium">${message}</span>`;
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            function showLoadingNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-6 right-6 bg-headline text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-3 z-50 animate-fade-in-up';
+                notification.innerHTML = `<i class="fas fa-spinner fa-pulse text-accent"></i> <span class="font-medium">${message}</span>`;
+                document.body.appendChild(notification);
+                // Notification will be removed when redirect happens, but keep it
+                return notification;
+            }
+
+            // Wishlist functionality (nice to have)
+            const wishlistIcons = document.querySelectorAll('.wishlist-icon');
+            wishlistIcons.forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.toggle('text-red-500');
+                    this.classList.toggle('text-gray-300');
+                    if (this.classList.contains('text-red-500')) {
+                        this.classList.remove('text-gray-300');
+                        showToastMessage('Added to wishlist! ❤️', 'success');
+                    } else {
+                        this.classList.add('text-gray-300');
+                        showToastMessage('Removed from wishlist', 'info');
+                    }
+                });
+            });
+
+            // Helper for small toast messages
+            function showToastMessage(msg, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-lg z-50 text-sm font-medium animate-fade-in-up`;
+                toast.innerHTML = msg;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
+
+            // All Access button handler
+            const allAccessBtn = document.getElementById('allAccessBtn');
+            if (allAccessBtn) {
+                allAccessBtn.addEventListener('click', function() {
+                    showToastMessage('🚀 All Access plan coming soon! Stay tuned.', 'info');
+                });
+            }
+
+            // Smooth fade-in animations for cards (initially hidden then reveal)
+            window.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.glass-card').forEach((card, idx) => {
+                    card.style.opacity = '0';
+                    card.style.animation = `fadeInUp 0.5s ease forwards ${idx * 0.05}s`;
+                });
+            });
+
+            // Also handle potential case where Django template variables might be empty
+            // Ensure all enroll buttons have proper href attributes
+            const checkAndFixButtons = () => {
+                document.querySelectorAll('.enroll-btn').forEach(btn => {
+                    const href = btn.getAttribute('href');
+                    if (!href || href === '#' || href === '') {
+                        console.warn('Button missing href:', btn);
+                        btn.style.opacity = '0.6';
+                        btn.style.cursor = 'not-allowed';
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            showNotification('Payment page not available for this course yet.', 'error');
+                        });
+                    }
+                });
+            };
+            checkAndFixButtons();
+
+            // Add ripple effect on card hover - pure css already implemented
+            // Extra: Add tooltip to price tags
+            const priceTags = document.querySelectorAll('.text-2xl.font-bold.text-primary');
+            priceTags.forEach(price => {
+                if(price.innerText.includes('TK')) {
+                    price.setAttribute('title', 'One month access price');
+                }
+            });
+        })();
+    </script>
+
+    <!-- Additional style for line-clamp if not available -->
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Smooth fade-in animation fix */
+        .glass-card {
+            opacity: 0;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+</html>

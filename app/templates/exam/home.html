@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MCQ পরীক্ষা — EduPath</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'marquee': 'marqueeScroll 20s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        marqueeScroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons (required for chevron, bars, user, sign-out icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg:        #0B0F1A;
+            --surface:   #111827;
+            --card:      #161D2E;
+            --border:    #1F2D45;
+            --border-hi: #2A3F60;
+            --accent:    #3B82F6;
+            --accent-hi: #60A5FA;
+            --accent-glow: rgba(59,130,246,0.18);
+            --green:     #22C55E;
+            --red:       #EF4444;
+            --amber:     #F59E0B;
+            --text:      #E2E8F0;
+            --muted:     #64748B;
+            --muted-hi:  #94A3B8;
+            --font:      'Sora', sans-serif;
+            --mono:      'JetBrains Mono', monospace;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE OVERLAY ─────────────────────── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0;
+            opacity: .5;
+        }
+
+        /* ── TOPBAR ─────────────────────────────── */
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11,15,26,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo {
+            display: flex; align-items: center; gap: .6rem;
+            font-size: 1rem; font-weight: 700; letter-spacing: -.02em;
+        }
+        .logo-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .6; transform: scale(1.4); }
+        }
+        .topbar-right {
+            display: flex; align-items: center; gap: 1rem;
+            font-size: .8rem; color: var(--muted);
+        }
+
+        /* ── PAGE WRAPPER ───────────────────────── */
+        .page { max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; position: relative; z-index: 1; }
+
+        /* ── HERO ───────────────────────────────── */
+        .hero {
+            display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+            margin-bottom: 2.5rem; flex-wrap: wrap;
+        }
+        .hero-text h1 {
+            font-size: clamp(1.8rem,4vw,2.8rem);
+            font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+        }
+        .hero-text h1 span { color: var(--accent); }
+        .hero-text p {
+            margin-top: .5rem; color: var(--muted-hi);
+            font-size: .9rem; max-width: 480px; line-height: 1.6;
+        }
+        .timer-widget {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            text-align: center;
+            min-width: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+        .timer-widget::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        .timer-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .15em; color: var(--muted); margin-bottom: .3rem; }
+        .timer-display {
+            font-family: var(--mono);
+            font-size: 2.8rem; font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+            line-height: 1;
+            letter-spacing: .05em;
+        }
+        .timer-sub { font-size: .7rem; color: var(--muted); margin-top: .4rem; }
+
+        /* ── LAYOUT GRID ───────────────────────── */
+        .layout { display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; align-items: start; }
+        @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+        /* ── CARD ───────────────────────────────── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            position: relative;
+        }
+        .card-title {
+            font-size: .95rem; font-weight: 700; letter-spacing: -.01em;
+            margin-bottom: 1.25rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .card-title i { color: var(--accent); font-size: .85rem; }
+
+        /* ── FORM ELEMENTS ─────────────────────── */
+        .field { margin-bottom: 1.1rem; }
+        .field-label {
+            font-size: .72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .1em;
+            color: var(--muted-hi); margin-bottom: .5rem;
+            display: flex; align-items: center; gap: .4rem;
+        }
+        .field-label i { color: var(--accent); }
+
+        select, input[type="number"] {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: .85rem;
+            padding: .65rem .9rem;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .select-wrapper { position: relative; }
+        .select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; right: .9rem; top: 50%; transform: translateY(-50%);
+            color: var(--muted); font-size: .65rem; pointer-events: none;
+        }
+
+        /* ── SCROLLABLE CHECKLIST ───────────────── */
+        .checklist {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            max-height: 180px; overflow-y: auto;
+            padding: .5rem;
+        }
+        .checklist::-webkit-scrollbar { width: 4px; }
+        .checklist::-webkit-scrollbar-track { background: var(--border); border-radius: 4px; }
+        .checklist::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+        .check-empty {
+            text-align: center; padding: 2rem 0;
+            color: var(--muted); font-size: .8rem;
+        }
+        .check-group-label {
+            font-size: .65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .12em; color: var(--accent);
+            padding: .5rem .6rem .25rem; display: block;
+        }
+        .check-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .5rem .6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .15s;
+            gap: .5rem;
+        }
+        .check-item:hover { background: var(--border); }
+        .check-item input[type="checkbox"] { display: none; }
+        .check-box {
+            width: 16px; height: 16px; border-radius: 4px;
+            border: 1.5px solid var(--border-hi);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all .15s;
+        }
+        .check-item.checked .check-box {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .check-item.checked .check-box::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            font-size: .55rem; color: white;
+        }
+        .check-name { font-size: .82rem; flex: 1; line-height: 1.3; }
+        .check-badge {
+            font-family: var(--mono); font-size: .65rem; font-weight: 700;
+            color: var(--accent); background: var(--accent-glow);
+            border: 1px solid var(--border-hi);
+            padding: .1rem .45rem; border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* ── SELECT ALL ROW ─────────────────────── */
+        .actions-row {
+            display: flex; gap: .5rem; margin-top: .6rem;
+        }
+        .pill-btn {
+            font-size: .7rem; font-weight: 600; letter-spacing: .04em;
+            padding: .3rem .8rem; border-radius: 20px; cursor: pointer; border: none;
+            transition: all .15s; font-family: var(--font);
+        }
+        .pill-btn.primary { background: var(--accent-glow); color: var(--accent-hi); border: 1px solid var(--border-hi); }
+        .pill-btn.primary:hover { background: rgba(59,130,246,.3); }
+        .pill-btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+        .pill-btn.ghost:hover { background: var(--border); color: var(--text); }
+
+        /* ── MCQ AVAIL STAT ─────────────────────── */
+        .stat-band {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .78rem; color: var(--green);
+            background: rgba(34,197,94,.08);
+            border: 1px solid rgba(34,197,94,.2);
+            border-radius: 8px; padding: .5rem .8rem;
+            margin-top: .6rem; display: none;
+        }
+
+        /* ── NUMBER ROW ─────────────────────────── */
+        .num-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+        /* ── START BUTTON ───────────────────────── */
+        .start-btn {
+            width: 100%; padding: .9rem;
+            background: var(--accent);
+            color: white; font-family: var(--font);
+            font-size: .9rem; font-weight: 700;
+            border: none; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+            transition: all .2s;
+            box-shadow: 0 4px 20px rgba(59,130,246,.35);
+            margin-top: 1.25rem;
+        }
+        .start-btn:hover:not(:disabled) {
+            background: var(--accent-hi);
+            box-shadow: 0 6px 28px rgba(59,130,246,.5);
+            transform: translateY(-1px);
+        }
+        .start-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── SUMMARY CARD ───────────────────────── */
+        .summary-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
+        }
+        .sum-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .75rem 1rem;
+        }
+        .sum-key {
+            font-size: .65rem; text-transform: uppercase; letter-spacing: .1em;
+            color: var(--muted); margin-bottom: .2rem;
+        }
+        .sum-val {
+            font-size: .85rem; font-weight: 600; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sum-highlight { color: var(--accent); }
+
+        /* ── EXAM PANEL ─────────────────────────── */
+        .exam-panel {
+            display: none;
+            margin-top: 2rem;
+        }
+        .exam-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .progress-wrap {
+            background: var(--border); border-radius: 4px;
+            height: 4px; width: 100%; margin-top: .5rem;
+        }
+        .progress-bar {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-hi));
+            transition: width .4s ease;
+        }
+        .pill-stat {
+            display: flex; align-items: center; gap: .4rem;
+            font-size: .78rem; font-weight: 600;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: .35rem .85rem;
+        }
+
+        /* ── QUESTION CARD ──────────────────────── */
+        .q-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2rem;
+        }
+        .q-number {
+            font-family: var(--mono); font-size: .7rem; font-weight: 700;
+            color: var(--accent); letter-spacing: .12em; text-transform: uppercase;
+            margin-bottom: .75rem;
+        }
+        .q-text {
+            font-size: 1.05rem; font-weight: 600; line-height: 1.55;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-label {
+            display: flex; align-items: center; gap: .9rem;
+            padding: .85rem 1.1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 12px; margin-bottom: .6rem;
+            cursor: pointer; transition: all .18s;
+            position: relative; overflow: hidden;
+        }
+        .option-label:hover { border-color: var(--border-hi); background: rgba(255,255,255,.02); }
+        .option-label.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .option-label input { display: none; }
+        .option-letter {
+            width: 28px; height: 28px; border-radius: 8px;
+            background: var(--surface); border: 1.5px solid var(--border-hi);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono); font-size: .72rem; font-weight: 700;
+            color: var(--muted-hi); flex-shrink: 0;
+            transition: all .18s;
+        }
+        .option-label.selected .option-letter {
+            background: var(--accent); border-color: var(--accent); color: white;
+        }
+        .option-text { font-size: .88rem; line-height: 1.45; }
+
+        /* ── NAV BUTTONS ────────────────────────── */
+        .nav-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 1.5rem; gap: 1rem; flex-wrap: wrap;
+        }
+        .nav-btn {
+            display: flex; align-items: center; gap: .4rem;
+            padding: .65rem 1.25rem;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); font-family: var(--font); font-size: .83rem; font-weight: 600;
+            border-radius: 10px; cursor: pointer; transition: all .18s;
+        }
+        .nav-btn:hover:not(:disabled) { border-color: var(--border-hi); background: var(--border); }
+        .nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+        .submit-btn {
+            display: flex; align-items: center; gap: .4rem;
+            padding: .65rem 1.5rem;
+            background: var(--accent); color: white;
+            font-family: var(--font); font-size: .83rem; font-weight: 700;
+            border: none; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(59,130,246,.3);
+            transition: all .18s;
+        }
+        .submit-btn:hover { background: var(--accent-hi); box-shadow: 0 6px 24px rgba(59,130,246,.45); }
+
+        /* ── RESULT PANEL ───────────────────────── */
+        .result-panel { display: none; margin-top: 2rem; }
+        .result-score-row {
+            display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .score-box {
+            border-radius: 16px; padding: 1.25rem;
+            text-align: center;
+        }
+        .score-box.correct { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.25); }
+        .score-box.wrong   { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25); }
+        .score-box.skip    { background: rgba(100,116,139,.1); border: 1px solid rgba(100,116,139,.25); }
+        .score-num { font-family: var(--mono); font-size: 2.4rem; font-weight: 700; line-height: 1; }
+        .score-box.correct .score-num { color: var(--green); }
+        .score-box.wrong   .score-num { color: var(--red); }
+        .score-box.skip    .score-num { color: var(--muted-hi); }
+        .score-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: .35rem; }
+
+        .result-list { max-height: 420px; overflow-y: auto; space-y: .5rem; }
+        .result-list::-webkit-scrollbar { width: 4px; }
+        .result-list::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+        .r-item {
+            border-radius: 12px; padding: 1rem 1.15rem;
+            margin-bottom: .6rem;
+        }
+        .r-item.correct { background: rgba(34,197,94,.07); border: 1px solid rgba(34,197,94,.18); }
+        .r-item.wrong   { background: rgba(239,68,68,.07);  border: 1px solid rgba(239,68,68,.18); }
+        .r-item.skip    { background: rgba(100,116,139,.07); border: 1px solid rgba(100,116,139,.18); }
+        .r-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+        .r-num { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+        .r-badge {
+            font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+            padding: .1rem .45rem; border-radius: 20px;
+        }
+        .r-badge.correct { background: rgba(34,197,94,.18); color: var(--green); }
+        .r-badge.wrong   { background: rgba(239,68,68,.18);  color: var(--red); }
+        .r-badge.skip    { background: rgba(100,116,139,.18); color: var(--muted-hi); }
+        .r-q { font-size: .87rem; font-weight: 600; line-height: 1.45; margin-bottom: .5rem; }
+        .r-ans { font-size: .78rem; color: var(--muted-hi); }
+        .r-ans strong { color: var(--green); }
+        .r-exp { font-size: .75rem; color: var(--muted); margin-top: .3rem; font-style: italic; }
+
+        .new-btn {
+            width: 100%; padding: .85rem;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text); font-family: var(--font);
+            font-size: .88rem; font-weight: 600; border-radius: 12px;
+            cursor: pointer; transition: all .2s; margin-top: 1.25rem;
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+        }
+        .new-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+        /* ── TOAST ───────────────────────────────── */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: .85rem 1.2rem;
+            display: flex; align-items: center; gap: .75rem;
+            min-width: 260px; max-width: 360px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.6);
+            transform: translateY(120%);
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateY(0); pointer-events: all; }
+        .toast.err { border-color: rgba(239,68,68,.4); }
+        .toast-icon { font-size: .85rem; }
+        .toast.ok .toast-icon  { color: var(--green); }
+        .toast.err .toast-icon { color: var(--red); }
+        .toast-msg { font-size: .82rem; flex: 1; }
+
+        /* ── SPINNER ─────────────────────────────── */
+        .spinner {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid var(--border-hi);
+            border-top-color: var(--accent);
+            animation: spin .7s linear infinite; display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── FADE IN ─────────────────────────────── */
+        .fade-in { animation: fadeUp .4s ease both; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── BREADCRUMB ──────────────────────────── */
+        .breadcrumb {
+            display: flex; align-items: center; gap: .4rem;
+            font-size: .72rem; color: var(--muted); margin-bottom: 2rem;
+        }
+        .breadcrumb span { color: var(--muted-hi); }
+        .breadcrumb i { font-size: .55rem; }
+
+        /* ── RIGHT PANEL TOP STRIP ───────────────── */
+        .strip-card {
+            background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(96,165,250,.05));
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .strip-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 1rem; }
+
+        @media (max-width: 600px) {
+            .result-score-row { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .timer-display { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+{% include "header.html" %}
+
+<div class="page">
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+        <span>হোম</span><i class="fas fa-chevron-right"></i>
+        <span>পরীক্ষা কেন্দ্র</span><i class="fas fa-chevron-right"></i>
+        <span style="color:var(--accent)">MCQ পরীক্ষা</span>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero fade-in">
+        <div class="hero-text">
+            <h1>MCQ <span>পরীক্ষা</span> মোড</h1>
+            <p>বিষয়, অধ্যায়, লেসন ও সাবলেসন নির্বাচন করে নিজের মতো করে পরীক্ষা সাজান এবং শুরু করুন।</p>
+        </div>
+        <div class="timer-widget">
+            <div class="timer-label"><i class="fas fa-clock" style="margin-right:.3rem"></i> পরীক্ষা টাইমার</div>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+            <div class="timer-sub">টাইমার শুরুর অপেক্ষায়</div>
+        </div>
+    </div>
+
+    <!-- CONFIG + SUMMARY -->
+    <div class="layout fade-in" style="animation-delay:.1s">
+
+        <!-- LEFT: CONFIG CARD -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-sliders-h"></i> পরীক্ষার কনফিগারেশন</div>
+
+            <!-- Subject -->
+            <div class="field">
+                <div class="field-label"><i class="fas fa-book"></i> বিষয়</div>
+                <div class="select-wrapper">
+                    <select id="subjectSelect">
+                        <option value="">বিষয় নির্বাচন করুন…</option>
+                         {% for subject in subjects %} -->
+                         <option value="{{ subject.id }}">{{ subject.name }}</option> -->
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Chapters -->
+            <div class="field">
+                <div class="field-label"><i class="fas fa-folder-open"></i> অধ্যায় (একাধিক)</div>
+                <div class="checklist" id="chaptersContainer">
+                    <div class="check-empty">প্রথমে বিষয় নির্বাচন করুন</div>
+                </div>
+            </div>
+
+            <!-- Lessons -->
+            <div class="field">
+                <div class="field-label"><i class="fas fa-book-open"></i> লেসন (একাধিক)</div>
+                <div class="checklist" id="lessonsContainer">
+                    <div class="check-empty">প্রথমে অধ্যায় নির্বাচন করুন</div>
+                </div>
+            </div>
+
+            <!-- SubLessons -->
+            <div class="field">
+                <div class="field-label"><i class="fas fa-layer-group"></i> সাবলেসন (একাধিক)</div>
+                <div class="checklist" id="subLessonsContainer">
+                    <div class="check-empty">প্রথমে লেসন নির্বাচন করুন</div>
+                </div>
+                <div class="actions-row">
+                    <button class="pill-btn primary" id="selectAllSubLessons"><i class="fas fa-check-double" style="margin-right:.3rem"></i>সব নির্বাচন</button>
+                    <button class="pill-btn ghost" id="clearAllSubLessons"><i class="fas fa-times" style="margin-right:.3rem"></i>বাদ দিন</button>
+                </div>
+                <div class="stat-band" id="statBand">
+                    <i class="fas fa-database"></i>
+                    <span id="totalMcqCount">0</span> টি MCQ উপলব্ধ আছে
+                </div>
+            </div>
+
+            <!-- Time & Questions -->
+            <div class="num-row">
+                <div class="field" style="margin-bottom:0">
+                    <div class="field-label"><i class="fas fa-hourglass-half"></i> সময় (মিনিট)</div>
+                    <input type="number" id="customTime" min="1" max="120" value="10">
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <div class="field-label"><i class="fas fa-question-circle"></i> প্রশ্ন সংখ্যা</div>
+                    <input type="number" id="questionCount" min="1" max="100" value="10">
+                </div>
+            </div>
+
+            <button class="start-btn" id="startExamBtn" disabled>
+                <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
+            </button>
+        </div>
+
+        <!-- RIGHT: SUMMARY + INFO -->
+        <div>
+            <div class="strip-card">
+                <div class="strip-title"><i class="fas fa-clipboard-list" style="margin-right:.4rem"></i>নির্বাচিত সারাংশ</div>
+                <div class="summary-grid">
+                    <div class="sum-item">
+                        <div class="sum-key">বিষয়</div>
+                        <div class="sum-val" id="sumSubject">—</div>
+                    </div>
+                    <div class="sum-item">
+                        <div class="sum-key">অধ্যায়</div>
+                        <div class="sum-val" id="sumChapters">—</div>
+                    </div>
+                    <div class="sum-item">
+                        <div class="sum-key">লেসন</div>
+                        <div class="sum-val" id="sumLessons">—</div>
+                    </div>
+                    <div class="sum-item">
+                        <div class="sum-key">সাবলেসন</div>
+                        <div class="sum-val" id="sumSubLessons">—</div>
+                    </div>
+                    <div class="sum-item">
+                        <div class="sum-key">সময়</div>
+                        <div class="sum-val sum-highlight" id="sumTime">১০ মিনিট</div>
+                    </div>
+                    <div class="sum-item">
+                        <div class="sum-key">প্রশ্ন</div>
+                        <div class="sum-val sum-highlight" id="sumQuestions">১০ টি</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instruction -->
+            <div class="card" style="border-left:3px solid var(--accent)">
+                <div class="card-title"><i class="fas fa-info-circle"></i> নির্দেশিকা</div>
+                <ul style="list-style:none;display:flex;flex-direction:column;gap:.65rem">
+                    <li style="display:flex;gap:.6rem;font-size:.83rem;color:var(--muted-hi);align-items:flex-start">
+                        <i class="fas fa-check-circle" style="color:var(--accent);margin-top:.15rem;flex-shrink:0"></i>
+                        বিষয় থেকে শুরু করে ধাপে ধাপে সাবলেসন পর্যন্ত নির্বাচন করুন
+                    </li>
+                    <li style="display:flex;gap:.6rem;font-size:.83rem;color:var(--muted-hi);align-items:flex-start">
+                        <i class="fas fa-check-circle" style="color:var(--accent);margin-top:.15rem;flex-shrink:0"></i>
+                        একটি সাবলেসনে যতটি MCQ আছে তার বেশি প্রশ্ন চাইলে সতর্কতা দেখাবে
+                    </li>
+                    <li style="display:flex;gap:.6rem;font-size:.83rem;color:var(--muted-hi);align-items:flex-start">
+                        <i class="fas fa-check-circle" style="color:var(--accent);margin-top:.15rem;flex-shrink:0"></i>
+                        সময় শেষ হলে স্বয়ংক্রিয়ভাবে পরীক্ষা জমা হয়ে যাবে
+                    </li>
+                    <li style="display:flex;gap:.6rem;font-size:.83rem;color:var(--muted-hi);align-items:flex-start">
+                        <i class="fas fa-check-circle" style="color:var(--accent);margin-top:.15rem;flex-shrink:0"></i>
+                        প্রতিটি সঠিক উত্তরের জন্য ফলাফলে বিস্তারিত ব্যাখ্যা দেখানো হবে
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── EXAM PANEL ── -->
+    <div class="exam-panel card fade-in" id="examPanel">
+        <div class="exam-header">
+            <div>
+                <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)">পরীক্ষা চলছে</div>
+                <div style="font-size:1.2rem;font-weight:700;margin-top:.2rem">
+                    <span id="answeredCount">0</span><span style="color:var(--muted)"> / </span><span id="totalQuestionsCount">0</span>
+                    <span style="font-size:.75rem;font-weight:400;color:var(--muted);margin-left:.4rem">প্রশ্ন উত্তর দেওয়া হয়েছে</span>
+                </div>
+                <div class="progress-wrap" style="margin-top:.6rem;width:240px">
+                    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="pill-stat">
+                <i class="fas fa-clock" style="color:var(--accent)"></i>
+                <span style="font-family:var(--mono)" id="examTimerDisplay">00:00</span>
+            </div>
+        </div>
+
+        <div id="questionContainer"></div>
+
+        <div class="nav-row">
+            <div style="display:flex;gap:.5rem">
+                <button class="nav-btn" id="prevBtn" disabled><i class="fas fa-arrow-left"></i> আগের</button>
+                <button class="nav-btn" id="nextBtn" disabled>পরবর্তী <i class="fas fa-arrow-right"></i></button>
+            </div>
+            <button class="submit-btn" id="submitExamBtn">
+                <i class="fas fa-paper-plane"></i> পরীক্ষা জমা দিন
+            </button>
+        </div>
+    </div>
+
+    <!-- ── RESULT PANEL ── -->
+    <div class="result-panel card fade-in" id="resultPanel">
+        <div class="card-title" style="font-size:1.1rem;margin-bottom:1.5rem">
+            <i class="fas fa-chart-bar"></i> পরীক্ষার ফলাফল
+        </div>
+        <div class="result-score-row">
+            <div class="score-box correct">
+                <div class="score-num" id="finalCorrect">0</div>
+                <div class="score-lbl">সঠিক</div>
+            </div>
+            <div class="score-box wrong">
+                <div class="score-num" id="finalWrong">0</div>
+                <div class="score-lbl">ভুল</div>
+            </div>
+            <div class="score-box skip">
+                <div class="score-num" id="finalSkip">0</div>
+                <div class="score-lbl">বাদ</div>
+            </div>
+        </div>
+        <div class="result-list" id="detailedResults"></div>
+        <button class="new-btn" id="newExamBtn">
+            <i class="fas fa-redo-alt"></i> নতুন পরীক্ষা শুরু করুন
+        </button>
+    </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <i class="toast-icon fas fa-check-circle"></i>
+    <span class="toast-msg" id="toastMsg"></span>
+</div>
+
+<script>
+/* ───────── STATE ───────── */
+let selectedChaptersIds = [], selectedLessonsIds = [], selectedSubLessonsIds = [];
+let questionsData = [], userAnswers = [], currentQ = 0;
+let examTimer = null, timeSeconds = 600;
+
+/* ───────── HELPERS ───────── */
+function esc(t) {
+    if (!t) return '';
+    return String(t).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]||m));
+}
+
+let toastTimer;
+function showToast(msg, isErr = false) {
+    const el = document.getElementById('toast');
+    const msgEl = document.getElementById('toastMsg');
+    const icon = el.querySelector('.toast-icon');
+    el.className = 'toast ' + (isErr ? 'err' : 'ok');
+    icon.className = 'toast-icon fas ' + (isErr ? 'fa-exclamation-circle' : 'fa-check-circle');
+    msgEl.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+function fmt(s) {
+    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+/* ───────── SUMMARY ───────── */
+function updateSummary() {
+    document.getElementById('sumSubject').textContent =
+        document.querySelector('#subjectSelect option:checked')?.text || '—';
+
+    const ch = [...document.querySelectorAll('.chapter-checkbox.chk-active')]
+        .map(el => el.dataset.name).join(', ') || '—';
+    document.getElementById('sumChapters').textContent = ch;
+
+    const les = [...document.querySelectorAll('.lesson-checkbox.chk-active')]
+        .map(el => el.dataset.name).join(', ') || '—';
+    document.getElementById('sumLessons').textContent = les;
+
+    const subs = [...document.querySelectorAll('.sub-lesson-checkbox.chk-active')];
+    document.getElementById('sumSubLessons').textContent =
+        subs.length > 3 ? `${subs.length} টি সাবলেসন` : (subs.map(e=>e.dataset.name).join(', ') || '—');
+
+    const t = document.getElementById('customTime').value || 10;
+    const q = document.getElementById('questionCount').value || 10;
+    document.getElementById('sumTime').textContent = t + ' মিনিট';
+    document.getElementById('sumQuestions').textContent = q + ' টি';
+
+    // MCQ stat
+    let totalMcqs = subs.reduce((s,e) => s + (parseInt(e.dataset.mcqCount)||0), 0);
+    const band = document.getElementById('statBand');
+    if (totalMcqs > 0) {
+        band.style.display = 'flex';
+        document.getElementById('totalMcqCount').textContent = totalMcqs;
+    } else { band.style.display = 'none'; }
+
+    document.getElementById('startExamBtn').disabled = selectedSubLessonsIds.length === 0;
+}
+
+/* ───────── CUSTOM CHECKBOX RENDER ───────── */
+function renderCheckItems(container, items, cls, nameKey, badgeKey, groupLabel) {
+    if (!items || !items.length) {
+        container.innerHTML = '<div class="check-empty">কোনো আইটেম নেই</div>';
+        return;
+    }
+    container.innerHTML = '';
+    if (groupLabel) {
+        const gl = document.createElement('span');
+        gl.className = 'check-group-label';
+        gl.textContent = groupLabel;
+        container.appendChild(gl);
+    }
+    items.forEach(item => {
+        const label = document.createElement('div');
+        label.className = `check-item`;
+        label.dataset.id = item.id;
+        label.dataset.name = item[nameKey];
+        if (badgeKey) label.dataset.mcqCount = item[badgeKey] || 0;
+
+        label.innerHTML = `
+            <div class="check-box"></div>
+            <span class="check-name">${esc(item[nameKey])}</span>
+            ${badgeKey ? `<span class="check-badge">${item[badgeKey]||0}</span>` : ''}
+        `;
+        label.addEventListener('click', () => toggleCheck(label, cls));
+        label.classList.add(cls + '-item');
+        container.appendChild(label);
+    });
+}
+
+function toggleCheck(label, cls) {
+    label.classList.toggle('checked');
+    const isChecked = label.classList.contains('checked');
+    // Sync hidden checkbox proxy
+    label.classList.toggle('chk-active', isChecked);
+    label.dataset.checked = isChecked ? '1' : '';
+    syncIds(cls);
+}
+
+function syncIds(cls) {
+    if (cls === 'chapter-checkbox') {
+        selectedChaptersIds = [...document.querySelectorAll('.chapter-checkbox-item.checked')]
+            .map(e => e.dataset.id);
+        if (!selectedChaptersIds.length) {
+            document.getElementById('lessonsContainer').innerHTML = '<div class="check-empty">প্রথমে অধ্যায় নির্বাচন করুন</div>';
+            document.getElementById('subLessonsContainer').innerHTML = '<div class="check-empty">প্রথমে লেসন নির্বাচন করুন</div>';
+            selectedLessonsIds = []; selectedSubLessonsIds = [];
+            updateSummary(); return;
+        }
+        loadLessons();
+    } else if (cls === 'lesson-checkbox') {
+        selectedLessonsIds = [...document.querySelectorAll('.lesson-checkbox-item.checked')]
+            .map(e => e.dataset.id);
+        if (!selectedLessonsIds.length) {
+            document.getElementById('subLessonsContainer').innerHTML = '<div class="check-empty">লেসন নির্বাচন করুন</div>';
+            selectedSubLessonsIds = [];
+            updateSummary(); return;
+        }
+        loadSubLessons();
+    } else if (cls === 'sub-lesson-checkbox') {
+        selectedSubLessonsIds = [...document.querySelectorAll('.sub-lesson-checkbox-item.checked')]
+            .map(e => e.dataset.id);
+        updateSummary();
+    }
+}
+
+/* ───────── DATA LOADERS ───────── */
+$('#subjectSelect').change(function() {
+    const sid = $(this).val();
+    if (!sid) {
+        $('#chaptersContainer').html('<div class="check-empty">বিষয় নির্বাচন করুন</div>');
+        $('#lessonsContainer').html('<div class="check-empty">প্রথমে অধ্যায় নির্বাচন করুন</div>');
+        $('#subLessonsContainer').html('<div class="check-empty">প্রথমে লেসন নির্বাচন করুন</div>');
+        selectedChaptersIds = []; selectedLessonsIds = []; selectedSubLessonsIds = [];
+        updateSummary(); return;
+    }
+    $('#chaptersContainer').html('<div class="check-empty"><span class="spinner"></span> লোড হচ্ছে…</div>');
+    $.get('/api/chapters/', { subject_id: sid }, function(chs) {
+        const cont = document.getElementById('chaptersContainer');
+        renderCheckItems(cont, chs, 'chapter-checkbox', 'name', null, null);
+        updateSummary();
+    });
+});
+
+function loadLessons() {
+    $('#lessonsContainer').html('<div class="check-empty"><span class="spinner"></span></div>');
+    $.ajax({
+        url: '/api/lessons/', method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ chapter_ids: selectedChaptersIds }),
+        success(less) {
+            const grouped = {};
+            less.forEach(l => { grouped[l.chapter_id] = grouped[l.chapter_id]||[]; grouped[l.chapter_id].push(l); });
+            const cont = document.getElementById('lessonsContainer');
+            cont.innerHTML = '';
+            const chNames = {};
+            document.querySelectorAll('.chapter-checkbox-item.checked').forEach(e => chNames[e.dataset.id] = e.dataset.name);
+            Object.entries(grouped).forEach(([cid, items]) => {
+                const gl = document.createElement('span');
+                gl.className = 'check-group-label';
+                gl.innerHTML = `<i class="fas fa-folder-open" style="margin-right:.3rem"></i>${esc(chNames[cid]||'অধ্যায়')}`;
+                cont.appendChild(gl);
+                items.forEach(item => {
+                    const label = document.createElement('div');
+                    label.className = 'check-item lesson-checkbox-item';
+                    label.dataset.id = item.id; label.dataset.name = item.name;
+                    label.innerHTML = `<div class="check-box"></div><span class="check-name">${esc(item.name)}</span>`;
+                    label.addEventListener('click', () => toggleCheck(label, 'lesson-checkbox'));
+                    cont.appendChild(label);
+                });
+            });
+            updateSummary();
+        }
+    });
+}
+
+function loadSubLessons() {
+    $('#subLessonsContainer').html('<div class="check-empty"><span class="spinner"></span></div>');
+    $.ajax({
+        url: '/api/sub-lessons/', method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ lesson_ids: selectedLessonsIds }),
+        success(subs) {
+            const grouped = {};
+            subs.forEach(s => { grouped[s.lesson_id] = grouped[s.lesson_id]||[]; grouped[s.lesson_id].push(s); });
+            const cont = document.getElementById('subLessonsContainer');
+            cont.innerHTML = '';
+            const lnames = {};
+            document.querySelectorAll('.lesson-checkbox-item.checked').forEach(e => lnames[e.dataset.id] = e.dataset.name);
+            Object.entries(grouped).forEach(([lid, items]) => {
+                const gl = document.createElement('span');
+                gl.className = 'check-group-label';
+                gl.innerHTML = `<i class="fas fa-book-open" style="margin-right:.3rem"></i>${esc(lnames[lid]||'লেসন')}`;
+                cont.appendChild(gl);
+                items.forEach(item => {
+                    const label = document.createElement('div');
+                    label.className = 'check-item sub-lesson-checkbox-item';
+                    label.dataset.id = item.id; label.dataset.name = item.name; label.dataset.mcqCount = item.mcq_count||0;
+                    label.innerHTML = `<div class="check-box"></div><span class="check-name">${esc(item.name)}</span><span class="check-badge">${item.mcq_count||0}</span>`;
+                    label.addEventListener('click', () => toggleCheck(label, 'sub-lesson-checkbox'));
+                    cont.appendChild(label);
+                });
+            });
+            updateSummary();
+        }
+    });
+}
+
+/* ───────── SELECT / CLEAR ALL ───────── */
+document.getElementById('selectAllSubLessons').addEventListener('click', () => {
+    document.querySelectorAll('.sub-lesson-checkbox-item').forEach(e => {
+        e.classList.add('checked','chk-active'); e.dataset.checked = '1';
+    });
+    syncIds('sub-lesson-checkbox');
+});
+document.getElementById('clearAllSubLessons').addEventListener('click', () => {
+    document.querySelectorAll('.sub-lesson-checkbox-item').forEach(e => {
+        e.classList.remove('checked','chk-active'); e.dataset.checked = '';
+    });
+    syncIds('sub-lesson-checkbox');
+});
+
+/* ───────── LIVE INPUT SUMMARY ───────── */
+document.getElementById('customTime').addEventListener('input', updateSummary);
+document.getElementById('questionCount').addEventListener('input', updateSummary);
+updateSummary();
+
+/* ───────── START EXAM ───────── */
+document.getElementById('startExamBtn').addEventListener('click', async () => {
+    if (!selectedSubLessonsIds.length) { showToast('দয়া করে অন্তত একটি সাবলেসন নির্বাচন করুন', true); return; }
+
+    let qCount = parseInt(document.getElementById('questionCount').value) || 10;
+    if (qCount < 1) qCount = 1; if (qCount > 100) qCount = 100;
+
+    const totalAvail = [...document.querySelectorAll('.sub-lesson-checkbox-item.checked')]
+        .reduce((s,e) => s + (parseInt(e.dataset.mcqCount)||0), 0);
+
+    if (!totalAvail) { showToast('সাবলেসনে কোনো MCQ নেই', true); return; }
+    if (qCount > totalAvail) { showToast(`সতর্কতা: মাত্র ${totalAvail} টি MCQ উপলব্ধ!`, true); return; }
+
+    const btn = document.getElementById('startExamBtn');
+    btn.innerHTML = '<span class="spinner"></span> লোড হচ্ছে…'; btn.disabled = true;
+
+    try {
+        const resp = await fetch('/api/mcqs/', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ sub_lesson_ids: selectedSubLessonsIds, question_count: qCount })
+        });
+        const data = await resp.json();
+        if (!data.questions?.length) { showToast('প্রশ্ন পাওয়া যায়নি', true); return; }
+
+        questionsData = data.questions;
+        userAnswers = new Array(questionsData.length).fill(null);
+        currentQ = 0;
+        const timeMin = parseInt(document.getElementById('customTime').value) || 10;
+        timeSeconds = timeMin * 60;
+
+        document.getElementById('totalQuestionsCount').textContent = questionsData.length;
+        document.getElementById('answeredCount').textContent = '0';
+        document.getElementById('resultPanel').style.display = 'none';
+        document.getElementById('examPanel').style.display = 'block';
+        renderQuestion();
+        startExamTimer();
+        document.getElementById('examPanel').scrollIntoView({ behavior:'smooth', block:'start' });
+    } catch(e) { showToast('সার্ভার ত্রুটি হয়েছে', true); }
+    finally { btn.innerHTML = '<i class="fas fa-play"></i> পরীক্ষা শুরু করুন'; btn.disabled = false; }
+});
+
+/* ───────── RENDER QUESTION ───────── */
+const OPTS = ['ক', 'খ', 'গ', 'ঘ'];
+function renderQuestion() {
+    if (!questionsData.length) return;
+    const q = questionsData[currentQ];
+    const sel = userAnswers[currentQ];
+
+    let optsHtml = '';
+    q.options.forEach((opt, i) => {
+        optsHtml += `
+        <label class="option-label${sel===i?' selected':''}" id="opt_${i}">
+            <input type="radio" name="qOpt" value="${i}" ${sel===i?'checked':''}>
+            <span class="option-letter">${OPTS[i]||i+1}</span>
+            <span class="option-text">${esc(opt)}</span>
+        </label>`;
+    });
+
+    document.getElementById('questionContainer').innerHTML = `
+        <div class="q-card">
+            <div class="q-number">প্রশ্ন ${currentQ+1} / ${questionsData.length}</div>
+            <div class="q-text">${esc(q.question)}</div>
+            ${optsHtml}
+        </div>`;
+
+    // Bind option clicks
+    document.querySelectorAll('.option-label').forEach(lbl => {
+        lbl.addEventListener('click', () => {
+            const val = parseInt(lbl.querySelector('input').value);
+            userAnswers[currentQ] = val;
+            document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+            lbl.classList.add('selected');
+            const answered = userAnswers.filter(a => a!==null).length;
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('progressBar').style.width = (answered/questionsData.length*100)+'%';
+        });
+    });
+
+    document.getElementById('prevBtn').disabled = currentQ === 0;
+    document.getElementById('nextBtn').disabled = currentQ === questionsData.length - 1;
+}
+
+/* ───────── TIMER ───────── */
+function startExamTimer() {
+    if (examTimer) clearInterval(examTimer);
+    document.getElementById('examTimerDisplay').textContent = fmt(timeSeconds);
+    document.getElementById('timerDisplay').textContent = fmt(timeSeconds);
+    examTimer = setInterval(() => {
+        if (timeSeconds <= 0) { clearInterval(examTimer); submitExam(); return; }
+        timeSeconds--;
+        document.getElementById('examTimerDisplay').textContent = fmt(timeSeconds);
+        document.getElementById('timerDisplay').textContent = fmt(timeSeconds);
+        // Red when < 60s
+        const c = timeSeconds < 60 ? 'var(--red)' : 'var(--accent)';
+        document.getElementById('examTimerDisplay').style.color = c;
+        document.getElementById('timerDisplay').style.color = c;
+    }, 1000);
+}
+
+/* ───────── SUBMIT ───────── */
+async function submitExam() {
+    if (examTimer) clearInterval(examTimer);
+    let correct=0, wrong=0, skipped=0, details='';
+
+    questionsData.forEach((q,i) => {
+        const ans = userAnswers[i];
+        const isRight = ans!==null && (ans+1)===q.correct_answer;
+        if (ans===null) skipped++; else if (isRight) correct++; else wrong++;
+
+        const cls = isRight?'correct':(ans===null?'skip':'wrong');
+        const badge = isRight?'সঠিক':(ans===null?'বাদ':'ভুল');
+        const uTxt = ans!==null ? esc(q.options[ans]) : 'উত্তর দেননি';
+        const cTxt = esc(q.options[q.correct_answer-1]);
+
+        details += `<div class="r-item ${cls}">
+            <div class="r-header">
+                <span class="r-num">প্রশ্ন ${i+1}</span>
+                <span class="r-badge ${cls}">${badge}</span>
+            </div>
+            <div class="r-q">${esc(q.question)}</div>
+            <div class="r-ans">আপনার উত্তর: ${uTxt} &nbsp;|&nbsp; <strong>সঠিক: ${cTxt}</strong></div>
+            ${q.explanation?`<div class="r-exp"><i class="fas fa-lightbulb" style="color:var(--amber);margin-right:.3rem"></i>${esc(q.explanation)}</div>`:''}
+        </div>`;
+    });
+
+    document.getElementById('finalCorrect').textContent = correct;
+    document.getElementById('finalWrong').textContent = wrong;
+    document.getElementById('finalSkip').textContent = skipped;
+    document.getElementById('detailedResults').innerHTML = details;
+    document.getElementById('examPanel').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'block';
+    document.getElementById('resultPanel').scrollIntoView({ behavior:'smooth' });
+
+    const total = questionsData.length;
+    const pct = ((correct/total)*100).toFixed(1);
+
+    const chData = [...document.querySelectorAll('.chapter-checkbox-item.checked')]
+        .map(e => ({ id: e.dataset.id, name: e.dataset.name }));
+    const slData = [...document.querySelectorAll('.sub-lesson-checkbox-item.checked')]
+        .map(e => ({ id: e.dataset.id, name: e.dataset.name }));
+
+    try {
+        await fetch('/api/save-exam-result/', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                subject_id: document.getElementById('subjectSelect').value,
+                time_limit_minutes: parseInt(document.getElementById('customTime').value),
+                total_questions: total, correct_answers: correct,
+                wrong_answers: wrong, skipped_answers: skipped,
+                score_percentage: parseFloat(pct),
+                mcq_ids_order: questionsData.map(q=>q.id),
+                user_answers: userAnswers.map(a=>a!==null?a+1:null),
+                correct_status: userAnswers.map((a,i)=>a!==null&&(a+1)===questionsData[i].correct_answer),
+                selected_chapters: chData, selected_sub_lessons: slData
+            })
+        });
+        showToast('ফলাফল সফলভাবে সংরক্ষণ করা হয়েছে');
+    } catch { showToast('ফলাফল সংরক্ষণে সমস্যা হয়েছে', true); }
+}
+
+/* ───────── BUTTONS ───────── */
+document.getElementById('submitExamBtn').addEventListener('click', submitExam);
+document.getElementById('newExamBtn').addEventListener('click', () => location.reload());
+document.getElementById('prevBtn').addEventListener('click', () => { if (currentQ>0) { currentQ--; renderQuestion(); } });
+document.getElementById('nextBtn').addEventListener('click', () => { if (currentQ<questionsData.length-1) { currentQ++; renderQuestion(); } });
+</script>
+</body>
+</html>

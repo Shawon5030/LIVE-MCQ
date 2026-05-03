@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - Your Course Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card.total .stat-value { color: #667eea; }
+        .stat-card.approved .stat-value { color: #28a745; }
+        .stat-card.pending .stat-value { color: #ffc107; }
+        .stat-card.rejected .stat-value { color: #dc3545; }
+        .stat-card.amount .stat-value { color: #17a2b8; }
+
+        /* Search and Filter Bar */
+        .filters {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            padding: 0 30px 30px 30px;
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .payment-table thead {
+            background: #f8f9fa;
+        }
+
+        .payment-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
+        }
+
+        .payment-table tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.3s;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Payment System Badge */
+        .payment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .payment-bkash {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .payment-nagad {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .payment-rocket {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* Amount Styling */
+        .amount {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        /* Action Buttons */
+        .view-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .pagination .current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        /* No Data Message */
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-data svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .payment-table th, 
+            .payment-table td {
+                padding: 10px;
+                font-size: 12px;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💰 Payment History</h1>
+            <p>Track all your course payments and their current status</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-container">
+            <div class="stat-card total">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Payments</div>
+            </div>
+            <div class="stat-card approved">
+                <div class="stat-value">{{ stats.approved }}</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="stat-value">{{ stats.pending }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card rejected">
+                <div class="stat-value">{{ stats.rejected }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+            <div class="stat-card amount">
+                <div class="stat-value">৳{{ stats.total_amount }}</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="filters">
+            <div class="search-box">
+                <form method="GET" action="">
+                    <input type="text" name="search" placeholder="🔍 Search by Transaction ID or Course Name..." 
+                           value="{{ search_query }}">
+                    {% if status_filter and status_filter != 'all' %}
+                        <input type="hidden" name="status" value="{{ status_filter }}">
+                    {% endif %}
+                </form>
+            </div>
+            <div class="filter-buttons">
+                <a href="?status=all{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <button type="button" class="filter-btn {% if status_filter == 'all' or not status_filter %}active{% endif %}">
+                        All
+                    </button>
+                </a>
+                <a href="?status=approved{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <button type="button" class="filter-btn {% if status_filter == 'approved' %}active{% endif %}">
+                        ✓ Approved
+                    </button>
+                </a>
+                <a href="?status=pending{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <button type="button" class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+                        ⏳ Pending
+                    </button>
+                </a>
+                <a href="?status=rejected{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <button type="button" class="filter-btn {% if status_filter == 'rejected' %}active{% endif %}">
+                        ✗ Rejected
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <!-- Payment Table -->
+        <div class="table-container">
+            {% if payments %}
+            <table class="payment-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Course Name</th>
+                        <th>Payment System</th>
+                        <th>Amount</th>
+                        <th>Duration</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>
+                            <strong>{{ payment.transaction_id|truncatechars:15 }}</strong>
+                        </td>
+                        <td>{{ payment.course.name }}</td>
+                        <td>
+                            <span class="payment-badge payment-{{ payment.payment_system|lower }}">
+                                {% if payment.payment_system == "bkash" %}📱 bKash
+                                {% elif payment.payment_system == "nagad" %}📲 Nagad
+                                {% else %}🚀 Rocket{% endif %}
+                            </span>
+                        </td>
+                        <td class="amount">৳{{ payment.amount }}</td>
+                        <td>{{ payment.month }} Month(s)</td>
+                        <td>{{ payment.created_at|date:"d M Y, h:i A" }}</td>
+                        <td>
+                            {% if payment.status == "approved" %}
+                                <span class="status-badge status-approved">✓ Approved</span>
+                            {% elif payment.status == "pending" %}
+                                <span class="status-badge status-pending">⏳ Pending</span>
+                            {% else %}
+                                <span class="status-badge status-rejected">✗ Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'payment_detail' payment.id %}" class="view-btn">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            {% if payments.has_other_pages %}
+            <div class="pagination">
+                {% if payments.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; First</a>
+                    <a href="?page={{ payments.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ payments.number }} of {{ payments.paginator.num_pages }}
+                </span>
+
+                {% if payments.has_next %}
+                    <a href="?page={{ payments.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                    <a href="?page={{ payments.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="no-data">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>No payment records found.</p>
+                <p style="font-size: 14px; margin-top: 10px;">You haven't made any payments yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Auto-submit search form on input
+        const searchInput = document.querySelector('.search-box input');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.form.submit();
+                }, 500);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+    <h1 style="margin-bottom: 30px;">My Courses</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="?status=all" class="btn btn-secondary">All</a>
+        <a href="?status=active" class="btn btn-secondary">Active</a>
+        <a href="?status=expired" class="btn btn-secondary">Expired</a>
+        <a href="?status=completed" class="btn btn-secondary">Completed</a>
+    </div>
+    
+    <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+        {% for enrollment in enrollments %}
+        <div class="course-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3>{{ enrollment.course.name }}</h3>
+            <p>Enrolled: {{ enrollment.enrolled_at|date:"F d, Y" }}</p>
+            <p>Expires: {{ enrollment.end_time|date:"F d, Y" }}</p>
+            <span class="status-badge status-{{ enrollment.status }}">{{ enrollment.status|title }}</span>
+            <a href="{% url 'course_detail' enrollment.course.id %}" style="display: inline-block; margin-top: 15px;">Go to Course →</a>
+        </div>
+        {% empty %}
+        <p>You haven't enrolled in any courses yet.</p>
+        {% endfor %}
+    </div>
+</div>

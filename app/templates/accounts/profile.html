@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{{ profile_user.username }} - প্রোফাইল | Live MCQ™</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        error: '#EF4444',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'slide-in-right': 'slideInRight 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .edit-mode-hidden { display: none; }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 640px) {
+            .profile-actions { flex-direction: column; width: 100%; }
+            .profile-actions button, .profile-actions a { width: 100%; justify-content: center; }
+            .stats-grid { gap: 0.75rem; }
+            .table-container { overflow-x: auto; }
+        }
+    </style>
+</head>
+
+<body class="font-figtree bg-gradient-to-br from-gray-50 to-gray-100">
+    {% include "header.html" %}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-16">
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div class="fixed top-20 right-4 z-50 space-y-2" id="messageContainer">
+            {% for message in messages %}
+            <div class="bg-white rounded-lg shadow-lg border-l-4 
+                        {% if message.tags == 'success' %}border-green-500{% elif message.tags == 'error' %}border-red-500{% elif message.tags == 'warning' %}border-yellow-500{% else %}border-primary{% endif %} 
+                        p-4 min-w-[280px] animate-slide-in-right">
+                <div class="flex items-center">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle text-green-500{% elif message.tags == 'error' %}fa-exclamation-circle text-red-500{% elif message.tags == 'warning' %}fa-exclamation-triangle text-yellow-500{% else %}fa-info-circle text-primary{% endif %} mr-3"></i>
+                    <p class="text-sm text-gray-700 flex-1">{{ message }}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Profile Header with Inline Edit -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 animate-fade-in-up">
+            <div class="bg-gradient-custom h-24 sm:h-32 relative">
+                <div class="absolute -bottom-12 sm:-bottom-16 left-4 sm:left-8">
+                    <!-- View Mode Avatar -->
+                    <div id="viewAvatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-white p-1 shadow-lg cursor-pointer" onclick="toggleEditMode()">
+                        {% if profile.profile_image %}
+                            <img src="{{ profile.profile_image.url }}" alt="Profile" class="w-full h-full rounded-xl object-cover">
+                        {% else %}
+                            <div class="w-full h-full rounded-xl bg-gradient-custom flex items-center justify-center">
+                                <span class="text-3xl sm:text-5xl font-bold text-white">
+                                    {{ profile_user.username|first|upper }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Edit Mode Avatar -->
+                    <div id="editAvatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-white p-1 shadow-lg edit-mode-hidden">
+                        <label class="w-full h-full rounded-xl bg-gradient-custom flex flex-col items-center justify-center cursor-pointer">
+                            <i class="fas fa-camera text-white text-2xl mb-1"></i>
+                            <span class="text-white text-xs">Change</span>
+                            <input type="file" id="profile_image" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-4 right-4 flex gap-2">
+                    <button id="editBtn" onclick="toggleEditMode()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm transition">
+                        <i class="fas fa-edit mr-1"></i> Edit Profile
+                    </button>
+                    <button id="saveBtn" onclick="saveProfile()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition edit-mode-hidden">
+                        <i class="fas fa-save mr-1"></i> Save Changes
+                    </button>
+                    <button id="cancelBtn" onclick="cancelEdit()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition edit-mode-hidden">
+                        <i class="fas fa-times mr-1"></i> Cancel
+                    </button>
+                    <a href="{% url 'change_password' %}" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm transition">
+                        <i class="fas fa-key mr-1"></i> Change Password
+                    </a>
+                </div>
+            </div>
+            
+            <div class="pt-16 sm:pt-20 pb-6 px-4 sm:px-8">
+                <!-- View Mode -->
+                <div id="viewMode">
+                    <h1 class="text-xl sm:text-3xl font-bold text-headline">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+                    <p class="text-primary font-medium text-sm sm:text-base mt-1">@{{ profile_user.username }}</p>
+                    <div class="flex flex-wrap gap-3 sm:gap-4 mt-3 text-body text-xs sm:text-sm">
+                        <span><i class="fas fa-envelope mr-1"></i> {{ profile_user.email }}</span>
+                        {% if profile.phone_number %}
+                        <span><i class="fas fa-phone mr-1"></i> {{ profile.phone_number }}</span>
+                        {% endif %}
+                        {% if profile.district %}
+                        <span><i class="fas fa-map-marker-alt mr-1"></i> {{ profile.district }}</span>
+                        {% endif %}
+                        <span><i class="fas fa-calendar-alt mr-1"></i> জয়েন: {{ profile_user.date_joined|date:"d M, Y" }}</span>
+                    </div>
+                </div>
+                
+                <!-- Edit Mode -->
+                <div id="editMode" class="edit-mode-hidden space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">First Name</label>
+                            <input type="text" id="first_name" value="{{ profile_user.first_name }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Last Name</label>
+                            <input type="text" id="last_name" value="{{ profile_user.last_name }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="email" value="{{ profile_user.email }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                            <input type="tel" id="phone_number" value="{{ profile.phone_number|default:'' }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">District</label>
+                            <input type="text" id="district" value="{{ profile.district|default:'' }}" list="districts" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" placeholder="Type to search districts">
+                            <datalist id="districts">
+                                <option value="Bagerhat">
+                                <option value="Bandarban">
+                                <option value="Barguna">
+                                <option value="Barisal">
+                                <option value="Bhola">
+                                <option value="Bogra">
+                                <option value="Brahmanbaria">
+                                <option value="Chandpur">
+                                <option value="Chapai Nawabganj">
+                                <option value="Chattogram">
+                                <option value="Chuadanga">
+                                <option value="Cox's Bazar">
+                                <option value="Cumilla">
+                                <option value="Dhaka">
+                                <option value="Dinajpur">
+                                <option value="Faridpur">
+                                <option value="Feni">
+                                <option value="Gaibandha">
+                                <option value="Gazipur">
+                                <option value="Gopalganj">
+                                <option value="Habiganj">
+                                <option value="Jamalpur">
+                                <option value="Jashore">
+                                <option value="Jhalokati">
+                                <option value="Jhenaidah">
+                                <option value="Joypurhat">
+                                <option value="Khagrachhari">
+                                <option value="Khulna">
+                                <option value="Kishoreganj">
+                                <option value="Kurigram">
+                                <option value="Kushtia">
+                                <option value="Lakshmipur">
+                                <option value="Lalmonirhat">
+                                <option value="Madaripur">
+                                <option value="Magura">
+                                <option value="Manikganj">
+                                <option value="Maulvibazar">
+                                <option value="Meherpur">
+                                <option value="Munshiganj">
+                                <option value="Mymensingh">
+                                <option value="Naogaon">
+                                <option value="Narail">
+                                <option value="Narayanganj">
+                                <option value="Narsingdi">
+                                <option value="Natore">
+                                <option value="Nawabganj">
+                                <option value="Netrokona">
+                                <option value="Nilphamari">
+                                <option value="Noakhali">
+                                <option value="Pabna">
+                                <option value="Panchagarh">
+                                <option value="Patuakhali">
+                                <option value="Pirojpur">
+                                <option value="Rajbari">
+                                <option value="Rajshahi">
+                                <option value="Rangamati">
+                                <option value="Rangpur">
+                                <option value="Satkhira">
+                                <option value="Shariatpur">
+                                <option value="Sherpur">
+                                <option value="Sirajganj">
+                                <option value="Sunamganj">
+                                <option value="Sylhet">
+                                <option value="Tangail">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
+            <div class="bg-white rounded-xl p-4 shadow-lg card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-body text-xs mb-1">এনরোলড কোর্স</p>
+                        <p class="text-2xl font-bold text-headline">{{ active_courses_count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-open text-primary text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 shadow-lg card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-body text-xs mb-1">পরীক্ষা দেওয়া</p>
+                        <p class="text-2xl font-bold text-headline">{{ total_exams }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-accent text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 shadow-lg card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-body text-xs mb-1">গড় স্কোর</p>
+                        <p class="text-2xl font-bold gradient-text">{{ avg_score }}%</p>
+                    </div>
+                    <div class="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-star text-success text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-gradient-custom h-1.5 rounded-full" style="width: {{ avg_score }}%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 shadow-lg card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-body text-xs mb-1">মোট খরচ</p>
+                        <p class="text-2xl font-bold text-headline">৳{{ total_spent }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-wallet text-warning text-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiring Soon Alert -->
+        {% if expiring_soon %}
+        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 rounded-xl p-4 mb-8">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold text-yellow-700">সতর্কতা!</h4>
+                    <p class="text-sm text-gray-700">
+                        আপনার নিচের কোর্সগুলো ৭ দিনের মধ্যে মেয়াদ শেষ হবে:
+                        {% for enrollment in expiring_soon %}
+                            <strong>{{ enrollment.course.name }}</strong> ({{ enrollment.end_time|date:"d M, Y" }})
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Active Courses Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-headline flex items-center gap-2">
+                    <i class="fas fa-graduation-cap text-primary"></i>
+                    আমার অ্যাক্টিভ কোর্স
+                </h2>
+                <a href="{% url 'my_courses' %}" class="text-primary hover:text-secondary font-medium text-sm flex items-center gap-1">
+                    দেখুন সব <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            {% if active_enrollments %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for enrollment in active_enrollments|slice:":3" %}
+                <div class="bg-gray-50 rounded-xl overflow-hidden card-hover">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-lg font-bold text-headline">{{ enrollment.course.name }}</h3>
+                            <span class="px-2 py-1 bg-success/10 text-success text-xs rounded-full font-medium">
+                                <i class="fas fa-play-circle"></i> অ্যাক্টিভ
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-sm text-body mb-4">
+                            <p><i class="fas fa-calendar-plus mr-2"></i>এনরোল: {{ enrollment.enrolled_at|date:"d M, Y" }}</p>
+                            <p><i class="fas fa-hourglass-end mr-2"></i>মেয়াদ শেষ: {{ enrollment.end_time|date:"d M, Y" }}</p>
+                        </div>
+                        <a href="" class="block text-center bg-primary/10 hover:bg-primary text-primary hover:text-white py-2 rounded-lg transition-all duration-300">
+                            <i class="fas fa-play-circle mr-1"></i> চালিয়ে যান
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-book-open text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">কোনো অ্যাক্টিভ কোর্স নেই</p>
+                <a href="{% url 'course_list_page' %}" class="inline-block mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition">
+                    কোর্স ব্রাউজ করুন
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Expired Courses Section -->
+        {% if past_enrollments %}
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-headline flex items-center gap-2">
+                    <i class="fas fa-history text-primary"></i>
+                    মেয়াদোত্তীর্ণ কোর্স
+                </h2>
+                <a href="{% url 'my_courses' %}" class="text-primary hover:text-secondary font-medium text-sm flex items-center gap-1">
+                    দেখুন সব <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for enrollment in past_enrollments|slice:":3" %}
+                <div class="bg-gray-50 rounded-xl overflow-hidden card-hover opacity-75">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-lg font-bold text-headline">{{ enrollment.course.name }}</h3>
+                            <span class="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium">
+                                <i class="fas fa-clock"></i> মেয়াদ শেষ
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-sm text-body mb-4">
+                            <p><i class="fas fa-calendar-plus mr-2"></i>এনরোল: {{ enrollment.enrolled_at|date:"d M, Y" }}</p>
+                            <p><i class="fas fa-hourglass-end mr-2"></i>মেয়াদ শেষ: {{ enrollment.end_time|date:"d M, Y" }}</p>
+                        </div>
+                        <a href="{% url 'course_list_page' %}" class="block text-center bg-primary/10 hover:bg-primary text-primary hover:text-white py-2 rounded-lg transition-all duration-300">
+                            <i class="fas fa-shopping-cart mr-1"></i> পুনরায় এনরোল
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Payments -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-headline flex items-center gap-2">
+                    <i class="fas fa-history text-primary"></i>
+                    সাম্প্রতিক পেমেন্ট
+                </h2>
+                <a href="{% url 'payment_history' %}" class="text-primary hover:text-secondary font-medium text-sm flex items-center gap-1">
+                    দেখুন সব <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            {% if payments %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-body">ট্রানজেকশন আইডি</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-body">কোর্সের নাম</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-body">টাকার পরিমাণ</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-body">তারিখ</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-body">স্ট্যাটাস</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for payment in payments %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 text-sm text-gray-700">{{ payment.transaction_id|truncatechars:12 }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">{{ payment.course.name|truncatechars:30 }}</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-primary">৳{{ payment.amount }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500">{{ payment.created_at|date:"d M, Y" }}</td>
+                            <td class="px-4 py-3">
+                                {% if payment.status == "approved" %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-success/10 text-success text-xs rounded-full">
+                                        <i class="fas fa-check-circle"></i> অ্যাপ্রুভড
+                                    </span>
+                                {% elif payment.status == "pending" %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">
+                                        <i class="fas fa-clock"></i> পেন্ডিং
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-error/10 text-error text-xs rounded-full">
+                                        <i class="fas fa-times-circle"></i> রিজেক্টেড
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-receipt text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">কোনো পেমেন্ট রেকর্ড নেই</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Subject Performance -->
+        {% if subject_performance %}
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-headline flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-primary"></i>
+                    সাবজেক্ট ভিত্তিক পারফরমেন্স
+                </h2>
+                <a href="{% url 'my_exams' %}" class="text-primary hover:text-secondary font-medium text-sm flex items-center gap-1">
+                    দেখুন সব <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for subject_name, performance in subject_performance.items %}
+                <div class="bg-gray-50 rounded-xl p-5 card-hover">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-headline">{{ subject_name }}</h3>
+                        <span class="text-sm text-body">{{ performance.attempts }} টি পরীক্ষা</span>
+                    </div>
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>গড় স্কোর</span>
+                            <span class="font-bold text-primary">{{ performance.avg_score|floatformat:1 }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-custom h-2 rounded-full transition-all duration-500" style="width: {{ performance.avg_score }}%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-body">
+                        <span><i class="fas fa-trophy"></i> র‍্যাংক: {{ forloop.counter }}</span>
+                        <span><i class="fas fa-chart-line"></i> লেভেল: {% if performance.avg_score >= 80 %}উন্নত{% elif performance.avg_score >= 60 %}মধ্যম{% else %}প্রাথমিক{% endif %}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Footer CTA -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'exam_home' %}" class="inline-flex items-center gap-2 bg-gradient-custom text-white px-8 py-3 rounded-xl hover:shadow-lg transition-all duration-300">
+                <i class="fas fa-play-circle"></i>
+                <span>পরীক্ষা শুরু করুন</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                document.getElementById('viewMode').style.display = 'none';
+                document.getElementById('editMode').style.display = 'block';
+                document.getElementById('editBtn').style.display = 'none';
+                document.getElementById('saveBtn').style.display = 'inline-flex';
+                document.getElementById('cancelBtn').style.display = 'inline-flex';
+                document.getElementById('viewAvatar').style.display = 'none';
+                document.getElementById('editAvatar').style.display = 'block';
+            } else {
+                document.getElementById('viewMode').style.display = 'block';
+                document.getElementById('editMode').style.display = 'none';
+                document.getElementById('editBtn').style.display = 'inline-flex';
+                document.getElementById('saveBtn').style.display = 'none';
+                document.getElementById('cancelBtn').style.display = 'none';
+                document.getElementById('viewAvatar').style.display = 'block';
+                document.getElementById('editAvatar').style.display = 'none';
+            }
+        }
+        
+        function saveProfile() {
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            formData.append('first_name', document.getElementById('first_name').value);
+            formData.append('last_name', document.getElementById('last_name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('phone_number', document.getElementById('phone_number').value);
+            formData.append('district', document.getElementById('district').value);
+            
+            const imageFile = document.getElementById('profile_image').files[0];
+            if (imageFile) {
+                formData.append('profile_image', imageFile);
+            }
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Error saving profile');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Error saving profile');
+            });
+        }
+        
+        function cancelEdit() {
+            window.location.reload();
+        }
+        
+        document.getElementById('profile_image').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.querySelector('#viewAvatar img');
+                    if (preview) {
+                        preview.src = event.target.result;
+                    } else {
+                        const avatarDiv = document.querySelector('#viewAvatar div');
+                        if (avatarDiv) {
+                            avatarDiv.innerHTML = `<img src="${event.target.result}" class="w-full h-full rounded-xl object-cover">`;
+                        }
+                    }
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        setTimeout(() => {
+            const container = document.getElementById('messageContainer');
+            if (container) container.remove();
+        }, 5000);
+    </script>
+</body>
+</html>

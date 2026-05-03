@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Practice Mode | Learn MCQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-hero { background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); }
+        .option-correct { background: #DCFCE7 !important; border-color: #22C55E !important; }
+        .option-wrong { background: #FEE2E2 !important; border-color: #EF4444 !important; }
+        .option-selected { background: #EEF2FF !important; border-color: #4F46E5 !important; }
+        .toast-notification { position: fixed; bottom: 24px; right: 24px; z-index: 1000; animation: slideInRight 0.3s ease; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #E2E8F0; border-top: 2px solid #4F46E5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#F8FAFE]">
+
+    {% include "header.html" %}
+
+    <main class="pb-20">
+        <!-- Hero Section -->
+        <section class="gradient-hero text-white pt-20 pb-16 relative overflow-hidden">
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">📖 Practice Mode</h1>
+                        <p class="text-green-100 text-base lg:text-lg max-w-xl">Select ONE sub-lesson. Practice all questions. Save your progress.</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                        <div class="text-sm uppercase tracking-[0.2em] text-white/70 mb-2 text-center">Practice Stats</div>
+                        <div class="text-3xl font-bold text-white text-center" id="statsDisplay">0/0</div>
+                        <p class="text-center text-xs text-gray-200 mt-2">questions answered</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+            <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
+                <!-- Left Panel - Configuration -->
+                <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 border border-green-100">
+                    <div class="mb-6">
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-sliders-h text-green-600"></i> Practice Setup</h2>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-1">Select ONE subject → chapter → lesson → sub-lesson</p>
+                    </div>
+                    <div class="space-y-5">
+                        <!-- Subject -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book text-green-500 mr-1"></i> Subject</label>
+                            <select id="subjectSelect" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition">
+                                <option value="">Select Subject</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Chapter -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-folder-open text-green-500 mr-1"></i> Chapter</label>
+                            <div id="chaptersContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">Select a subject first</div>
+                            </div>
+                        </div>
+
+                        <!-- Lesson -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book-open text-green-500 mr-1"></i> Lesson</label>
+                            <div id="lessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">Select a chapter first</div>
+                            </div>
+                        </div>
+
+                        <!-- Sub-Lesson -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-layer-group text-green-500 mr-1"></i> Sub-Lesson</label>
+                            <div id="subLessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-slate-50 scrollbar-thin">
+                                <div class="text-center py-6 text-slate-400 text-sm">Select a lesson first</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50/40 rounded-xl p-4">
+                            <div class="text-sm text-slate-700">
+                                <i class="fas fa-info-circle text-green-600 mr-2"></i>
+                                You will practice ALL questions from this sub-lesson.
+                                Your progress will be saved when you click "Remember Me".
+                            </div>
+                        </div>
+
+                        <button id="startPracticeBtn" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3.5 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                            <i class="fas fa-play"></i> Start Practice
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Info & Progress -->
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- Selection Summary -->
+                    <div class="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 border border-green-100">
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-info-circle text-green-500"></i> Selection Summary</h3>
+                        <div class="grid grid-cols-1 gap-3 mt-4">
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <i class="fas fa-book text-green-500 w-6"></i>
+                                <span class="font-medium">Subject:</span>
+                                <span id="selectedSubject" class="text-slate-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <i class="fas fa-folder-open text-green-500 w-6"></i>
+                                <span class="font-medium">Chapter:</span>
+                                <span id="selectedChapter" class="text-slate-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <i class="fas fa-book-open text-green-500 w-6"></i>
+                                <span class="font-medium">Lesson:</span>
+                                <span id="selectedLesson" class="text-slate-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <i class="fas fa-layer-group text-green-500 w-6"></i>
+                                <span class="font-medium">Sub-Lesson:</span>
+                                <span id="selectedSubLesson" class="text-slate-600">--</span>
+                                <span id="mcqCountBadge" class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full ml-auto"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Progress Card -->
+                    <div id="savedProgressCard" class="hidden bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <i class="fas fa-save text-green-600"></i>
+                                <span class="font-semibold text-green-700">Saved Progress Found!</span>
+                            </div>
+                            <span id="savedDate" class="text-xs text-green-600"></span>
+                        </div>
+                        <div id="savedProgressContent" class="mt-2"></div>
+                        <div class="flex gap-2 mt-3">
+                            <button id="resumeBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition">Resume Practice</button>
+                            <button id="freshStartBtn" class="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm hover:bg-red-50 transition">Start Fresh</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice Panel -->
+            <div id="practicePanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden border-t-4 border-green-500">
+                <div class="flex flex-wrap justify-between items-center border-b pb-4 mb-5 gap-3">
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-chalkboard-user text-green-600"></i>
+                            <span id="practiceTitle">Practice Session</span>
+                        </h3>
+                        <p class="text-slate-500 text-sm mt-1">Question <span id="currentQNum">1</span> of <span id="totalQuestions">0</span></p>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="bg-green-100 px-4 py-2 rounded-full">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span id="correctCount" class="font-bold text-green-600">0</span>
+                            <span class="text-slate-500 text-xs">/ <span id="answeredCount">0</span></span>
+                        </div>
+                        <button id="saveProgressBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-save"></i> Remember Me
+                        </button>
+                    </div>
+                </div>
+                <div id="questionContainer" class="space-y-6"></div>
+                <div class="flex justify-between mt-6">
+                    <button id="prevBtn" class="bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-lg disabled:opacity-50">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button id="nextBtn" class="bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-lg disabled:opacity-50">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Completion Panel -->
+            <div id="completionPanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden border-t-4 border-green-500">
+                <div class="text-center py-8">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-3xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">🎉 Congratulations!</h2>
+                    <p class="text-slate-600 mb-4">You have completed all questions in this sub-lesson!</p>
+                    <div class="bg-green-50 rounded-xl p-4 max-w-md mx-auto mb-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><span class="text-green-600 font-bold text-xl" id="finalCorrect">0</span><br><span class="text-xs">Correct</span></div>
+                            <div><span class="text-red-600 font-bold text-xl" id="finalWrong">0</span><br><span class="text-xs">Wrong</span></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-sm font-semibold">Accuracy: <span id="finalAccuracy">0</span>%</div>
+                        </div>
+                    </div>
+                    <button id="practiceAgainBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition">
+                        <i class="fas fa-redo-alt"></i> Practice Another Sub-Lesson
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toastMessage" class="toast-notification hidden">
+        <div class="bg-white rounded-xl shadow-2xl border-l-4 border-green-500 p-4 min-w-[280px]">
+            <div class="flex items-center"><i class="fas fa-bell text-green-500 mr-3"></i><p id="toastText" class="text-sm text-slate-700 flex-1"></p><button onclick="this.closest('.toast-notification').classList.add('hidden')"><i class="fas fa-times text-slate-400"></i></button></div>
+        </div>
+    </div>
+
+    <script>
+        // Practice Mode - Single Sub-Lesson
+        let selectedChapterId = null;
+        let selectedLessonId = null;
+        let selectedSubLesson = null;
+        let questionsData = [], userAnswers = [], currentQ = 0;
+        let practiceStats = { correct: 0, wrong: 0 };
+        let hasUnsavedChanges = false;
+        let savedProgressData = null;
+        let currentSubLessonId = null;
+
+        function showToast(msg, err = false) { 
+            let t = $('#toastMessage'); 
+            t.find('.border-l-4').removeClass('border-green-500 border-red-500').addClass(err ? 'border-red-500' : 'border-green-500'); 
+            $('#toastText').text(msg); 
+            t.removeClass('hidden'); 
+            setTimeout(() => t.addClass('hidden'), 3000); 
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function updateSelectionSummary() {
+            $('#selectedSubject').text($('#subjectSelect option:selected').text() || '--');
+            $('#selectedChapter').text($('#chaptersContainer .chapter-radio:checked').closest('label').find('span').text() || '--');
+            $('#selectedLesson').text($('#lessonsContainer .lesson-radio:checked').closest('label').find('span').text() || '--');
+            
+            if (selectedSubLesson) {
+                $('#selectedSubLesson').text(selectedSubLesson.name);
+                $('#mcqCountBadge').text(`${selectedSubLesson.mcqCount} MCQs`);
+            } else {
+                $('#selectedSubLesson').text('--');
+                $('#mcqCountBadge').text('');
+            }
+            
+            let canStart = selectedSubLesson !== null;
+            $('#startPracticeBtn').prop('disabled', !canStart);
+        }
+
+        // Load Chapters (Radio buttons - single selection)
+        $('#subjectSelect').change(function() {
+            let sid = $(this).val(); 
+            if (!sid) {
+                $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">Select a subject first</div>');
+                $('#lessonsContainer, #subLessonsContainer').html('<div class="text-center py-6 text-slate-400">--</div>');
+                selectedChapterId = null;
+                selectedLessonId = null;
+                selectedSubLesson = null;
+                updateSelectionSummary();
+                return;
+            }
+            $('#chaptersContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
+            $.ajax({
+                url: '/api/chapters/',
+                data: { subject_id: sid },
+                success: function(chs) {
+                    if (!chs.length) {
+                        $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">No chapters</div>');
+                        return;
+                    }
+                    let html = '<div class="space-y-2">';
+                    chs.forEach(ch => {
+                        html += `<label class="flex items-center gap-2 p-2 hover:bg-green-50 rounded-lg cursor-pointer">
+                            <input type="radio" name="chapter" value="${ch.id}" class="chapter-radio"> 
+                            <span class="text-sm">${escapeHtml(ch.name)}</span>
+                        </label>`;
+                    });
+                    html += '</div>';
+                    $('#chaptersContainer').html(html);
+                    bindChapters();
+                }
+            });
+        });
+
+        function bindChapters() {
+            $('.chapter-radio').off('change').on('change', function() {
+                selectedChapterId = $(this).val();
+                $('#lessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
+                $.ajax({
+                    url: '/api/lessons/',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ chapter_ids: [selectedChapterId] }),
+                    success: function(less) {
+                        if (!less.length) {
+                            $('#lessonsContainer').html('<div class="text-center py-6 text-slate-400">No lessons</div>');
+                            return;
+                        }
+                        let html = '<div class="space-y-2">';
+                        less.forEach(l => {
+                            html += `<label class="flex items-center gap-2 p-2 hover:bg-green-50 rounded-lg cursor-pointer">
+                                <input type="radio" name="lesson" value="${l.id}" class="lesson-radio"> 
+                                <span class="text-sm">${escapeHtml(l.name)}</span>
+                            </label>`;
+                        });
+                        html += '</div>';
+                        $('#lessonsContainer').html(html);
+                        bindLessons();
+                    }
+                });
+            });
+        }
+
+        function bindLessons() {
+            $('.lesson-radio').off('change').on('change', function() {
+                selectedLessonId = $(this).val();
+                $('#subLessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
+                $.ajax({
+                    url: '/api/sub-lessons/',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ lesson_ids: [selectedLessonId] }),
+                    success: function(subs) {
+                        if (!subs.length) {
+                            $('#subLessonsContainer').html('<div class="text-center py-6 text-slate-400">No sub-lessons</div>');
+                            return;
+                        }
+                        let html = '<div class="space-y-2">';
+                        subs.forEach(s => {
+                            html += `<label class="flex items-center justify-between p-2 hover:bg-green-50 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="sub_lesson" value="${s.id}" data-mcq-count="${s.mcq_count}" class="sub-lesson-radio"> 
+                                    <span class="text-sm">${escapeHtml(s.name)}</span>
+                                </div>
+                                <span class="text-xs text-green-600 font-semibold">📊 ${s.mcq_count || 0} MCQ</span>
+                            </label>`;
+                        });
+                        html += '</div>';
+                        $('#subLessonsContainer').html(html);
+                        bindSubLessons();
+                    }
+                });
+            });
+        }
+
+        function bindSubLessons() {
+            $('.sub-lesson-radio').off('change').on('change', function() {
+                selectedSubLesson = {
+                    id: $(this).val(),
+                    name: $(this).closest('label').find('span:first').text(),
+                    mcqCount: $(this).data('mcq-count') || 0
+                };
+                updateSelectionSummary();
+                
+                // Check for saved progress
+                checkSavedProgress(selectedSubLesson.id);
+            });
+        }
+
+        async function checkSavedProgress(subLessonId) {
+            $('#savedProgressCard').addClass('hidden');
+            savedProgressData = null;
+            
+            if (!subLessonId) return;
+            
+            try {
+                let response = await fetch(`/api/practice/progress/?sub_lesson_id=${subLessonId}`);
+                let data = await response.json();
+                
+                if (data.exists && data.answered_questions > 0 && data.answered_questions < data.total_questions) {
+                    savedProgressData = data;
+                    let percentage = data.progress_percentage.toFixed(1);
+                    $('#savedProgressContent').html(`
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Progress: ${data.answered_questions}/${data.total_questions}</span>
+                            <span class="font-bold text-green-700">${percentage}%</span>
+                        </div>
+                        <div class="w-full bg-green-200 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-center text-xs mt-2">
+                            <div class="bg-white rounded p-1"><span class="text-green-600">✓ ${data.correct_count}</span> Correct</div>
+                            <div class="bg-white rounded p-1"><span class="text-red-600">✗ ${data.wrong_count}</span> Wrong</div>
+                        </div>
+                    `);
+                    $('#savedDate').text(`Last: ${data.last_updated}`);
+                    $('#savedProgressCard').removeClass('hidden');
+                }
+            } catch(e) {
+                console.error('Error checking progress:', e);
+            }
+        }
+
+        // Start Practice
+        $('#startPracticeBtn').click(async function() {
+            if (!selectedSubLesson) {
+                showToast('Please select a sub-lesson', true);
+                return;
+            }
+            
+            currentSubLessonId = selectedSubLesson.id;
+            
+            // If saved progress exists and user hasn't chosen, show card
+            if (savedProgressData && savedProgressData.answered_questions > 0 && savedProgressData.answered_questions < savedProgressData.total_questions) {
+                $('#savedProgressCard').removeClass('hidden');
+                return;
+            }
+            
+            await startFreshPractice();
+        });
+
+        $('#resumeBtn').click(async function() {
+            $('#savedProgressCard').addClass('hidden');
+            await startWithSavedProgress();
+        });
+
+        $('#freshStartBtn').click(async function() {
+            $('#savedProgressCard').addClass('hidden');
+            await deleteSavedProgress();
+            await startFreshPractice();
+        });
+
+        async function deleteSavedProgress() {
+            if (currentSubLessonId) {
+                await fetch('/api/practice/delete/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sub_lesson_id: currentSubLessonId})
+                });
+            }
+        }
+
+        async function startWithSavedProgress() {
+            if (!savedProgressData) return;
+            
+            try {
+                let response = await fetch('/api/practice/mcqs-by-ids/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({mcq_ids: savedProgressData.questions_order})
+                });
+                let data = await response.json();
+                
+                questionsData = data.questions;
+                userAnswers = savedProgressData.user_answers;
+                currentQ = savedProgressData.current_index;
+                practiceStats.correct = savedProgressData.correct_count;
+                practiceStats.wrong = savedProgressData.wrong_count;
+                hasUnsavedChanges = false;
+                
+                startPracticeSession();
+            } catch(e) {
+                showToast('Error loading saved progress', true);
+            }
+        }
+
+        async function startFreshPractice() {
+            try {
+                let response = await fetch('/api/mcq/practice/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sub_lesson_ids: [currentSubLessonId], question_count: 999}) // Get all MCQs
+                });
+                let data = await response.json();
+                
+                if (!data.questions || data.questions.length === 0) {
+                    showToast('No questions found in this sub-lesson', true);
+                    return;
+                }
+                
+                questionsData = data.questions;
+                userAnswers = new Array(questionsData.length).fill(null);
+                currentQ = 0;
+                practiceStats = { correct: 0, wrong: 0 };
+                hasUnsavedChanges = false;
+                
+                startPracticeSession();
+            } catch(e) {
+                showToast('Error starting practice', true);
+            }
+        }
+
+        function startPracticeSession() {
+            $('#practiceTitle').text(selectedSubLesson.name);
+            $('#totalQuestions').text(questionsData.length);
+            $('#correctCount').text(practiceStats.correct);
+            $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
+            $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
+            
+            $('#completionPanel').addClass('hidden');
+            $('#practicePanel').removeClass('hidden');
+            renderQuestion();
+            $('html, body').animate({ scrollTop: $('#practicePanel').offset().top - 80 }, 400);
+        }
+
+        function renderQuestion() {
+            if (!questionsData.length) return;
+            let q = questionsData[currentQ];
+            let selectedIdx = userAnswers[currentQ];
+            
+            let optionsHtml = '';
+            q.options.forEach((opt, idx) => {
+                let isSelected = (selectedIdx === idx);
+                let extraClass = '';
+                if (selectedIdx !== null) {
+                    if (idx === (q.correct_answer - 1)) extraClass = 'option-correct';
+                    else if (isSelected && idx !== (q.correct_answer - 1)) extraClass = 'option-wrong';
+                } else if (isSelected) {
+                    extraClass = 'option-selected';
+                }
+                
+                let disabledAttr = (selectedIdx !== null) ? 'disabled' : '';
+                
+                optionsHtml += `<label class="block rounded-xl border p-4 mb-3 cursor-pointer transition-all ${extraClass} ${!selectedIdx ? 'hover:border-green-300' : ''}">
+                    <input type="radio" name="qOption" value="${idx}" class="mr-3" ${isSelected ? 'checked' : ''} ${disabledAttr}>
+                    <span class="text-slate-700">${escapeHtml(opt)}</span>
+                </label>`;
+            });
+            
+            let explanationHtml = '';
+            if (selectedIdx !== null && q.explanation) {
+                let isCorrect = (selectedIdx + 1) === q.correct_answer;
+                explanationHtml = `<div class="mt-4 p-4 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} rounded-xl border text-sm">
+                    <i class="fas ${isCorrect ? 'fa-check-circle text-green-600' : 'fa-times-circle text-red-600'} mr-2"></i>
+                    <strong>${isCorrect ? 'Correct!' : 'Incorrect!'}</strong>
+                    <p class="mt-1 text-slate-600">${escapeHtml(q.explanation)}</p>
+                </div>`;
+            }
+            
+            $('#questionContainer').html(`<div class="rounded-2xl shadow-sm border p-4 sm:p-6 bg-white">
+                <div class="flex justify-between mb-3">
+                    <span class="text-green-600 text-sm font-bold">Question ${currentQ + 1}/${questionsData.length}</span>
+                </div>
+                <h3 class="text-base sm:text-xl font-bold text-slate-800 mb-5">${escapeHtml(q.question)}</h3>
+                ${optionsHtml}
+                ${explanationHtml}
+            </div>`);
+            
+            if (selectedIdx === null) {
+                $('input[name="qOption"]').change(function() {
+                    let val = parseInt($(this).val());
+                    let isCorrect = (val + 1) === q.correct_answer;
+                    
+                    userAnswers[currentQ] = val;
+                    if (isCorrect) practiceStats.correct++;
+                    else practiceStats.wrong++;
+                    
+                    $('#correctCount').text(practiceStats.correct);
+                    $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
+                    $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
+                    hasUnsavedChanges = true;
+                    
+                    let answered = userAnswers.filter(a => a !== null).length;
+                    let isCompleted = answered === questionsData.length;
+                    
+                    if (isCompleted) {
+                        saveProgress();
+                        showCompletion();
+                    } else if (answered % 5 === 0) {
+                        saveProgress(); // Auto-save every 5 answers
+                    }
+                    
+                    renderQuestion();
+                });
+            }
+            
+            $('#prevBtn').prop('disabled', currentQ === 0);
+            $('#nextBtn').prop('disabled', currentQ === questionsData.length - 1);
+        }
+
+        async function saveProgress() {
+            let answered = userAnswers.filter(a => a !== null).length;
+            let correct = practiceStats.correct;
+            
+            const saveData = {
+                sub_lesson_id: currentSubLessonId,
+                total_questions: questionsData.length,
+                answered_questions: answered,
+                current_index: currentQ,
+                user_answers: userAnswers,
+                questions_order: questionsData.map(q => q.id),
+                correct_count: correct,
+                wrong_count: answered - correct
+            };
+            
+            try {
+                let response = await fetch('/api/practice/save/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(saveData)
+                });
+                let data = await response.json();
+                
+                if (data.success) {
+                    hasUnsavedChanges = false;
+                    showToast(`✅ Progress saved! ${answered}/${questionsData.length} completed`);
+                    $('#saveProgressBtn').html('<i class="fas fa-check"></i> Saved!');
+                    setTimeout(() => {
+                        $('#saveProgressBtn').html('<i class="fas fa-save"></i> Remember Me');
+                    }, 2000);
+                }
+            } catch(e) {
+                showToast('Error saving progress', true);
+            }
+        }
+
+        function showCompletion() {
+            $('#practicePanel').addClass('hidden');
+            $('#finalCorrect').text(practiceStats.correct);
+            $('#finalWrong').text(practiceStats.wrong);
+            let accuracy = (practiceStats.correct / questionsData.length * 100).toFixed(1);
+            $('#finalAccuracy').text(accuracy);
+            $('#completionPanel').removeClass('hidden');
+            $('html, body').animate({ scrollTop: $('#completionPanel').offset().top - 80 }, 400);
+        }
+
+        $('#saveProgressBtn').click(saveProgress);
+        $('#prevBtn').click(() => { if (currentQ > 0) { currentQ--; renderQuestion(); } });
+        $('#nextBtn').click(() => { if (currentQ < questionsData.length - 1) { currentQ++; renderQuestion(); } });
+        $('#practiceAgainBtn').click(() => { location.reload(); });
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (hasUnsavedChanges && questionsData.length > 0) {
+                e.preventDefault();
+                return 'You have unsaved progress. Click "Remember Me" to save before leaving.';
+            }
+        });
+        
+        updateSelectionSummary();
+    </script>
+
+    {% include "footer.html" %}
+</body>
+</html>

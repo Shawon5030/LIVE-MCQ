@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>লগইন | Live MCQ™</title>
+    <meta name="description" content="Live MCQ™-এ লগইন করুন এবং চাকরির প্রস্তুতি শুরু করুন।">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Poppins:wght@500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .bg-fluid-gradient {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255, 255, 255, 0) 35%),
+                        radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255, 255, 255, 0) 45%),
+                        radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255, 255, 255, 0) 9%);
+        }
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Message Container Styles */
+        .messages-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 999;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .message-item {
+            animation: slideInRight 0.3s ease;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .message-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .message-error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .message-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .message-info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden font-figtree text-body">
+
+    {% include "header.html" %}
+
+    <!-- Django Messages Display -->
+    {% if messages %}
+    <div class="messages-container" id="djangoMessages">
+        {% for message in messages %}
+        <div class="message-item message-{{ message.tags }} p-4 rounded-lg shadow-lg flex items-start justify-between" role="alert">
+            <div class="flex items-start gap-3">
+                {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle text-green-600 text-xl mt-0.5"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle text-red-600 text-xl mt-0.5"></i>
+                {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>
+                {% elif message.tags == 'info' %}
+                    <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+                {% else %}
+                    <i class="fas fa-bell text-gray-600 text-xl mt-0.5"></i>
+                {% endif %}
+                <div class="flex-1">
+                    <p class="text-sm font-medium">{{ message }}</p>
+                </div>
+            </div>
+            <button onclick="this.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const messagesDiv = document.getElementById('djangoMessages');
+            if (messagesDiv) {
+                messagesDiv.style.opacity = '0';
+                setTimeout(function() {
+                    messagesDiv.remove();
+                }, 300);
+            }
+        }, 5000);
+    </script>
+    {% endif %}
+
+    <main>
+        <!-- Login Section -->
+        <section class=" bg-white lg:py-20 py-8 flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <!-- Left Side - Branding -->
+                    <div class="hidden md:flex flex-col justify-evenly">
+                        <div class="mb-8">
+                            <h1 class="text-4xl font-bold text-headline mb-4">
+                                Live MCQ™-এ স্বাগতম
+                            </h1>
+                            <p class="text-lg text-body leading-relaxed">
+                                সঠিক প্রস্তুতি, সহজ প্রিলি। চাকরির পরীক্ষায় সফল হওয়ার জন্য আজই শুরু করুন আপনার যাত্রা।
+                            </p>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex gap-4 items-start bg-white border-[0.25px] border-gray-100 rounded-lg p-4 drop-shadow-xl hover:-translate-y-2 transition duration-500">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10">
+                                        <i class="fas fa-book text-primary text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="">
+                                    <h3 class="font-bold text-headline">৫২৫০০+ প্রশ্ন</h3>
+                                    <p class="text-body text-sm">বিস্তৃত প্রশ্ন ব্যাংক থেকে শিখুন</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start bg-white border-[0.25px] border-gray-100 rounded-lg p-4 drop-shadow-xl hover:-translate-y-2 transition duration-500">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10">
+                                        <i class="fas fa-video text-primary text-xl"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-headline">১৩০০+ ভিডিও ক্লাস</h3>
+                                    <p class="text-body text-sm">বিশেষজ্ঞ মেন্টরদের সাথে শিখুন</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start bg-white border-[0.25px] border-gray-100 rounded-lg p-4 drop-shadow-xl hover:-translate-y-2 transition duration-500">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10">
+                                        <i class="fas fa-trophy text-primary text-xl"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-headline">লাইভ প্রতিযোগিতা</h3>
+                                    <p class="text-body text-sm">বাস্তব প্রতিযোগীদের সাথে পরীক্ষা দিন</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Login Form -->
+                    <div>
+                        <div class="bg-white border-[0.25px] border-gray-100 drop-shadow-xl rounded-2xl p-8 shadow-lg">
+                            <h2 class="text-2xl font-bold text-headline mb-6">লগইন করুন</h2>
+                            
+                            <form id="loginForm" class="space-y-5">
+                                {% csrf_token %}
+                                <div>
+                                    <label class="block text-sm font-medium text-headline mb-2">ইউজারনেম / ইমেইল</label>
+                                    <input type="text" id="username" name="username" placeholder="আপনার ইউজারনেম বা ইমেইল লিখুন" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" required>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-headline mb-2">পাসওয়ার্ড</label>
+                                    <div class="relative">
+                                        <input type="password" id="password" name="password" placeholder="আপনার পাসওয়ার্ড লিখুন" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" required>
+                                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded border-gray-300 accent-primary">
+                                        <span class="text-sm text-body">আমাকে মনে রাখুন</span>
+                                    </label>
+                                    <a href="{% url 'password_reset' %}" class="text-sm text-primary hover:text-secondary font-medium">পাসওয়ার্ড ভুলে গেছেন?</a>
+                                </div>
+
+                                <div id="errorMsg" class="hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"></div>
+
+                                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                                    লগইন করুন
+                                </button>
+                            </form>
+
+                            <div class="mt-6">
+                                <div class="relative">
+                                    <div class="absolute inset-0 flex items-center">
+                                        <div class="w-full border-t border-gray-300"></div>
+                                    </div>
+                                    <div class="relative flex justify-center text-sm">
+                                        <span class="px-2 bg-light text-body">অথবা</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-center mt-6 text-body">
+                                এখনও অ্যাকাউন্ট নেই? 
+                                <a href="{% url 'register_page' %}" class="text-primary hover:text-secondary font-bold">রেজিস্টার করুন</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification for AJAX responses -->
+    <div id="toastMessage" class="toast-notification hidden  mt-8">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 border-green-500 p-4 pr-6 min-w-400">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p id="toastText" class="text-base text-gray-700"></p>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')" class="ml-auto">
+                    <i class="fas fa-times text-gray-400 ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% include "footer.html" %}
+
+    <script>
+        function showToast(message, isError = false) {
+            const toast = $('#toastMessage');
+            const toastText = $('#toastText');
+            const borderColor = isError ? 'border-red-500' : 'border-green-500';
+            const iconColor = isError ? 'text-red-500' : 'text-green-500';
+            const icon = isError ? 'fa-exclamation-circle' : 'fa-check-circle';
+            
+            toast.removeClass('hidden');
+            toast.find('.border-l-4').removeClass('border-green-500 border-red-500').addClass(borderColor);
+            toast.find('.flex-shrink-0 i').removeClass('fa-check-circle fa-exclamation-circle').addClass(icon);
+            toastText.text(message);
+            
+            setTimeout(() => {
+                toast.addClass('hidden');
+            }, 3000);
+        }
+
+        $('#loginForm').submit(function(e) {
+            e.preventDefault();
+            
+            const username = $('#username').val();
+            const password = $('#password').val();
+            const rememberMe = $('#rememberMe').is(':checked');
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            
+            // Disable submit button
+            const submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true).text('লগইন হচ্ছে...');
+            
+            $.ajax({
+                url: '/api/login/',
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                data: JSON.stringify({
+                    username: username,
+                    password: password,
+                    remember_me: rememberMe
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message || 'লগইন সফল হয়েছে! পুনঃনির্দেশিত হচ্ছে...');
+                        setTimeout(() => {
+                            window.location.href = '/exam/';
+                        }, 1500);
+                    } else {
+                        showToast(response.message || 'লগইন ব্যর্থ হয়েছে', true);
+                        submitBtn.prop('disabled', false).text('লগইন করুন');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMsg = 'লগইন করতে সমস্যা হয়েছে';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    showToast(errorMsg, true);
+                    submitBtn.prop('disabled', false).text('লগইন করুন');
+                }
+            });
+        });
+
+        // Check if user was redirected with error message
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error')) {
+            showToast('দয়া করে লগইন করুন', true);
+        }
+        
+        // Function to manually add Django-style messages
+        function addDjangoMessage(message, tag = 'info') {
+            const messagesContainer = document.getElementById('djangoMessages');
+            if (!messagesContainer) {
+                const container = document.createElement('div');
+                container.id = 'djangoMessages';
+                container.className = 'messages-container';
+                document.body.appendChild(container);
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-item message-${tag} p-4 rounded-lg shadow-lg flex items-start justify-between`;
+            messageDiv.innerHTML = `
+                <div class="flex items-start gap-3">
+                    ${tag === 'success' ? '<i class="fas fa-check-circle text-green-600 text-xl mt-0.5"></i>' : 
+                      tag === 'error' ? '<i class="fas fa-exclamation-circle text-red-600 text-xl mt-0.5"></i>' :
+                      tag === 'warning' ? '<i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>' :
+                      '<i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>'}
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.getElementById('djangoMessages').appendChild(messageDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Handle password reset confirmation messages
+        if (window.location.pathname.includes('password-reset')) {
+            addDjangoMessage('পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে', 'success');
+        }
+
+        // Toggle password visibility
+        $('#togglePassword').click(function() {
+            const passwordInput = $('#password');
+            const icon = $(this).find('i');
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+    </script>
+</body>
+
+</html>

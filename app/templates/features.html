@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>সকল ফিচার | Live MCQ™</title>
+    <meta name="description" content="Live MCQ™ অ্যাপের সকল ফিচার সম্পর্কে বিস্তারিত জানুন। স্মার্ট সার্চ, টপিক গুরু, তথ্যকল্পদ্রুম, সেন্ট্রাল আর্কাইভ, জব সল্যুশন এবং আরও অনেক কিছু।">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom config to match original design -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Custom Icons (Lucide, Remix, Themify style via CSS) -->
+    <style>
+        /* Custom styles to complement Tailwind */
+        body {
+            font-family: 'Figtree', sans-serif;
+            color: #546078;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Figtree', sans-serif;
+            color: #1C1C1D;
+        }
+        /* Custom icon classes to match original icons */
+        .lu { font-family: 'Lucide-Icons', sans-serif; }
+        .ri { font-family: 'remixicon', sans-serif; }
+        .ti { font-family: 'themify', sans-serif; }
+        .ii { font-family: 'Iconic-Icons', sans-serif; }
+        
+        /* Animated underline for highlighted text */
+        .highlighted-text {
+            position: relative;
+            display: inline-block;
+        }
+        .highlighted-text svg {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 106%;
+            height: 40%;
+            overflow: visible;
+        }
+        .highlighted-text svg path {
+            stroke: #FF6600;
+            stroke-width: 8;
+            fill: none;
+            stroke-dasharray: 1500;
+            animation: drawLine 1.5s cubic-bezier(0.29, 1.11, 0.74, 1.04) forwards;
+        }
+        @keyframes drawLine {
+            from { stroke-dasharray: 0 1500; }
+            to { stroke-dasharray: 1500 1500; }
+        }
+        /* Feature card hover effect */
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+        /* Animated background gradient */
+        .animated-bg {
+            background: radial-gradient(circle at 80% 3%, #D2D2FF, rgba(255,255,255,0) 35%),
+                        radial-gradient(circle at 60% 60%, #FFE1CE, rgba(255,255,255,0) 45%),
+                        radial-gradient(circle at 36% 65%, #D2D2FF, rgba(255,255,255,0) 9%);
+            background-size: 200% 200%;
+            animation: gradientShift 14s linear infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 50% 80%; opacity: 1; }
+            50% { background-position: 55% 50%; opacity: 0.6; }
+            100% { background-position: 50% 80%; opacity: 1; }
+        }
+        /* Fluid canvas effect */
+        .fluid-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(51, 51, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 102, 0, 0.2), transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(42, 44, 141, 0.4), transparent 50%);
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fluidShift 15s linear infinite;
+        }
+        @keyframes fluidShift {
+            0% { background-position: 0% 0%; }
+            33% { background-position: 100% 0%; }
+            66% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3333FF;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    
+    {% include 'header.html' %}
+
+    <section class="relative overflow-hidden bg-secondary pt-16 pb-20 lg:pt-20 lg:pb-28">
+        <div class="absolute inset-0 fluid-overlay"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-2 text-sm text-white/80 mb-6">
+                <a href="/" class="hover:text-white transition"><i class="fas fa-home mr-1"></i> হোম</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-white">সকল ফিচার</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-on-scroll" data-delay="0.1s">
+                সকল ফিচার
+            </h1>
+        </div>
+    </section>
+
+    <section class="py-20 bg-[#F4F4FA]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-headline">
+                    গুরুত্বপূর্ণ <span class="text-accent relative inline-block highlighted-text">
+                        ফিচার
+                        <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+                            <path d="M5,125.4c30.5-8.1,69.7-16.3,113.2-21.2c43.5-4.9,86.9-6.6,130.1-5.9c43.2,0.7,86.4,2.7,129.2,6.4c42.8,3.7,85.3,8.7,127.4,14.9" stroke="currentColor" stroke-width="8" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </span> সমূহ
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="0.2s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">স্মার্ট সার্চ</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        এই ফিচারের মাধ্যমে Live MCQ™-এর আর্কাইভ থেকে যেকোনো প্রশ্ন খুঁজে বের করুন সহজেই।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="0.4s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">টপিক গুরু</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        এই ফিচারে থাকছে, চাকরির পরীক্ষার সকল বিষয়ের উপর টপিকভিত্তিক পড়াশোনার সুযোগ।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="0.6s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">তথ্যকল্পদ্রুম</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        চাকরির পরীক্ষার বিভিন্ন প্রচলিত বিভ্রান্তিমূলক প্রশ্ন ও তথ্যের অথেনটিক রেফারেন্স অনুসারে সমাধান।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="0.8s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">সেন্ট্রাল আর্কাইভ</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        এই ফিচারে Live MCQ™ অ্যাপের সকল প্রশ্ন পাওয়া যাবে একসাথে।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="1.0s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">জব সল্যুশন</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        এই ফিচারে থাকছে জব সল্যুশনের প্রশ্নের উপর টপিকভিত্তিক পড়াশোনার সুযোগ।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="1.2s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">সেন্ট্রাল রেজাল্ট</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        এই ফিচারে থাকছে সকল লাইভ পরীক্ষার ফলাফল একসাথে দেখার সুযোগ।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="1.4s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">কুইজ মাস্টার</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        Live MCQ™-এর সকল প্রশ্ন বা পছন্দের টপিক সিলেক্ট করে আনলিমিটেড কুইজ প্রদানের সুযোগ।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="1.6s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-chart-simple"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">ডাইনামিক ইনফো প্যানেল</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        চাকরির পরীক্ষার জন্য প্রয়োজনীয় গুরুত্বপূর্ণ সকল পরিবর্তনশীল তথ্যের আপডেট।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="1.8s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">Wrong & Unanswered</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        লাইভ পরীক্ষায় একজন পরীক্ষার্থীর ভুল ও উত্তর না করা প্রশ্নের উপর পড়াশোনা ও কুইজ প্রদানের সুযোগ।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="2.0s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">সেন্ট্রাল ফেভারিট</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        নিজের ফেভারিট করে রাখা গুরুত্বপূর্ণ প্রশ্ন পাওয়া যাবে একসাথে।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="2.2s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">অডিও সেকশন</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        প্রশ্ন ও ব্যাখ্যা শুনে শুনেও প্রস্তুতি নেওয়া যাবে।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="2.4s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">প্রশ্ন বিশ্লেষণ</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        প্রতি প্রশ্নের সাথেই ডিফিকাল্টি লেভেল দেখার জন্য থাকছে অ্যানালিটিক্স।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="2.6s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">OMR ফিচার</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        Live MCQ-এ ঘরে বসেই OMR-এ সকল চাকরির প্রস্তুতি পরীক্ষা দিয়ে বাস্তব প্রিলির অভিজ্ঞতা নিন।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="2.8s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">লাইভ এক্সাম</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        প্রকৃত প্রতিদ্বন্দ্বীদের সঙ্গে একই প্রশ্নে, একই সময়ে লাইভ পরীক্ষার ফিচার যা প্রতিযোগিতামূলক চাকরির প্রস্তুতির সহজ উপায়।
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="3.0s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-wifi-slash"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">অফলাইন সেকশন</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        অ্যাপের অফলাইন ডাটাবেজ ডাউনলোড করে নিলে নেট ছাড়াই পড়াশোনা ও পরীক্ষা দুটোই চলবে নিরবচ্ছিন্নভাবে!
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="3.2s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">My Section</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        শুধু প্রয়োজনীয় ও পছন্দের চাকরির বাটন নিয়ে সাজানো স্মার্ট ড্যাশবোর্ড প্রস্তুতিকে করবে আরও লক্ষ্যভিত্তিক!
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-sm feature-card transition-all duration-300 hover:shadow-xl animate-on-scroll" data-delay="3.4s">
+                    <div class="w-16 h-16 bg-[#F9F9FB] rounded-full flex items-center justify-center text-primary text-3xl mb-6 mx-auto lg:mx-0">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-headline mb-3 text-center lg:text-left">মাল্টিপ্লেয়ার কুইজ গেম</h3>
+                    <p class="text-body leading-relaxed mb-5 text-center lg:text-left">
+                        পড়াশোনার অবসরে শেখাকে আরও কার্যকর ও উপভোগ্য করে তুলবে এই মজার MultiPlayer Quiz Game!
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent hover:text-primary transition font-medium">
+                        আরো জানুন <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#F9F9FB] pt-16 pb-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <img src="https://web.livemcq.com/core/uploads/2025/07/Live-MCQ-Dark-Logo.png" class="h-10 mb-4" alt="Logo">
+                    <p class="text-sm text-body mb-4">সকল সরকারি-বেসরকারি চাকরির পূর্ণাঙ্গ প্রস্তুতি নিন Live MCQ™ অ্যাপে।</p>
+                    <div class="flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i><span class="font-bold">৪.৬</span><span class="text-sm">(১.৮ মিলিয়ন+ ডাউনলোড)</span></div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">কুইক লিঙ্ক</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">হোম</a></li>
+                        <li><a href="#" class="hover:text-primary">বুক ষ্টোর</a></li>
+                        <li><a href="#" class="hover:text-primary">ফিচারসমূহ</a></li>
+                        <li><a href="#" class="hover:text-primary">প্যাকেজসমূহ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">আরও জানুন</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-primary">সকল পোস্ট</a></li>
+                        <li><a href="#" class="hover:text-primary">সকল মেন্টর</a></li>
+                        <li><a href="#" class="hover:text-primary">আমাদের সম্পর্কে</a></li>
+                        <li><a href="#" class="hover:text-primary">সাধারণ জিজ্ঞাসা</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">যোগাযোগ</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><i class="fas fa-phone-alt mr-2"></i> 01701-377322</li>
+                        <li><i class="fas fa-envelope mr-2"></i> contact@livemcq.com</li>
+                        <li><i class="fab fa-facebook mr-2"></i> facebook.com/livemcq</li>
+                        <li><i class="fab fa-youtube mr-2"></i> youtube.com/@LiveMCQ</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-body">
+                <p>© স্বত্বাধিকার ২০১৭ - ২০২৬ | সর্বস্বত্ব সংরক্ষিত | <span class="text-accent">CrackTech Limited</span> দ্বারা পরিচালিত</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="hover:text-primary"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple intersection observer for fade-in animations
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        const animated = new Set();
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !animated.has(entry.target)) {
+                    animated.add(entry.target);
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            el.style.transition = 'opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
