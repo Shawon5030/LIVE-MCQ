@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Practice Mode | Learn MCQ</title>
+    <title>Practice Mode | EduPath</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -22,6 +22,32 @@
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .progress-bar-custom { transition: width 0.3s ease; }
+        
+        /* Custom checkbox styles */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 2px solid #CBD5E1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .check-item.checked .custom-checkbox {
+            background: #4F46E5;
+            border-color: #4F46E5;
+        }
+        .check-item.checked .custom-checkbox i {
+            display: block !important;
+        }
+        .check-item {
+            transition: all 0.2s;
+        }
+        .check-item:hover {
+            background: #F1F5F9;
+        }
     </style>
 </head>
 <body class="bg-[#F8FAFE]">
@@ -29,8 +55,8 @@
     {% include "header.html" %}
 
     <main class="pb-20">
-        <!-- Hero Section -->
-        <section class="gradient-hero text-white pt-20 pb-16 relative overflow-hidden">
+        <!-- Hero Section - Practice Mode Style -->
+        <section class="gradient-hero text-white pt-20 pb-16 relative overflow-hidden mb-8">
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                     <div>
@@ -216,7 +242,7 @@
     </div>
 
     <script>
-        // Practice Mode - Single Sub-Lesson
+        // Practice Mode - Single Sub-Lesson (Same logic, new design)
         let selectedChapterId = null;
         let selectedLessonId = null;
         let selectedSubLesson = null;
@@ -365,8 +391,6 @@
                     mcqCount: $(this).data('mcq-count') || 0
                 };
                 updateSelectionSummary();
-                
-                // Check for saved progress
                 checkSavedProgress(selectedSubLesson.id);
             });
         }
@@ -374,13 +398,10 @@
         async function checkSavedProgress(subLessonId) {
             $('#savedProgressCard').addClass('hidden');
             savedProgressData = null;
-            
             if (!subLessonId) return;
-            
             try {
                 let response = await fetch(`/api/practice/progress/?sub_lesson_id=${subLessonId}`);
                 let data = await response.json();
-                
                 if (data.exists && data.answered_questions > 0 && data.answered_questions < data.total_questions) {
                     savedProgressData = data;
                     let percentage = data.progress_percentage.toFixed(1);
@@ -405,21 +426,16 @@
             }
         }
 
-        // Start Practice
         $('#startPracticeBtn').click(async function() {
             if (!selectedSubLesson) {
                 showToast('Please select a sub-lesson', true);
                 return;
             }
-            
             currentSubLessonId = selectedSubLesson.id;
-            
-            // If saved progress exists and user hasn't chosen, show card
             if (savedProgressData && savedProgressData.answered_questions > 0 && savedProgressData.answered_questions < savedProgressData.total_questions) {
                 $('#savedProgressCard').removeClass('hidden');
                 return;
             }
-            
             await startFreshPractice();
         });
 
@@ -446,7 +462,6 @@
 
         async function startWithSavedProgress() {
             if (!savedProgressData) return;
-            
             try {
                 let response = await fetch('/api/practice/mcqs-by-ids/', {
                     method: 'POST',
@@ -454,14 +469,12 @@
                     body: JSON.stringify({mcq_ids: savedProgressData.questions_order})
                 });
                 let data = await response.json();
-                
                 questionsData = data.questions;
                 userAnswers = savedProgressData.user_answers;
                 currentQ = savedProgressData.current_index;
                 practiceStats.correct = savedProgressData.correct_count;
                 practiceStats.wrong = savedProgressData.wrong_count;
                 hasUnsavedChanges = false;
-                
                 startPracticeSession();
             } catch(e) {
                 showToast('Error loading saved progress', true);
@@ -473,21 +486,18 @@
                 let response = await fetch('/api/mcq/practice/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sub_lesson_ids: [currentSubLessonId], question_count: 999}) // Get all MCQs
+                    body: JSON.stringify({sub_lesson_ids: [currentSubLessonId], question_count: 999})
                 });
                 let data = await response.json();
-                
                 if (!data.questions || data.questions.length === 0) {
                     showToast('No questions found in this sub-lesson', true);
                     return;
                 }
-                
                 questionsData = data.questions;
                 userAnswers = new Array(questionsData.length).fill(null);
                 currentQ = 0;
                 practiceStats = { correct: 0, wrong: 0 };
                 hasUnsavedChanges = false;
-                
                 startPracticeSession();
             } catch(e) {
                 showToast('Error starting practice', true);
@@ -500,7 +510,6 @@
             $('#correctCount').text(practiceStats.correct);
             $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
             $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
-            
             $('#completionPanel').addClass('hidden');
             $('#practicePanel').removeClass('hidden');
             renderQuestion();
@@ -511,6 +520,7 @@
             if (!questionsData.length) return;
             let q = questionsData[currentQ];
             let selectedIdx = userAnswers[currentQ];
+            $('#currentQNum').text(currentQ + 1);
             
             let optionsHtml = '';
             q.options.forEach((opt, idx) => {
@@ -522,9 +532,7 @@
                 } else if (isSelected) {
                     extraClass = 'option-selected';
                 }
-                
                 let disabledAttr = (selectedIdx !== null) ? 'disabled' : '';
-                
                 optionsHtml += `<label class="block rounded-xl border p-4 mb-3 cursor-pointer transition-all ${extraClass} ${!selectedIdx ? 'hover:border-green-300' : ''}">
                     <input type="radio" name="qOption" value="${idx}" class="mr-3" ${isSelected ? 'checked' : ''} ${disabledAttr}>
                     <span class="text-slate-700">${escapeHtml(opt)}</span>
@@ -554,30 +562,24 @@
                 $('input[name="qOption"]').change(function() {
                     let val = parseInt($(this).val());
                     let isCorrect = (val + 1) === q.correct_answer;
-                    
                     userAnswers[currentQ] = val;
                     if (isCorrect) practiceStats.correct++;
                     else practiceStats.wrong++;
-                    
                     $('#correctCount').text(practiceStats.correct);
                     $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
                     $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
                     hasUnsavedChanges = true;
-                    
                     let answered = userAnswers.filter(a => a !== null).length;
                     let isCompleted = answered === questionsData.length;
-                    
                     if (isCompleted) {
                         saveProgress();
                         showCompletion();
                     } else if (answered % 5 === 0) {
-                        saveProgress(); // Auto-save every 5 answers
+                        saveProgress();
                     }
-                    
                     renderQuestion();
                 });
             }
-            
             $('#prevBtn').prop('disabled', currentQ === 0);
             $('#nextBtn').prop('disabled', currentQ === questionsData.length - 1);
         }
@@ -585,7 +587,6 @@
         async function saveProgress() {
             let answered = userAnswers.filter(a => a !== null).length;
             let correct = practiceStats.correct;
-            
             const saveData = {
                 sub_lesson_id: currentSubLessonId,
                 total_questions: questionsData.length,
@@ -596,7 +597,6 @@
                 correct_count: correct,
                 wrong_count: answered - correct
             };
-            
             try {
                 let response = await fetch('/api/practice/save/', {
                     method: 'POST',
@@ -604,7 +604,6 @@
                     body: JSON.stringify(saveData)
                 });
                 let data = await response.json();
-                
                 if (data.success) {
                     hasUnsavedChanges = false;
                     showToast(`✅ Progress saved! ${answered}/${questionsData.length} completed`);
