@@ -1,13 +1,10 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from django.db.models import Count
-from .models import (
-    Subject, Chapter, Lesson, SubLesson, MCQ,
-    Course, UserCourseEnrollment, ExamAttempt,
-    UserMasterProgress, TransactionVerification,
-    Payment, UserProfile,
-)
+from django.utils.html import format_html
 
+from .models import (MCQ, Chapter, Course, ExamAttempt, Lesson, Payment,
+                     Subject, SubLesson, TransactionVerification,
+                     UserCourseEnrollment, UserMasterProgress, UserProfile)
 
 # ──────────────────────────────────────────────
 # Inlines

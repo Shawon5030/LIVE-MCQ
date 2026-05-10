@@ -1,7 +1,11 @@
 import json
 import random
+from datetime import datetime
+from io import BytesIO
 
 from django.contrib import messages
+# Admin views for payment verification
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -10,11 +14,14 @@ from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.db.models import Avg, Count, Q, Sum
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import (require_GET, require_http_methods,
+                                          require_POST)
+from xhtml2pdf import pisa
 
 from app.models import UserCourseEnrollment
 
@@ -36,12 +43,6 @@ def Faq_page(request):
 
 # views.py - Complete with all API functions
 
-import json
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from .models import Subject, Chapter, Lesson, SubLesson, MCQ
 
 # ---------- PAGE VIEW ----------
 def upload_mcq_page(request):
@@ -318,16 +319,6 @@ def logout_api(request):
 
 
 
-import json
-import random
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_POST
-
-from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
-
 
 # ─────────────────────────────────────────────
 # 1. Hierarchy loaders (cascading dropdowns)
@@ -359,15 +350,6 @@ def exam_home(request):
         return redirect("course_list_page")
     return render(request,"exam/home.html")
 
-import json
-import random
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_POST
-
-from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
 
 # ─────────────────────────────────────────────
 # 1. Hierarchy loaders (cascading dropdowns)
@@ -467,12 +449,6 @@ def preview_mcq_count(request):
 # ─────────────────────────────────────────────
 
 
-import json
-import random
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 
 
 @require_POST
@@ -799,19 +775,6 @@ def _build_mcq_queryset_from_lists(subject_ids, chapter_ids, lesson_ids, sub_les
 
 
 # views.py (additions)
-
-import json
-import random
-from datetime import datetime
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_POST
-
-from .models import (MCQ, Chapter, Lesson, Subject, SubLesson,
-                     UserMasterProgress)
 
 
 @login_required
@@ -1194,15 +1157,6 @@ def course_detail_page(request, course_id):
     )
 
 
-import json
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-
-from .models import Course, Payment, TransactionVerification
 
 
 @login_required
@@ -1331,9 +1285,6 @@ def payment_page(request,course_id):
     }
     return render(request, 'payments/payment_detail.html', context)
 
-
-# Admin views for payment verification
-from django.contrib.admin.views.decorators import staff_member_required
 
 
 @staff_member_required
@@ -1635,14 +1586,7 @@ def my_exams(request):
     
     return render(request, 'accounts/my_exams.html', context)
 
-import json
-from datetime import datetime
-from io import BytesIO
 
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.template.loader import render_to_string
-from xhtml2pdf import pisa
 
 def generate_question_pdf(request):
     if request.method == 'POST' and request.FILES.get('json_file'):

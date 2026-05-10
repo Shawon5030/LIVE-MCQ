@@ -6,3 +6,4 @@ djangorestframework
 psycopg2-binary
 gunicorn
 pillow
+xhtml2pdf

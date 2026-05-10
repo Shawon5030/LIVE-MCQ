@@ -585,6 +585,7 @@ def create_user_master_progress(sender, instance, created, **kwargs):
         UserMasterProgress.objects.get_or_create(user=instance)
 
 from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 
