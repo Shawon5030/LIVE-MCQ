@@ -1,9 +1,14 @@
-from django.urls import path
-from app.views import *
-from app import views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
+from django.urls import path
+
+from app import views
+from app.views import *
+
+from . import views
+
 urlpatterns = [
     
     
@@ -60,19 +65,18 @@ urlpatterns = [
         name="submit_payment"
     ),
     
-    # Exam URLs (all require login)
-    path('exam/', views.exam_home, name='exam_home'),
-    path('api/chapters/', views.get_chapters_api, name='api_chapters'),
-    path('api/lessons/', views.get_lessons_api, name='api_lessons'),
-    path('api/sub-lessons/', views.get_sub_lessons_api, name='api_sub_lessons'),  # New endpoint
-    path('api/mcqs/', views.get_mcqs_api, name='api_mcqs'),
-    path('api/save-exam-result/', views.save_exam_result_api, name='save_exam_result'),
+    path("exam/",views.exam_home,name="exam_home"),
+    path('api/subjects/',    views.get_subjects,   name='api_subjects'),
+    path('api/chapters/',    views.get_chapters,   name='api_chapters'),
+    path('api/lessons/',    views.get_lessons,    name='api_lessons'),
+    path('api/sublessons/',  views.get_sublessons, name='api_sublessons'),
+ 
+    # Exam
+    path('api/exam/preview/', views.preview_mcq_count, name='api_exam_preview'),
+    path('api/exam/start/',  views.start_exam,         name='api_exam_start'),
+    path('api/exam/submit/',  views.submit_exam,        name='api_exam_submit'),
     
-  
-   
-   
-   
-
+    
     path('payment/submit/', views.submit_payment, name='submit_payment'),
     path('payment/history/', views.payment_history, name='payment_history'),
     path('payment/<int:payment_id>/', views.payment_detail, name='payment_detail'),
@@ -86,16 +90,33 @@ urlpatterns = [
     path('my-exams/', views.my_exams, name='my_exams'),
     
 
-    # Practice URLs
-    path('practice/', views.practice_page, name='practice_page'),
-    path('api/mcq/practice/', views.get_mcqs_api_practice, name='get_mcqs_api_practice'),
-    path('api/practice/progress/', views.get_practice_progress, name='get_practice_progress'),
-    path('api/practice/save/', views.save_practice_progress, name='save_practice_progress'),
-    path('api/practice/delete/', views.delete_practice_progress, name='delete_practice_progress'),
-    path('api/practice/mcqs-by-ids/', views.get_mcqs_by_ids, name='get_mcqs_by_ids'),
-    path('api/practice/dashboard/', views.practice_dashboard, name='practice_dashboard'),
+    
+
+   
+    
+    
+    path('generate-question-pdf/', views.generate_question_pdf, name='generate_question_pdf'),
+    path('generate-answer-pdf/', views.generate_answer_pdf, name='generate_answer_pdf'),
     
 ]
+
+
+
+
+
+urlpatterns1 =  [
+    # Practice home
+    path('practice/', views.practice_home, name='practice_page'),
+    
+    # Practice APIs
+    path('api/practice/content/', views.practice_content, name='practice_content'),
+    path('api/practice/start/', views.start_practice, name='start_practice'),
+    path('api/practice/save/', views.save_practice_progress, name='save_practice'),
+    path('api/practice/delete/', views.delete_practice_progress, name='delete_practice'),
+    path('api/practice/progress-list/', views.practice_progress_list, name='practice_progress'),
+]
+
+urlpatterns += urlpatterns1
 
 if settings.DEBUG:
     urlpatterns += static(

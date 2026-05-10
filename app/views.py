@@ -1,57 +1,28 @@
-from django.shortcuts import render, redirect
-import json
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
-from django.shortcuts import render
-from .models import UserMasterProgress, SubLesson, MCQ, Lesson, Chapter, Subject
 import json
 import random
-from django.db import transaction
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
+
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from .models import Subject, Chapter, Lesson, SubLesson, MCQ, ExamAttempt
-import random
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import Payment, TransactionVerification
-from .models import Course, Payment
-from app.models import UserCourseEnrollment
-from django.utils import timezone
-from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib import messages
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction
+from django.db.models import Avg, Count, Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db.models import Sum, Count, Q, Avg
-from .models import (
-    UserCourseEnrollment, 
-    Payment, 
-    ExamAttempt,
-    Course,
-    Subject
-)
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum, Avg
-from django.utils import timezone
-from django.contrib import messages
-from .models import (
-    User, UserProfile, UserCourseEnrollment, Payment, 
-    ExamAttempt, Subject, UserMasterProgress
-)
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+from app.models import UserCourseEnrollment
+
+from .models import (MCQ, Chapter, Course, ExamAttempt, Lesson, Payment,
+                     Subject, SubLesson, TransactionVerification, User,
+                     UserCourseEnrollment, UserMasterProgress, UserProfile)
+
+
 def Home_page(request):
     return render(request,'index.html')
 def Contact_page(request):
@@ -209,420 +180,761 @@ def logout_api(request):
 
 
 
-@login_required
+import json
+import random
 
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
+
+
+# ─────────────────────────────────────────────
+# 1. Hierarchy loaders (cascading dropdowns)
+# ─────────────────────────────────────────────
+@login_required
 def exam_home(request):
-    # only active + not expired enrollments
-    enrollments = UserCourseEnrollment.objects.filter(
-        user=request.user,
-        status="active",
-       
-    ).select_related(
-        'course'
-    ).prefetch_related(
-        'course__subjects'
+    return render(request,"exam/home.html")
+import json
+import random
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
+
+# ─────────────────────────────────────────────
+# 1. Hierarchy loaders (cascading dropdowns)
+# ─────────────────────────────────────────────
+
+@login_required
+@require_GET
+def get_subjects(request):
+    """Return all subjects."""
+    subjects = Subject.objects.all().values("id", "name").order_by("name")
+    return JsonResponse({"subjects": list(subjects)})
+
+
+@login_required
+@require_GET
+def get_chapters(request):
+    """Return chapters for given subject IDs (comma-separated ?subject_ids=1,2)."""
+    ids = _parse_ids(request.GET.get("subject_ids", ""))
+    if not ids:
+        return JsonResponse({"error": "subject_ids required"}, status=400)
+    chapters = (
+        Chapter.objects
+        .filter(subject_id__in=ids)
+        .select_related("subject")
+        .values("id", "name", "subject_id", "subject__name")
+        .order_by("subject__name", "name")
+    )
+    return JsonResponse({"chapters": list(chapters)})
+
+
+@login_required
+@require_GET
+def get_lessons(request):
+    """Return lessons for given chapter IDs."""
+    ids = _parse_ids(request.GET.get("chapter_ids", ""))
+    if not ids:
+        return JsonResponse({"error": "chapter_ids required"}, status=400)
+    lessons = (
+        Lesson.objects
+        .filter(chapter_id__in=ids)
+        .select_related("chapter__subject")
+        .values("id", "name", "chapter_id", "chapter__name", "chapter__subject__name")
+        .order_by("chapter__name", "name")
+    )
+    return JsonResponse({"lessons": list(lessons)})
+
+
+@login_required
+@require_GET
+def get_sublessons(request):
+    """Return sub-lessons for given lesson IDs."""
+    ids = _parse_ids(request.GET.get("lesson_ids", ""))
+    if not ids:
+        return JsonResponse({"error": "lesson_ids required"}, status=400)
+    subs = (
+        SubLesson.objects
+        .filter(lesson_id__in=ids)
+        .select_related("lesson__chapter__subject")
+        .values(
+            "id", "name", "mcq_count",
+            "lesson_id", "lesson__name",
+            "lesson__chapter__name",
+            "lesson__chapter__subject__name"
+        )
+        .order_by("lesson__name", "name")
+    )
+    return JsonResponse({"sub_lessons": list(subs)})
+
+
+# ─────────────────────────────────────────────
+# 2. MCQ count preview (before starting exam)
+# ─────────────────────────────────────────────
+
+@login_required
+@require_GET
+def preview_mcq_count(request):
+    """
+    Returns how many MCQs are available for the given selection.
+    Pass any combination of subject_ids, chapter_ids, lesson_ids, sub_lesson_ids.
+    All selected IDs are unioned together.
+    """
+    qs = _build_mcq_queryset(request.GET)
+    return JsonResponse({"available_mcq_count": qs.count()})
+
+
+# ─────────────────────────────────────────────
+# 3. Start / Submit exam
+# ─────────────────────────────────────────────
+
+
+import json
+import random
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+
+@require_POST
+def start_exam(request):
+    
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    subject_ids    = body.get("subject_ids", [])
+    chapter_ids    = body.get("chapter_ids", [])
+    lesson_ids     = body.get("lesson_ids", [])
+    sub_lesson_ids = body.get("sub_lesson_ids", [])
+    question_count = int(body.get("question_count", 20))
+    time_limit     = int(body.get("time_limit_minutes", 10))
+    random_order   = bool(body.get("random_order", True))
+    include_answers = body.get("include_answers", False)  # NEW: flag to include answers
+
+    # Check if user is admin - only admins can export answers
+    is_admin = request.user.is_staff
+    include_answers = include_answers and is_admin  # Only include if admin requests it
+
+    if not any([subject_ids, chapter_ids, lesson_ids, sub_lesson_ids]):
+        return JsonResponse({"error": "Select at least one subject, chapter, lesson, or sub-lesson."}, status=400)
+
+    if question_count < 1 or question_count > 200:
+        return JsonResponse({"error": "question_count must be between 1 and 200."}, status=400)
+
+    # Collect MCQs
+    mcq_qs = _build_mcq_queryset_from_lists(
+        subject_ids, chapter_ids, lesson_ids, sub_lesson_ids
     )
 
-    # IMPORTANT:
-    # previous query was fetching all subjects of user
-    # without checking active enrollment properly
+    total_available = mcq_qs.count()
+    if total_available == 0:
+        return JsonResponse({"error": "No MCQs found for the selected filters."}, status=404)
 
-    subjects = Subject.objects.filter(
-        courses__enrollments__in=enrollments
-    ).distinct()
+    # Clamp count
+    question_count = min(question_count, total_available)
 
-    total_subject = subjects.count()
-    if total_subject==0:
-        messages.error(
-        request,
-        "First Enroll Please"
+    # Include all fields including correct_answer, explanation, previous_year
+    mcq_list = list(mcq_qs.values(
+        "id", "question",
+        "option_1", "option_2", "option_3", "option_4",
+        "subject_id", "chapter_id", "lesson_id", "sub_lesson_id",
+        "previous_year", "correct_answer", "explanation"  # Now including these
+    ))
+
+    if random_order:
+        random.shuffle(mcq_list)
+
+    selected = mcq_list[:question_count]
+    mcq_ids_order = [m["id"] for m in selected]
+
+    # Derive the primary subject for ExamAttempt
+    primary_subject_id = (
+        subject_ids[0] if subject_ids
+        else (selected[0]["subject_id"] if selected else None)
     )
-       
-    
-        return redirect("course_list_page")
-    return render(
-        request,
-        'exam/home.html',
-        {
-            'subjects': subjects,
-            'user': request.user,
-            "total_subject":total_subject
-        }
-    )
 
-@login_required
-def get_chapters_api(request):
-    """Get chapters for a subject"""
-    subject_id = request.GET.get('subject_id')
-    if not subject_id:
-        return JsonResponse([], safe=False)
-    chapters = Chapter.objects.filter(subject_id=subject_id).values('id', 'name')
-    return JsonResponse(list(chapters), safe=False)
-
-
-@login_required
-@csrf_exempt
-def get_lessons_api(request):
-    """Get lessons for selected chapters"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            chapter_ids = data.get('chapter_ids', [])
-        except:
-            chapter_ids = []
-    else:
-        chapter_ids = request.GET.getlist('chapter_ids[]')
-        if not chapter_ids:
-            chapter_ids = request.GET.getlist('chapter_ids')
-    
-    if not chapter_ids:
-        return JsonResponse([], safe=False)
-    
-    try:
-        chapter_ids = [int(cid) for cid in chapter_ids if cid]
-    except ValueError:
-        return JsonResponse([], safe=False)
-    
-    # Get Lessons (not SubLessons) - these are the middle level
-    lessons = Lesson.objects.filter(chapter_id__in=chapter_ids).values('id', 'name', 'chapter_id')
-    return JsonResponse(list(lessons), safe=False)
-
-@login_required
-@csrf_exempt
-def get_sub_lessons_api(request):
-    """Get SubLessons for selected lessons with MCQ counts"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            lesson_ids = data.get('lesson_ids', [])
-        except:
-            lesson_ids = []
-    else:
-        lesson_ids = request.GET.getlist('lesson_ids[]')
-        if not lesson_ids:
-            lesson_ids = request.GET.getlist('lesson_ids')
-    
-    if not lesson_ids:
-        return JsonResponse([], safe=False)
-    
-    try:
-        lesson_ids = [int(lid) for lid in lesson_ids if lid]
-    except ValueError:
-        return JsonResponse([], safe=False)
-    
-    # Get SubLessons for selected lessons with mcq_count
-    sub_lessons = SubLesson.objects.filter(lesson_id__in=lesson_ids).values(
-        'id', 
-        'name', 
-        'lesson_id',
-        'mcq_count'  # ← Add this line
-    )
-    return JsonResponse(list(sub_lessons), safe=False)
-
-@login_required
-@csrf_exempt
-def get_mcqs_api(request):
-    """Get random MCQs from selected sub-lessons"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            sub_lesson_ids = data.get('sub_lesson_ids', [])
-            question_count = data.get('question_count', 10)
-        except:
-            sub_lesson_ids = []
-            question_count = 10
-    else:
-        sub_lesson_ids = request.GET.getlist('sub_lesson_ids[]')
-        if not sub_lesson_ids:
-            sub_lesson_ids = request.GET.getlist('sub_lesson_ids')
-        question_count = request.GET.get('question_count', 10)
-    
-    try:
-        question_count = int(question_count)
-        if question_count > 100:
-            question_count = 100
-        if question_count < 1:
-            question_count = 1
-    except ValueError:
-        question_count = 10
-    
-    if not sub_lesson_ids:
-        return JsonResponse({'questions': [], 'total': 0, 'mcq_ids': []})
-    
-    try:
-        sub_lesson_ids = [int(sid) for sid in sub_lesson_ids if sid]
-    except ValueError:
-        return JsonResponse({'questions': [], 'total': 0, 'mcq_ids': []})
-    
-    mcqs = MCQ.objects.filter(sub_lesson_id__in=sub_lesson_ids)
-    mcq_list = list(mcqs)
-    
-    if len(mcq_list) > question_count:
-        mcq_list = random.sample(mcq_list, question_count)
-    
-    mcq_ids_order = [mcq.id for mcq in mcq_list]
-    
-    questions_data = []
-    for mcq in mcq_list:
-        questions_data.append({
-            'id': mcq.id,
-            'question': mcq.question,
-            'options': [mcq.option_1, mcq.option_2, mcq.option_3, mcq.option_4],
-            'correct_answer': mcq.correct_answer,
-            'explanation': mcq.explanation or '',
-        })
-    
-    return JsonResponse({
-        'questions': questions_data,
-        'total': len(questions_data),
-        'mcq_ids': mcq_ids_order
-    })
-
-
-@login_required
-@csrf_exempt
-@require_http_methods(["POST"])
-def save_exam_result_api(request):
-
-    try:
-        data = json.loads(request.body)
-        
-        subject_id = data.get('subject_id')
-        subject = None
-        if subject_id:
-            try:
-                subject = Subject.objects.get(id=subject_id)
-            except Subject.DoesNotExist:
-                pass
-        
-        exam_attempt = ExamAttempt.objects.create(
+    # Only create ExamAttempt for actual exam sessions (not admin exports)
+    attempt = None
+    if not include_answers:
+        # Create ExamAttempt (results empty – filled on submit)
+        attempt = ExamAttempt.objects.create(
             user=request.user,
-            subject=subject,
-            time_limit_minutes=data.get('time_limit_minutes', 10),
-            total_questions=data.get('total_questions', 0),
-            correct_answers=data.get('correct_answers', 0),
-            wrong_answers=data.get('wrong_answers', 0),
-            skipped_answers=data.get('skipped_answers', 0),
-            score_percentage=data.get('score_percentage', 0),
-            mcq_ids_order=data.get('mcq_ids_order', []),
-            user_answers=data.get('user_answers', []),
-            correct_status=data.get('correct_status', []),
-            selected_chapters=data.get('selected_chapters', []),
-            selected_sub_lessons=data.get('selected_sub_lessons', [])
+            subject_id=primary_subject_id,
+            time_limit_minutes=time_limit,
+            total_questions=question_count,
+            mcq_ids_order=mcq_ids_order,
+            user_answers=[None] * question_count,
+            correct_status=[None] * question_count,
+            selected_chapters=chapter_ids,
+            selected_sub_lessons=sub_lesson_ids,
         )
-        
-        return JsonResponse({
-            'success': True,
-            'exam_id': exam_attempt.id,
-            'message': 'পরীক্ষার ফলাফল সফলভাবে সংরক্ষণ করা হয়েছে'
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=400)
 
-# these practice mode views
+    # Build questions for response
+    questions_for_client = []
+    for idx, m in enumerate(selected):
+        question_data = {
+            "index":      idx,
+            "id":         m["id"],
+            "question":   m["question"],
+            "options": [
+                {"key": 1, "text": m["option_1"]},
+                {"key": 2, "text": m["option_2"]},
+                {"key": 3, "text": m["option_3"]},
+                {"key": 4, "text": m["option_4"]},
+            ],
+        }
+        
+        # Include correct_answer, explanation, and previous_year ONLY for admin exports
+        if include_answers:
+            question_data["correct_answer"] = m["correct_answer"]
+            question_data["explanation"] = m["explanation"] if m["explanation"] else None
+            question_data["previous_year"] = m["previous_year"] if m["previous_year"] else None
+            question_data["has_previous_year"] = bool(m["previous_year"])
+        
+        questions_for_client.append(question_data)
+
+    response_data = {
+        "total_questions":    question_count,
+        "time_limit_minutes": time_limit,
+        "questions":          questions_for_client,
+    }
+    
+    # Only include attempt_id if this is a real exam (not admin export)
+    if attempt:
+        response_data["attempt_id"] = attempt.id
+    
+    # If this is an admin export, add metadata
+    if include_answers:
+        response_data["export_type"] = "admin_export"
+        response_data["exported_by"] = request.user.username
+        response_data["total_available"] = total_available
+    
+    return JsonResponse(response_data)
+
+
+def _build_mcq_queryset_from_lists(subject_ids, chapter_ids, lesson_ids, sub_lesson_ids):
+    """Helper function to build MCQ queryset from filters"""
+    from .models import MCQ  # Import here to avoid circular imports
+    
+    qs = MCQ.objects.all()
+    
+    if subject_ids:
+        qs = qs.filter(subject_id__in=subject_ids)
+    if chapter_ids:
+        qs = qs.filter(chapter_id__in=chapter_ids)
+    if lesson_ids:
+        qs = qs.filter(lesson_id__in=lesson_ids)
+    if sub_lesson_ids:
+        qs = qs.filter(sub_lesson_id__in=sub_lesson_ids)
+    
+    return qs
+
 
 @login_required
-@csrf_exempt
-def practice_page(request):
-    enrollments = UserCourseEnrollment.objects.filter(
-        user=request.user,
-        status="active",
-       
-    ).select_related(
-        'course'
-    ).prefetch_related(
-        'course__subjects'
-    )
+@require_POST
+def submit_exam(request):
 
-    subjects = Subject.objects.filter(
-        courses__enrollments__in=enrollments
-    ).distinct()
-    return render(request, 'exam/practice.html', {'subjects': subjects})
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-@login_required
-@csrf_exempt
-def get_mcqs_api_practice(request):
-    """Get random MCQs from selected sub-lessons"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            sub_lesson_ids = data.get('sub_lesson_ids', [])
-            question_count = data.get('question_count', 10)
-        except:
-            sub_lesson_ids = []
-            question_count = 10
-    else:
-        sub_lesson_ids = request.GET.getlist('sub_lesson_ids[]')
-        if not sub_lesson_ids:
-            sub_lesson_ids = request.GET.getlist('sub_lesson_ids')
-        question_count = request.GET.get('question_count', 10)
-    
+    attempt_id = body.get("attempt_id")
+    user_answers = body.get("answers", [])
+
     try:
-        question_count = int(question_count)
-        if question_count < 1:
-            question_count = 1
-    except ValueError:
-        question_count = 10
-    
-    if not sub_lesson_ids:
-        return JsonResponse({'questions': [], 'total': 0, 'mcq_ids': []})
-    
-    try:
-        sub_lesson_ids = [int(sid) for sid in sub_lesson_ids if sid]
-    except ValueError:
-        return JsonResponse({'questions': [], 'total': 0, 'mcq_ids': []})
-    
-    mcqs = MCQ.objects.filter(sub_lesson_id__in=sub_lesson_ids)
-    mcq_list = list(mcqs)
-    
-    if len(mcq_list) > question_count:
-        mcq_list = random.sample(mcq_list, question_count)
-    
-    mcq_ids_order = [mcq.id for mcq in mcq_list]
-    
-    questions_data = []
-    for mcq in mcq_list:
-        questions_data.append({
-            'id': mcq.id,
-            'question': mcq.question,
-            'options': [mcq.option_1, mcq.option_2, mcq.option_3, mcq.option_4],
-            'correct_answer': mcq.correct_answer,
-            'explanation': mcq.explanation or '',
+        attempt = ExamAttempt.objects.get(id=attempt_id, user=request.user)
+    except ExamAttempt.DoesNotExist:
+        return JsonResponse({"error": "Exam attempt not found."}, status=404)
+
+    mcq_ids = attempt.mcq_ids_order
+    if len(user_answers) != len(mcq_ids):
+        return JsonResponse({"error": "Answer count does not match question count."}, status=400)
+
+    # Fetch correct answers
+    mcqs = MCQ.objects.filter(id__in=mcq_ids).values("id", "correct_answer", "explanation",
+                                                       "option_1", "option_2", "option_3", "option_4")
+    correct_map = {m["id"]: m for m in mcqs}
+
+    correct_count = 0
+    wrong_count   = 0
+    skipped_count = 0
+    correct_status = []
+    result_details = []
+
+    for idx, (mcq_id, answer) in enumerate(zip(mcq_ids, user_answers)):
+        mcq_data = correct_map.get(mcq_id, {})
+        correct_ans = mcq_data.get("correct_answer")
+
+        if answer is None:
+            skipped_count += 1
+            status = "skipped"
+        elif answer == correct_ans:
+            correct_count += 1
+            status = "correct"
+        else:
+            wrong_count += 1
+            status = "wrong"
+
+        correct_status.append(status)
+        result_details.append({
+            "index":          idx,
+            "mcq_id":         mcq_id,
+            "your_answer":    answer,
+            "correct_answer": correct_ans,
+            "status":         status,
+            "explanation":    mcq_data.get("explanation") or "",
+            "options": [
+                {"key": 1, "text": mcq_data.get("option_1", "")},
+                {"key": 2, "text": mcq_data.get("option_2", "")},
+                {"key": 3, "text": mcq_data.get("option_3", "")},
+                {"key": 4, "text": mcq_data.get("option_4", "")},
+            ],
         })
-    
+
+    total = attempt.total_questions
+    score_pct = round((correct_count / total * 100) if total > 0 else 0, 2)
+
+    # Save results
+    attempt.user_answers    = user_answers
+    attempt.correct_status  = correct_status
+    attempt.correct_answers = correct_count
+    attempt.wrong_answers   = wrong_count
+    attempt.skipped_answers = skipped_count
+    attempt.score_percentage = score_pct
+    attempt.save()
+
     return JsonResponse({
-        'questions': questions_data,
-        'total': len(questions_data),
-        'mcq_ids': mcq_ids_order
+        "attempt_id":       attempt.id,
+        "total_questions":  total,
+        "correct_answers":  correct_count,
+        "wrong_answers":    wrong_count,
+        "skipped_answers":  skipped_count,
+        "score_percentage": score_pct,
+        "result_details":   result_details,
     })
 
-
-
-def get_practice_progress(request):
-    if request.method == 'GET':
-        sub_lesson_id = request.GET.get('sub_lesson_id')
-        
-        if not sub_lesson_id:
-            return JsonResponse({'error': 'sub_lesson_id required'}, status=400)
-        
-        try:
-            master = UserMasterProgress.objects.get(user=request.user)
-            progress = master.load_progress(sub_lesson_id)
-            
-            if progress:
-                return JsonResponse(progress)
-            else:
-                return JsonResponse({'exists': False})
-                
-        except UserMasterProgress.DoesNotExist:
-            return JsonResponse({'exists': False})
-
-
-@login_required
-@csrf_exempt
-@require_http_methods(["POST"])
-def save_practice_progress(request):
-    """Save practice progress (called when user clicks Remember Me)"""
+def _parse_ids(raw: str):
+    """Parse comma-separated integer IDs from a query string value."""
+    if not raw:
+        return []
     try:
-        data = json.loads(request.body)
-        
-        sub_lesson_id = data.get('sub_lesson_id')
-        total_questions = data.get('total_questions', 0)
-        answered_questions = data.get('answered_questions', 0)
-        current_index = data.get('current_index', 0)
-        user_answers = data.get('user_answers', [])
-        questions_order = data.get('questions_order', [])
-        correct_count = data.get('correct_count', 0)
-        wrong_count = data.get('wrong_count', 0)
-        random_order = data.get('random_order', False)
-        
-        # Get or create master progress
-        master, created = UserMasterProgress.objects.get_or_create(user=request.user)
-        
-        # Save progress
-        master.save_progress(
-            sub_lesson_id=sub_lesson_id,
-            total_questions=total_questions,
-            answered=answered_questions,
-            current_q_index=current_index,
-            user_answers=user_answers,
-            questions_order=questions_order,
-            correct_count=correct_count,
-            wrong_count=wrong_count,
-            random_order=random_order
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Progress saved successfully',
-            'answered': answered_questions,
-            'total': total_questions,
-            'percentage': (answered_questions / total_questions * 100) if total_questions > 0 else 0
-        })
-        
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        return [int(x.strip()) for x in raw.split(",") if x.strip()]
+    except ValueError:
+        return []
+
+
+def _build_mcq_queryset(GET):
+    return _build_mcq_queryset_from_lists(
+        _parse_ids(GET.get("subject_ids", "")),
+        _parse_ids(GET.get("chapter_ids", "")),
+        _parse_ids(GET.get("lesson_ids", "")),
+        _parse_ids(GET.get("sub_lesson_ids", "")),
+    )
+
+
+def _build_mcq_queryset_from_lists(subject_ids, chapter_ids, lesson_ids, sub_lesson_ids):
+    
+    from django.db.models import Q
+
+    sub_lesson_ids = list(sub_lesson_ids or [])
+    lesson_ids     = list(lesson_ids     or [])
+    chapter_ids    = list(chapter_ids    or [])
+    subject_ids    = list(subject_ids    or [])
+
+    if not any([sub_lesson_ids, lesson_ids, chapter_ids, subject_ids]):
+        return MCQ.objects.none()
+
+
+    covered_subject_ids = set()
+    if chapter_ids:
+        from .models import Chapter
+        covered = Chapter.objects.filter(id__in=chapter_ids).values_list('subject_id', flat=True)
+        covered_subject_ids.update(covered)
+
+    if lesson_ids:
+        from .models import Lesson
+        covered = Lesson.objects.filter(id__in=lesson_ids).values_list('chapter__subject_id', flat=True)
+        covered_subject_ids.update(covered)
+
+    if sub_lesson_ids:
+        from .models import SubLesson
+        covered = SubLesson.objects.filter(id__in=sub_lesson_ids).values_list('lesson__chapter__subject_id', flat=True)
+        covered_subject_ids.update(covered)
+
+
+    covered_chapter_ids = set()
+
+    if lesson_ids:
+        from .models import Lesson
+        covered = Lesson.objects.filter(id__in=lesson_ids).values_list('chapter_id', flat=True)
+        covered_chapter_ids.update(covered)
+
+    if sub_lesson_ids:
+        from .models import SubLesson
+        covered = SubLesson.objects.filter(id__in=sub_lesson_ids).values_list('lesson__chapter_id', flat=True)
+        covered_chapter_ids.update(covered)
+
+    # --- And a lesson is covered if a sublesson under it was selected ---
+    covered_lesson_ids = set()
+
+    if sub_lesson_ids:
+        from .models import SubLesson
+        covered = SubLesson.objects.filter(id__in=sub_lesson_ids).values_list('lesson_id', flat=True)
+        covered_lesson_ids.update(covered)
+
+    # --- Build the final Q ---
+    q = Q()
+
+    # Sub-lessons: always include as-is
+    if sub_lesson_ids:
+        q |= Q(sub_lesson_id__in=sub_lesson_ids)
+
+    # Lessons: only include if not already covered by a sublesson selection
+    effective_lesson_ids = [lid for lid in lesson_ids if lid not in covered_lesson_ids]
+    if effective_lesson_ids:
+        q |= Q(lesson_id__in=effective_lesson_ids)
+
+    # Chapters: only include if not already covered by a lesson/sublesson selection
+    effective_chapter_ids = [cid for cid in chapter_ids if cid not in covered_chapter_ids]
+    if effective_chapter_ids:
+        q |= Q(chapter_id__in=effective_chapter_ids)
+
+    # Subjects: only include as fallback when not covered by any finer selection
+    effective_subject_ids = [sid for sid in subject_ids if sid not in covered_subject_ids]
+    if effective_subject_ids:
+        q |= Q(subject_id__in=effective_subject_ids)
+
+    if not q:
+        return MCQ.objects.none()
+
+    return MCQ.objects.filter(q).distinct()
+    
+
+
+
+
+# views.py (additions)
+
+import json
+import random
+from datetime import datetime
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from .models import (MCQ, Chapter, Lesson, Subject, SubLesson,
+                     UserMasterProgress)
 
 
 @login_required
-@csrf_exempt
-@require_http_methods(["POST"])
-def delete_practice_progress(request):
-    """Delete practice progress (Start Fresh)"""
+def practice_home(request):
+    """Render the practice page."""
+    return render(request, 'exam/practice.html')
+
+
+@login_required
+@require_GET
+def practice_content(request):
+
+    subject_id = request.GET.get('subject_id')
+    chapter_id = request.GET.get('chapter_id')
+    lesson_id = request.GET.get('lesson_id')
+
+    # Level 0: No subject selected → list all subjects
+    if not subject_id:
+        subjects = Subject.objects.all().order_by('name')
+        items = []
+        for s in subjects:
+            mcq_count = MCQ.objects.filter(subject_id=s.id).count()
+            has_children = Chapter.objects.filter(subject_id=s.id).exists()
+            items.append({
+                'id': s.id,
+                'name': s.name,
+                'type': 'subject',
+                'mcq_count': mcq_count,
+                'has_children': has_children,
+            })
+        return JsonResponse({'type': 'subjects', 'items': items})
+
+    # Level 1: Subject selected, no chapter selected
+    if subject_id and not chapter_id:
+        chapters = Chapter.objects.filter(subject_id=subject_id).order_by('name')
+        if chapters.exists():
+            items = []
+            for ch in chapters:
+                mcq_count = MCQ.objects.filter(chapter_id=ch.id).count()
+                has_children = Lesson.objects.filter(chapter_id=ch.id).exists()
+                items.append({
+                    'id': ch.id,
+                    'name': ch.name,
+                    'type': 'chapter',
+                    'mcq_count': mcq_count,
+                    'has_children': has_children,
+                })
+            return JsonResponse({'type': 'chapters', 'items': items})
+        else:
+            # No chapters → practice directly at subject level
+            subject = Subject.objects.get(id=subject_id)
+            mcq_count = MCQ.objects.filter(subject_id=subject_id).count()
+            return JsonResponse({
+                'type': 'direct',
+                'level_type': 'subject',
+                'level_id': subject_id,
+                'level_name': subject.name,
+                'mcq_count': mcq_count,
+            })
+
+    # Level 2: Chapter selected, no lesson selected
+    if chapter_id and not lesson_id:
+        lessons = Lesson.objects.filter(chapter_id=chapter_id).order_by('name')
+        if lessons.exists():
+            items = []
+            for ls in lessons:
+                mcq_count = MCQ.objects.filter(lesson_id=ls.id).count()
+                has_children = SubLesson.objects.filter(lesson_id=ls.id).exists()
+                items.append({
+                    'id': ls.id,
+                    'name': ls.name,
+                    'type': 'lesson',
+                    'mcq_count': mcq_count,
+                    'has_children': has_children,
+                })
+            return JsonResponse({'type': 'lessons', 'items': items})
+        else:
+            chapter = Chapter.objects.get(id=chapter_id)
+            mcq_count = MCQ.objects.filter(chapter_id=chapter_id).count()
+            return JsonResponse({
+                'type': 'direct',
+                'level_type': 'chapter',
+                'level_id': chapter_id,
+                'level_name': chapter.name,
+                'mcq_count': mcq_count,
+            })
+
+    # Level 3: Lesson selected → show sublessons (if any)
+    if lesson_id:
+        sublessons = SubLesson.objects.filter(lesson_id=lesson_id).order_by('name')
+        if sublessons.exists():
+            items = []
+            for sl in sublessons:
+                mcq_count = sl.mcq_count  # denormalized field
+                items.append({
+                    'id': sl.id,
+                    'name': sl.name,
+                    'type': 'sublesson',
+                    'mcq_count': mcq_count,
+                    'has_children': False,
+                })
+            return JsonResponse({'type': 'sublessons', 'items': items})
+        else:
+            lesson = Lesson.objects.get(id=lesson_id)
+            mcq_count = MCQ.objects.filter(lesson_id=lesson_id).count()
+            return JsonResponse({
+                'type': 'direct',
+                'level_type': 'lesson',
+                'level_id': lesson_id,
+                'level_name': lesson.name,
+                'mcq_count': mcq_count,
+            })
+
+    return JsonResponse({'error': 'Invalid parameters'}, status=400)
+
+
+@login_required
+@require_POST
+def start_practice(request):
+
     try:
-        data = json.loads(request.body)
-        sub_lesson_id = data.get('sub_lesson_id')
-        
-        master = UserMasterProgress.objects.get(user=request.user)
-        deleted = master.delete_progress(sub_lesson_id)
-        
-        return JsonResponse({
-            'success': True,
-            'deleted': deleted,
-            'message': 'Progress deleted. Starting fresh!'
-        })
-        
-    except UserMasterProgress.DoesNotExist:
-        return JsonResponse({'success': True, 'message': 'No progress to delete'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+    level_type = body.get('level_type')
+    level_id = body.get('level_id')
+    random_order = body.get('random_order', False)
 
-@login_required
-@csrf_exempt
-def get_mcqs_by_ids(request):
-    """Get specific MCQs by IDs (for resuming practice)"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            mcq_ids = data.get('mcq_ids', [])
-        except:
-            mcq_ids = []
-    
-    if not mcq_ids:
-        return JsonResponse({'questions': []}, safe=False)
-    
-    # Get MCQs in the exact order
-    mcq_dict = {mcq.id: mcq for mcq in MCQ.objects.filter(id__in=mcq_ids)}
-    ordered_mcqs = [mcq_dict[mid] for mid in mcq_ids if mid in mcq_dict]
-    
-    questions_data = []
-    for mcq in ordered_mcqs:
-        questions_data.append({
+    if not level_type or not level_id:
+        return JsonResponse({'error': 'level_type and level_id required'}, status=400)
+
+    # Build filter for MCQs
+    filters = {}
+    level_name = ''
+
+    if level_type == 'subject':
+        filters['subject_id'] = level_id
+        filters['chapter__isnull'] = True
+        filters['lesson__isnull'] = True
+        filters['sub_lesson__isnull'] = True
+        level_name = Subject.objects.get(id=level_id).name
+    elif level_type == 'chapter':
+        filters['chapter_id'] = level_id
+        filters['lesson__isnull'] = True
+        filters['sub_lesson__isnull'] = True
+        level_name = Chapter.objects.get(id=level_id).name
+    elif level_type == 'lesson':
+        filters['lesson_id'] = level_id
+        filters['sub_lesson__isnull'] = True
+        level_name = Lesson.objects.get(id=level_id).name
+    elif level_type == 'sublesson':
+        filters['sub_lesson_id'] = level_id
+        level_name = SubLesson.objects.get(id=level_id).name
+    else:
+        return JsonResponse({'error': 'Invalid level_type'}, status=400)
+
+    mcqs = MCQ.objects.filter(**filters)
+    total = mcqs.count()
+    if total == 0:
+        return JsonResponse({'error': 'No MCQs found for this level'}, status=404)
+
+    # Build questions list
+    questions = []
+    for mcq in mcqs:
+        questions.append({
             'id': mcq.id,
             'question': mcq.question,
             'options': [mcq.option_1, mcq.option_2, mcq.option_3, mcq.option_4],
-            'correct_answer': mcq.correct_answer,
-            'explanation': mcq.explanation or '',
+            'correct': mcq.correct_answer,
+            'explanation': mcq.explanation or 'No explanation available.'
         })
+
+    level_key = f"{level_type}_{level_id}"
+    saved_progress = None
+    if not random_order:
+        master_progress, _ = UserMasterProgress.objects.get_or_create(user=request.user)
+        progress_data = master_progress.progress_data.get(level_key, {})
+        if progress_data and not progress_data.get('is_completed', False):
+            saved_progress = {
+                'answers': progress_data.get('user_answers', [None] * total),
+                'current_index': progress_data.get('current_index', 0),
+                'questions_order': progress_data.get('questions_order', []),
+            }
+
+    # If saved progress exists, reorder questions to match saved order
+    if saved_progress and saved_progress['questions_order']:
+        order_ids = saved_progress['questions_order']
+        if len(order_ids) == total:
+            reordered = []
+            for qid in order_ids:
+                q = next((q for q in questions if q['id'] == qid), None)
+                if q:
+                    reordered.append(q)
+            if len(reordered) == total:
+                questions = reordered
+        saved_answers = saved_progress['answers']
+        saved_index = saved_progress['current_index']
+    else:
+        saved_answers = None
+        saved_index = 0
+        if random_order:
+            random.shuffle(questions)
+
+    response = {
+        'questions': questions,
+        'level_name': level_name,
+        'level_key': level_key,
+        'total': total,
+        'random_order': random_order,
+    }
+    if saved_answers is not None:
+        response['saved_answers'] = saved_answers
+        response['saved_index'] = saved_index
+
+    return JsonResponse(response)
+
+
+@login_required
+@require_POST
+def save_practice_progress(request):
+    """Save current practice session progress."""
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    level_key = body.get('level_key')
+    user_answers = body.get('user_answers', [])
+    questions_order = body.get('questions_order', [])
+    current_index = body.get('current_index', 0)
+    random_order = body.get('random_order', True)
+    level_name = body.get('level_name', '')
+
+    if random_order:
+        return JsonResponse({'error': 'Cannot save progress when random order is on'}, status=400)
+
+    if not level_key:
+        return JsonResponse({'error': 'level_key required'}, status=400)
+
+    master_progress, _ = UserMasterProgress.objects.get_or_create(user=request.user)
+    answered_count = len([a for a in user_answers if a is not None])
+    total_questions = len(questions_order)
+    is_completed = answered_count == total_questions
+
+    master_progress.progress_data[level_key] = {
+        'user_answers': user_answers,
+        'questions_order': questions_order,
+        'current_index': current_index,
+        'level_name': level_name,
+        'total_questions': total_questions,
+        'answered_questions': answered_count,
+        'last_updated': datetime.now().isoformat(),
+        'is_completed': is_completed,
+        'random_order': random_order,
+    }
+    master_progress.save()
+    return JsonResponse({'success': True})
+
+
+@login_required
+@require_GET
+def delete_practice_progress(request):
+    """Delete progress for a specific level key."""
+    level_key = request.GET.get('level_key')
+    if not level_key:
+        return JsonResponse({'error': 'level_key required'}, status=400)
+
+    master_progress, _ = UserMasterProgress.objects.get_or_create(user=request.user)
+    if level_key in master_progress.progress_data:
+        del master_progress.progress_data[level_key]
+        master_progress.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Not found'}, status=404)
+
+
+@login_required
+@require_GET
+def practice_progress_list(request):
+    """List all active (non‑completed) practice sessions for the user."""
+    master_progress, _ = UserMasterProgress.objects.get_or_create(user=request.user)
+    items = []
+    for key, data in master_progress.progress_data.items():
+        if data.get('is_completed', False):
+            continue
+        items.append({
+            'level_key': key,
+            'level_name': data.get('level_name', key),
+            'answered': data.get('answered_questions', 0),
+            'total': data.get('total_questions', 0),
+            'last_updated': data.get('last_updated', ''),
+        })
+    return JsonResponse({'progress': items})
     
-    return JsonResponse({'questions': questions_data})
-
-
+    
+    
+    
 @login_required
 def practice_dashboard(request):
     """Get all practice progress for dashboard"""
@@ -648,6 +960,9 @@ def practice_dashboard(request):
     except UserMasterProgress.DoesNotExist:
         return JsonResponse({'success': True, 'progress_list': [], 'statistics': {}})
 
+    
+    
+    
     
 @login_required
 def course_list_page(request):
@@ -683,17 +998,16 @@ def course_detail_page(request, course_id):
     )
 
 
-# -----------------------------------
-# Payment page for single course
-# -----------------------------------
-# views.py
-from django.shortcuts import render, get_object_or_404
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Payment, Course, TransactionVerification
-import json
+
+from .models import Course, Payment, TransactionVerification
+
 
 @login_required
 @csrf_exempt
@@ -825,6 +1139,7 @@ def payment_page(request,course_id):
 # Admin views for payment verification
 from django.contrib.admin.views.decorators import staff_member_required
 
+
 @staff_member_required
 def verify_payment(request, payment_id):
     """Admin view to verify payment"""
@@ -836,9 +1151,10 @@ def verify_payment(request, payment_id):
             payment.status = 'approved'
             
             # Create or update enrollment for the user
-            from .models import UserCourseEnrollment
             from django.utils import timezone
-            
+
+            from .models import UserCourseEnrollment
+
             # Calculate end date based on month duration
             end_date = timezone.now() + timezone.timedelta(days=payment.month * 30)
             
@@ -875,8 +1191,6 @@ def verify_payment(request, payment_id):
     
     payment = get_object_or_404(Payment, id=payment_id)
     return render(request, 'admin/verify_payment.html', {'payment': payment})
-
-# views.py
 
 
 @login_required
@@ -1056,12 +1370,7 @@ def my_courses(request):
     
     return render(request, 'accounts/my_courses.html', context)
 
-import json
-from django.core.serializers.json import DjangoJSONEncoder
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from .models import ExamAttempt, MCQ
+
 
 @login_required
 def my_exams(request):
@@ -1129,3 +1438,75 @@ def my_exams(request):
     }
     
     return render(request, 'accounts/my_exams.html', context)
+
+import json
+from datetime import datetime
+from io import BytesIO
+
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+
+
+def generate_question_pdf(request):
+    """Generate question paper PDF from uploaded JSON"""
+    if request.method == 'POST' and request.FILES.get('json_file'):
+        json_file = request.FILES['json_file']
+        data = json.load(json_file)
+
+        # Add 'previous_year' marker if present
+        for q in data.get('questions', []):
+            if 'previous_year' in q and q['previous_year']:
+                q['has_previous_year'] = True
+            else:
+                q['has_previous_year'] = False
+
+        context = {
+            'institute_name': request.POST.get('institute_name', 'Your Institute Name'),
+            'exam_name': request.POST.get('exam_name', 'MCQ Examination'),
+            'total_questions': data.get('total', len(data.get('questions', []))),
+            'total_marks': data.get('total', 0),
+            'exported_at': data.get('exported_at'),
+            'selection': data.get('selection', {}),
+            'questions': data.get('questions', []),
+            'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        }
+
+        html_string = render_to_string('pdf/question_paper.html', context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="question_paper.pdf"'
+
+        # Convert HTML to PDF
+        pisa_status = pisa.CreatePDF(html_string, dest=response)
+        if pisa_status.err:
+            return HttpResponse('PDF generation error', status=500)
+        return response
+
+    return render(request, 'pdf/upload.html')
+
+
+def generate_answer_pdf(request):
+    """Generate answer sheet PDF from uploaded JSON"""
+    if request.method == 'POST' and request.FILES.get('json_file'):
+        json_file = request.FILES['json_file']
+        data = json.load(json_file)
+
+        context = {
+            'institute_name': request.POST.get('institute_name', 'Your Institute Name'),
+            'exam_name': request.POST.get('exam_name', 'MCQ Examination'),
+            'questions': data.get('questions', []),
+            'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'exported_at': data.get('exported_at'),
+        }
+
+        html_string = render_to_string('pdf/answer_sheet.html', context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="answer_sheet.pdf"'
+
+        pisa_status = pisa.CreatePDF(html_string, dest=response)
+        if pisa_status.err:
+            return HttpResponse('PDF generation error', status=500)
+        return response
+
+    return render(request, 'pdf/upload.html')

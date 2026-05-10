@@ -1,15 +1,17 @@
-from django.db import models
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, post_delete
-from django.utils import timezone
-from datetime import timedelta
-from datetime import datetime
 from django.db import models
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils import timezone
+
+# models.py
+
 
 class Subject(models.Model):
     name = models.CharField(max_length=100)
-
+    
     def __str__(self):
         return self.name
 
@@ -18,87 +20,151 @@ class Chapter(models.Model):
     subject = models.ForeignKey(
         Subject,
         on_delete=models.CASCADE,
-        related_name='chapters'
+        related_name="chapters",
+        null=True,
+        blank=True
     )
     name = models.CharField(max_length=100)
-
+    
     def __str__(self):
-        return f"{self.subject.name} -> {self.name}"
+        return f"{self.subject.name if self.subject else 'No Subject'} -> {self.name}"
 
 
 class Lesson(models.Model):
     chapter = models.ForeignKey(
         Chapter,
         on_delete=models.CASCADE,
-        related_name='lessons'
+        related_name="lessons",
+        null=True,
+        blank=True
     )
     name = models.CharField(max_length=100)
-
+    
     def __str__(self):
-        return f"{self.chapter.name} -> {self.name}"
-
+        if self.chapter:
+            return f"{self.chapter.name} -> {self.name}"
+        return self.name
 
 
 class SubLesson(models.Model):
     lesson = models.ForeignKey(
         Lesson,
         on_delete=models.CASCADE,
-        related_name='sub_lessons'
+        related_name="sub_lessons",
+        null=True,
+        blank=True
     )
     name = models.CharField(max_length=100)
     mcq_count = models.IntegerField(default=0, db_index=True)
     
     def __str__(self):
-        return (
-            f"Subject ({self.lesson.chapter.subject.name}) -> "
-            f"Chapter ({self.lesson.chapter.name}) -> "
-            f"Lesson ({self.lesson.name}) -> "
-            f"Sub Lesson ({self.name})"
-        )
+        if self.lesson and self.lesson.chapter:
+            return (
+                f"Subject ({self.lesson.chapter.subject.name}) -> "
+                f"Chapter ({self.lesson.chapter.name}) -> "
+                f"Lesson ({self.lesson.name}) -> "
+                f"Sub Lesson ({self.name})"
+            )
+        return self.name
     
     def update_mcq_count(self):
-        """Update the MCQ count based on related MCQs"""
+        """Update MCQ count based on related MCQs"""
         new_count = self.mcqs.count()
         if self.mcq_count != new_count:
             self.mcq_count = new_count
-            self.save(update_fields=['mcq_count'])
+            self.save(update_fields=["mcq_count"])
         return self.mcq_count
 
-  
+
 class MCQ(models.Model):
+    # Always required
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="mcqs"
+    )
+    
+    # Optional levels (can be null)
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.CASCADE,
+        related_name="mcqs",
+        null=True,
+        blank=True
+    )
+    
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name="mcqs",
+        null=True,
+        blank=True
+    )
+    
     sub_lesson = models.ForeignKey(
         SubLesson,
         on_delete=models.CASCADE,
-        related_name='mcqs'
+        related_name="mcqs",
+        null=True,
+        blank=True
     )
-
+    
     question = models.TextField()
-
+    
     option_1 = models.CharField(max_length=255)
     option_2 = models.CharField(max_length=255)
     option_3 = models.CharField(max_length=255)
     option_4 = models.CharField(max_length=255)
-
-    previous_year = models.TextField(blank=True, null=True)
-
-    correct_answer = models.IntegerField()  # 1,2,3,4
-    explanation = models.TextField(blank=True, null=True)
-
+    
+    previous_year = models.TextField(
+        blank=True,
+        null=True
+    )
+    
+    correct_answer = models.IntegerField(
+        help_text="Use 1, 2, 3, or 4"
+    )
+    
+    explanation = models.TextField(
+        blank=True,
+        null=True
+    )
+    
     def __str__(self):
         return self.question[:50]
+    
+    def save(self, *args, **kwargs):
+        """Optional validation logic: Ensure hierarchy is correct if levels exist"""
+        if self.chapter and self.chapter.subject != self.subject:
+            raise ValueError("Chapter does not belong to selected Subject")
+        
+        if self.lesson and self.chapter:
+            if self.lesson.chapter != self.chapter:
+                raise ValueError("Lesson does not belong to selected Chapter")
+        
+        if self.sub_lesson and self.lesson:
+            if self.sub_lesson.lesson != self.lesson:
+                raise ValueError("SubLesson does not belong to selected Lesson")
+        
+        super().save(*args, **kwargs)
+    
+    def get_options_list(self):
+        """Returns list of options"""
+        return [self.option_1, self.option_2, self.option_3, self.option_4]
 
 
 @receiver(post_save, sender=MCQ)
 def update_mcq_count_on_save(sender, instance, created, **kwargs):
-        """Update sub_lesson.mcq_count when an MCQ is saved"""
-        if hasattr(instance, 'sub_lesson'):
-            instance.sub_lesson.update_mcq_count()
+    """Update sub_lesson.mcq_count when MCQ is created or updated"""
+    if instance.sub_lesson:
+        instance.sub_lesson.update_mcq_count()
+
 
 @receiver(post_delete, sender=MCQ)
 def update_mcq_count_on_delete(sender, instance, **kwargs):
-        """Update sub_lesson.mcq_count when an MCQ is deleted"""
-        if hasattr(instance, 'sub_lesson'):
-            instance.sub_lesson.update_mcq_count()
+    """Update sub_lesson.mcq_count when MCQ is deleted"""
+    if instance.sub_lesson:
+        instance.sub_lesson.update_mcq_count()
 
 class Course(models.Model):
 
@@ -588,8 +654,7 @@ class TransactionVerification(models.Model):
                 )
 
    
-    def __str__(self):
-        return f"{self.user.username} - {self.course.name} - {self.transaction_id}"
+    
     
     def get_duration_display(self):
         """Return human readable duration"""

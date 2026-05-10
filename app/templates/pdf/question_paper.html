@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Paper - Student Assessment</title>
+    <style>
+        /* Extremely safe CSS - no @page with complex content, no calc, no variables */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif;
+            background: #ffffff;
+            color: #1a2c3e;
+            font-size: 11pt;
+            line-height: 1.5;
+            padding: 1.5cm;
+        }
+        
+        /* Simple page break control */
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .question-item {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 15px;
+        }
+        
+        .institute-name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        
+        .exam-title {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #374151;
+            margin: 10px 0;
+        }
+        
+        /* Info boxes */
+        .info-grid {
+            width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+        }
+        
+        .info-grid td {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            width: 25%;
+        }
+        
+        /* Instructions */
+        .instructions {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .instructions h3 {
+            color: #1e40af;
+            margin-bottom: 8px;
+            font-size: 12pt;
+        }
+        
+        .instructions ul {
+            margin-left: 25px;
+            font-size: 10pt;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+        
+        /* Question card */
+        .question-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left: 4px solid;
+            padding: 12px;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        
+        .border-blue { border-left-color: #3b82f6; }
+        .border-green { border-left-color: #10b981; }
+        .border-orange { border-left-color: #f59e0b; }
+        .border-red { border-left-color: #ef4444; }
+        .border-purple { border-left-color: #8b5cf6; }
+        
+        .question-header {
+            margin-bottom: 10px;
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: #e5e7eb;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 11pt;
+        }
+        
+        .question-text {
+            font-weight: 500;
+            font-size: 11pt;
+            line-height: 1.4;
+        }
+        
+        .marks {
+            float: right;
+            background: #e0e7ff;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #3730a3;
+        }
+        
+        .pyq-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 8pt;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 40px;
+            margin-bottom: 8px;
+        }
+        
+        /* Options */
+        .options {
+            margin-top: 10px;
+            margin-left: 40px;
+        }
+        
+        .option {
+            display: inline-block;
+            margin-right: 25px;
+            margin-bottom: 5px;
+            font-size: 10.5pt;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            color: #4f46e5;
+        }
+        
+        /* Answer space */
+        .answer-space {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #d1d5db;
+            text-align: right;
+            font-size: 9pt;
+            color: #9ca3af;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #6b7280;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Signature section */
+        .signature-section {
+            margin-top: 30px;
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .signature-box {
+            display: table-cell;
+            width: 50%;
+            padding: 10px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 9pt;
+        }
+        
+        /* Rough work */
+        .rough-work {
+            margin-top: 20px;
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .rough-work-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 10pt;
+        }
+        
+        .rough-work-area {
+            height: 80px;
+            border: 1px dashed #d1d5db;
+            background: #ffffff;
+            margin-top: 5px;
+        }
+        
+        /* Utility classes */
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .clearfix { clear: both; }
+        hr {
+            margin: 10px 0;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="institute-name">{{ institute_name|default:"SHIKSHA NIKETAN VIDYALAYA" }}</div>
+    <div class="exam-title">{{ exam_name|default:"ANNUAL EXAMINATION 2026" }}</div>
+    <div style="font-size: 9pt; color: #6b7280;">(Affiliated to Central Board of Secondary Education, Delhi)</div>
+    
+    <table class="info-grid">
+        <tr>
+            <td><strong>{{ total_questions|default:"45" }}</strong><br>Total Questions</td>
+            <td><strong>{{ total_marks|default:"45" }}</strong><br>Maximum Marks</td>
+            <td><strong>90</strong><br>Time Allowed</td>
+            <td><strong>1 Mark Each</strong><br>Per Question</td>
+        </tr>
+    </table>
+    
+    <div style="font-size: 8pt; color: #9ca3af;">
+        Exam Date: _______________ | Generated: {{ generated_at|default:"May 10, 2026" }}
+    </div>
+</div>
+
+<!-- Instructions -->
+<div class="instructions">
+    <h3>📖 IMPORTANT INSTRUCTIONS FOR CANDIDATES:</h3>
+    <ul>
+        <li>This question paper contains <strong>{{ total_questions|default:"45" }}</strong> compulsory questions.</li>
+        <li>Each question carries <strong>1 (one) mark</strong>. No negative marking for wrong answers.</li>
+        <li>Read each question carefully and select the most appropriate option.</li>
+        <li>Use <strong>blue or black pen</strong> only to mark your answers.</li>
+        <li>Rough work must be done only in the space provided at the end of the paper.</li>
+        <li>Write your roll number and sign on the answer sheet before starting the examination.</li>
+    </ul>
+</div>
+
+<!-- Questions -->
+{% for q in questions %}
+<div class="question-card {% cycle 'border-blue' 'border-green' 'border-orange' 'border-red' 'border-purple' %} question-item">
+    <div class="question-header">
+        <span class="question-number">{{ forloop.counter }}</span>
+        <span class="marks">[1 Mark]</span>
+        <div class="clearfix"></div>
+        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
+            {{ q.question }}
+        </div>
+    </div>
+    
+    <!-- Previous Year Badge -->
+    {% if q.has_previous_year or q.previous_year %}
+    <div class="pyq-badge">
+        ★ {% if q.previous_year and q.previous_year != true %}Previous Year ({{ q.previous_year }}){% else %}Previous Year Question{% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Options -->
+    <div class="options">
+        {% for opt in q.options %}
+        <div class="option">
+            <span class="option-letter">{{ opt.key }}.</span> {{ opt.text }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Answer Space -->
+    <div class="answer-space">
+        Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    </div>
+</div>
+{% empty %}
+
+<!-- Demo Questions (if no data) -->
+<div class="question-card border-blue question-item">
+    <div class="question-header">
+        <span class="question-number">1</span>
+        <span class="marks">[1 Mark]</span>
+        <div class="clearfix"></div>
+        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
+            Which of the following is a renewable source of energy?
+        </div>
+    </div>
+    <div class="options">
+        <div class="option"><span class="option-letter">A.</span> Coal</div>
+        <div class="option"><span class="option-letter">B.</span> Natural Gas</div>
+        <div class="option"><span class="option-letter">C.</span> Solar Power</div>
+        <div class="option"><span class="option-letter">D.</span> Diesel</div>
+    </div>
+    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+</div>
+
+<div class="question-card border-green question-item">
+    <div class="question-header">
+        <span class="question-number">2</span>
+        <span class="marks">[1 Mark]</span>
+        <div class="clearfix"></div>
+        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
+            What is the chemical symbol for Gold?
+        </div>
+    </div>
+    <div class="pyq-badge">★ Previous Year Question (2024)</div>
+    <div class="options">
+        <div class="option"><span class="option-letter">A.</span> Go</div>
+        <div class="option"><span class="option-letter">B.</span> Gd</div>
+        <div class="option"><span class="option-letter">C.</span> Au</div>
+        <div class="option"><span class="option-letter">D.</span> Ag</div>
+    </div>
+    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+</div>
+
+<div class="question-card border-orange question-item">
+    <div class="question-header">
+        <span class="question-number">3</span>
+        <span class="marks">[1 Mark]</span>
+        <div class="clearfix"></div>
+        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
+            The capital city of France is:
+        </div>
+    </div>
+    <div class="options">
+        <div class="option"><span class="option-letter">A.</span> Berlin</div>
+        <div class="option"><span class="option-letter">B.</span> Madrid</div>
+        <div class="option"><span class="option-letter">C.</span> Paris</div>
+        <div class="option"><span class="option-letter">D.</span> Lisbon</div>
+    </div>
+    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+</div>
+
+<div class="text-center" style="padding: 10px; color: #6b7280; font-style: italic;">
+    <hr>📝 Sample questions shown above. Upload your data to customize.<hr>
+</div>
+{% endfor %}
+
+<!-- Rough Work Section -->
+<div class="rough-work">
+    <div class="rough-work-title">📝 ROUGH WORK / CALCULATIONS SPACE</div>
+    <div class="rough-work-area"></div>
+    <div class="rough-work-area" style="margin-top: 10px;"></div>
+    <div class="rough-work-area" style="margin-top: 10px;"></div>
+</div>
+
+<!-- Signatures -->
+<div class="signature-section">
+    <div class="signature-box">
+        <strong>Candidate's Signature:</strong> _________________________
+    </div>
+    <div class="signature-box" style="text-align: right;">
+        <strong>Invigilator's Signature:</strong> _________________________
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <hr>
+    <div>Page 1 of 1 | Best of Luck! | This paper contains {{ total_questions|default:"45" }} questions</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Answer Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0cm;
+                height: 1cm;
+            }
+        }
+        body {
+            font-family: 'Helvetica', sans-serif;
+        }
+        .answer-row {
+            border-bottom: 1px dashed #d1d5db;
+            padding: 0.75rem 0;
+            break-inside: avoid;
+        }
+        .correct-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-center border-b pb-4 mb-6">
+        <h1 class="text-2xl font-bold">{{ institute_name }}</h1>
+        <h2 class="text-xl font-semibold mt-1">Answer Sheet – {{ exam_name }}</h2>
+        <p class="text-sm text-gray-600 mt-2">Generated: {{ generated_at }} | Exported: {{ exported_at|default:"—" }}</p>
+    </div>
+
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+                <th class="p-2 w-16">Q.No</th>
+                <th class="p-2">Question</th>
+                <th class="p-2 w-36">Correct Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in questions %}
+            <tr class="answer-row">
+                <td class="p-2 align-top font-medium">{{ forloop.counter }}</td>
+                <td class="p-2 align-top">{{ q.question }}</td>
+                <td class="p-2 align-top">
+                    <span class="correct-badge">
+                        {{ q.correct_answer|default:"Not Provided" }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center p-4 text-red-500">No questions in JSON.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footerContent" class="text-center text-xs text-gray-400 mt-8">
+        <hr class="my-2"> Answer Key – Page <pdf:pagenumber> of <pdf:pagecount>
+    </div>
+</body>
+</html>

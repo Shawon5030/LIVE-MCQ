@@ -1,647 +1,759 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Practice Mode | EduPath</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ExamForge — Quantum Practice Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3333FF',
+                        secondary: '#2A2C8D',
+                        accent: '#FF6600',
+                        headline: '#1C1C1D',
+                        body: '#546078',
+                        dark: '#39374A',
+                        light: '#FAF7F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'figtree': ['Figtree', 'sans-serif'],
+                        'space': ['Space Grotesk', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'fade-in': 'fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'marquee': 'marqueeScroll 20s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        marqueeScroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .gradient-hero { background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); }
-        .option-correct { background: #DCFCE7 !important; border-color: #22C55E !important; }
-        .option-wrong { background: #FEE2E2 !important; border-color: #EF4444 !important; }
-        .option-selected { background: #EEF2FF !important; border-color: #4F46E5 !important; }
-        .toast-notification { position: fixed; bottom: 24px; right: 24px; z-index: 1000; animation: slideInRight 0.3s ease; }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #E2E8F0; border-top: 2px solid #4F46E5; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        .progress-bar-custom { transition: width 0.3s ease; }
-        
-        /* Custom checkbox styles */
-        .custom-checkbox {
-            width: 18px;
-            height: 18px;
-            border-radius: 5px;
-            border: 2px solid #CBD5E1;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #03050b);
+            color: #eef2ff;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2dd4bf;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* glassmorphic core */
+        .glass-card {
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 229, 255, 0.5);
+            box-shadow: 0 0 18px rgba(0, 229, 255, 0.1);
+        }
+
+        .btn {
+            padding: 0.6rem 1.3rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: none;
+            font-family: inherit;
             display: inline-flex;
             align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(115deg, #06b6d4, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.5);
+        }
+
+        .btn-outline {
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.5);
+            color: #67e8f9;
+        }
+
+        .btn-outline:hover {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: #22d3ee;
+        }
+
+        .btn-save {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #34d399;
+        }
+
+        .btn-save:hover {
+            background: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 8px #10b98140;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #f87171;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .content-card:hover {
+            border-color: #2dd4bf;
+            transform: translateX(5px) translateY(-2px);
+            background: linear-gradient(120deg, rgba(45,212,191,0.05), rgba(139,92,246,0.05));
+        }
+
+        /* option styles */
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 0.65rem;
+            font-weight: 500;
+        }
+        .option-btn.selected {
+            border-left: 4px solid #2dd4bf;
+            background: rgba(45,212,191,0.12);
+        }
+        .option-btn.correct-highlight {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            box-shadow: 0 0 6px #10b98160;
+        }
+        .option-btn.wrong-highlight {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            text-decoration: line-through;
+        }
+        .option-key {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            background: rgba(0, 229, 255, 0.15);
+            border-radius: 12px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2dd4bf, #a78bfa);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+        .breadcrumb-item {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .breadcrumb-item:hover {
+            color: #2dd4bf;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #1f2937;
+            backdrop-filter: blur(12px);
+            border-left: 5px solid #2dd4bf;
+            padding: 0.9rem 1.8rem;
+            border-radius: 1rem;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.2s;
+            transform: translateY(10px);
+            pointer-events: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 0.9fr;
+            gap: 1.8rem;
+        }
+
+        .dot-nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #334155;
             transition: all 0.2s;
+            cursor: pointer;
         }
-        .check-item.checked .custom-checkbox {
-            background: #4F46E5;
-            border-color: #4F46E5;
+        .dot.answered {
+            background: #10b981;
+            box-shadow: 0 0 4px #10b981;
         }
-        .check-item.checked .custom-checkbox i {
-            display: block !important;
+        .dot.active-dot {
+            background: #2dd4bf;
+            transform: scale(1.3);
+            box-shadow: 0 0 6px cyan;
         }
-        .check-item {
-            transition: all 0.2s;
+
+        .loader {
+            border: 2px solid rgba(45,212,191,0.2);
+            border-top: 2px solid #2dd4bf;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
         }
-        .check-item:hover {
-            background: #F1F5F9;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 860px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+        }
+
+        .badge-neon {
+            background: rgba(0, 229, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
         }
     </style>
 </head>
-<body class="bg-[#F8FAFE]">
+<body>
 
     {% include "header.html" %}
-
-    <main class="pb-20">
-        <!-- Hero Section - Practice Mode Style -->
-        <section class="gradient-hero text-white pt-20 pb-16 relative overflow-hidden mb-8">
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-                    <div>
-                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">📖 Practice Mode</h1>
-                        <p class="text-green-100 text-base lg:text-lg max-w-xl">Select ONE sub-lesson. Practice all questions. Save your progress.</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-                        <div class="text-sm uppercase tracking-[0.2em] text-white/70 mb-2 text-center">Practice Stats</div>
-                        <div class="text-3xl font-bold text-white text-center" id="statsDisplay">0/0</div>
-                        <p class="text-center text-xs text-gray-200 mt-2">questions answered</p>
-                    </div>
+<div class="container">
+    <!-- SETUP PAGE (BROWSE) -->
+    <div id="setup-page">
+        <div class="flex-between" style="margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="font-size: 2.1rem;"><i class="fas fa-brain"></i> ExamForge · Practice Forge</h1>
+                <p style="color:#9ca3af; margin-top: 6px;">Explore subjects & resume mastery — random mode = explorer (no save)</p>
+            </div>
+            <button id="reset-all-btn" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Wipe all progress</button>
+        </div>
+        <div class="grid-2">
+            <div class="glass-card">
+                <div class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item" data-level="">📁 All Domains</span>
+                </div>
+                <div id="content-list"><div class="loader"></div></div>
+            </div>
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1rem; display: flex; gap: 8px;"><i class="fas fa-history"></i> 📌 Saved Sessions</h3>
+                <div id="progress-list" style="max-height: 380px; overflow-y: auto;">
+                    <div style="text-align:center; color:#6b7280;">Loading sessions...</div>
+                </div>
+                <div class="mt-4" style="margin-top: 1.2rem;">
+                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 2rem; cursor: pointer;">
+                        <input type="checkbox" id="random-order-checkbox" style="width: 18px; height: 18px;">
+                        <span>🎲 <strong>Random order</strong> (answers are NOT saved, pure training)</span>
+                    </label>
                 </div>
             </div>
-        </section>
-
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-            <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
-                <!-- Left Panel - Configuration -->
-                <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 border border-green-100">
-                    <div class="mb-6">
-                        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-sliders-h text-green-600"></i> Practice Setup</h2>
-                        <p class="text-slate-500 text-xs sm:text-sm mt-1">Select ONE subject → chapter → lesson → sub-lesson</p>
-                    </div>
-                    <div class="space-y-5">
-                        <!-- Subject -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book text-green-500 mr-1"></i> Subject</label>
-                            <select id="subjectSelect" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition">
-                                <option value="">Select Subject</option>
-                                {% for subject in subjects %}
-                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Chapter -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-folder-open text-green-500 mr-1"></i> Chapter</label>
-                            <div id="chaptersContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
-                                <div class="text-center py-6 text-slate-400 text-sm">Select a subject first</div>
-                            </div>
-                        </div>
-
-                        <!-- Lesson -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-book-open text-green-500 mr-1"></i> Lesson</label>
-                            <div id="lessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50 scrollbar-thin">
-                                <div class="text-center py-6 text-slate-400 text-sm">Select a chapter first</div>
-                            </div>
-                        </div>
-
-                        <!-- Sub-Lesson -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2"><i class="fas fa-layer-group text-green-500 mr-1"></i> Sub-Lesson</label>
-                            <div id="subLessonsContainer" class="border border-slate-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-slate-50 scrollbar-thin">
-                                <div class="text-center py-6 text-slate-400 text-sm">Select a lesson first</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-green-50/40 rounded-xl p-4">
-                            <div class="text-sm text-slate-700">
-                                <i class="fas fa-info-circle text-green-600 mr-2"></i>
-                                You will practice ALL questions from this sub-lesson.
-                                Your progress will be saved when you click "Remember Me".
-                            </div>
-                        </div>
-
-                        <button id="startPracticeBtn" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3.5 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                            <i class="fas fa-play"></i> Start Practice
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Panel - Info & Progress -->
-                <div class="lg:col-span-7 space-y-6">
-                    <!-- Selection Summary -->
-                    <div class="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 border border-green-100">
-                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-info-circle text-green-500"></i> Selection Summary</h3>
-                        <div class="grid grid-cols-1 gap-3 mt-4">
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                <i class="fas fa-book text-green-500 w-6"></i>
-                                <span class="font-medium">Subject:</span>
-                                <span id="selectedSubject" class="text-slate-600">--</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                <i class="fas fa-folder-open text-green-500 w-6"></i>
-                                <span class="font-medium">Chapter:</span>
-                                <span id="selectedChapter" class="text-slate-600">--</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                <i class="fas fa-book-open text-green-500 w-6"></i>
-                                <span class="font-medium">Lesson:</span>
-                                <span id="selectedLesson" class="text-slate-600">--</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                <i class="fas fa-layer-group text-green-500 w-6"></i>
-                                <span class="font-medium">Sub-Lesson:</span>
-                                <span id="selectedSubLesson" class="text-slate-600">--</span>
-                                <span id="mcqCountBadge" class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full ml-auto"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saved Progress Card -->
-                    <div id="savedProgressCard" class="hidden bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <i class="fas fa-save text-green-600"></i>
-                                <span class="font-semibold text-green-700">Saved Progress Found!</span>
-                            </div>
-                            <span id="savedDate" class="text-xs text-green-600"></span>
-                        </div>
-                        <div id="savedProgressContent" class="mt-2"></div>
-                        <div class="flex gap-2 mt-3">
-                            <button id="resumeBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition">Resume Practice</button>
-                            <button id="freshStartBtn" class="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm hover:bg-red-50 transition">Start Fresh</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Practice Panel -->
-            <div id="practicePanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden border-t-4 border-green-500">
-                <div class="flex flex-wrap justify-between items-center border-b pb-4 mb-5 gap-3">
-                    <div>
-                        <h3 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fas fa-chalkboard-user text-green-600"></i>
-                            <span id="practiceTitle">Practice Session</span>
-                        </h3>
-                        <p class="text-slate-500 text-sm mt-1">Question <span id="currentQNum">1</span> of <span id="totalQuestions">0</span></p>
-                    </div>
-                    <div class="flex gap-3">
-                        <div class="bg-green-100 px-4 py-2 rounded-full">
-                            <i class="fas fa-check-circle text-green-600"></i>
-                            <span id="correctCount" class="font-bold text-green-600">0</span>
-                            <span class="text-slate-500 text-xs">/ <span id="answeredCount">0</span></span>
-                        </div>
-                        <button id="saveProgressBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                            <i class="fas fa-save"></i> Remember Me
-                        </button>
-                    </div>
-                </div>
-                <div id="questionContainer" class="space-y-6"></div>
-                <div class="flex justify-between mt-6">
-                    <button id="prevBtn" class="bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-lg disabled:opacity-50">
-                        <i class="fas fa-arrow-left"></i> Previous
-                    </button>
-                    <button id="nextBtn" class="bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-lg disabled:opacity-50">
-                        Next <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Completion Panel -->
-            <div id="completionPanel" class="mt-10 bg-white rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-7 hidden border-t-4 border-green-500">
-                <div class="text-center py-8">
-                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-trophy text-3xl text-green-600"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-2">🎉 Congratulations!</h2>
-                    <p class="text-slate-600 mb-4">You have completed all questions in this sub-lesson!</p>
-                    <div class="bg-green-50 rounded-xl p-4 max-w-md mx-auto mb-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><span class="text-green-600 font-bold text-xl" id="finalCorrect">0</span><br><span class="text-xs">Correct</span></div>
-                            <div><span class="text-red-600 font-bold text-xl" id="finalWrong">0</span><br><span class="text-xs">Wrong</span></div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="text-sm font-semibold">Accuracy: <span id="finalAccuracy">0</span>%</div>
-                        </div>
-                    </div>
-                    <button id="practiceAgainBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition">
-                        <i class="fas fa-redo-alt"></i> Practice Another Sub-Lesson
-                    </button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <div id="toastMessage" class="toast-notification hidden">
-        <div class="bg-white rounded-xl shadow-2xl border-l-4 border-green-500 p-4 min-w-[280px]">
-            <div class="flex items-center"><i class="fas fa-bell text-green-500 mr-3"></i><p id="toastText" class="text-sm text-slate-700 flex-1"></p><button onclick="this.closest('.toast-notification').classList.add('hidden')"><i class="fas fa-times text-slate-400"></i></button></div>
         </div>
     </div>
 
-    <script>
-        // Practice Mode - Single Sub-Lesson (Same logic, new design)
-        let selectedChapterId = null;
-        let selectedLessonId = null;
-        let selectedSubLesson = null;
-        let questionsData = [], userAnswers = [], currentQ = 0;
-        let practiceStats = { correct: 0, wrong: 0 };
-        let hasUnsavedChanges = false;
-        let savedProgressData = null;
-        let currentSubLessonId = null;
+    <!-- PRACTICE PAGE (ACTIVE QUIZ) -->
+    <div id="practice-page" class="hidden">
+        <div class="flex-between mb-4" style="margin-bottom: 1.2rem;">
+            <button id="back-to-setup" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Library</button>
+            <div style="display: flex; gap: 12px;">
+                <button id="remember-me-btn" class="btn btn-save"><i class="fas fa-save"></i> Save progress</button>
+                <button id="start-fresh-btn" class="btn btn-outline"><i class="fas fa-eraser"></i> Start fresh</button>
+            </div>
+        </div>
+        <div class="glass-card">
+            <div class="flex-between mb-3">
+                <span id="question-counter" class="badge-neon"><i class="far fa-question-circle"></i> 0 / 0</span>
+                <div class="progress-bar" style="width: 200px;"><div id="practice-progress" class="progress-fill"></div></div>
+                <span id="random-badge" class="badge-neon">Random: OFF</span>
+            </div>
+            <h2 id="level-title" style="font-size: 1.3rem; font-weight: 600; background: linear-gradient(130deg,#c4b5fd,#2dd4bf); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></h2>
+            <div id="question-text" style="font-size: 1.2rem; margin: 1.2rem 0; line-height: 1.5;"></div>
+            <div id="options-container"></div>
+            <div id="explanation-container" class="hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.5); border-radius: 1rem; border-left: 4px solid #2dd4bf;"></div>
+            <div class="flex-between mt-4" style="margin-top: 1.8rem;">
+                <button id="prev-question" class="btn btn-outline"><i class="fas fa-chevron-left"></i> Previous</button>
+                <div id="dot-nav" class="dot-nav"></div>
+                <button id="next-question" class="btn btn-primary">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toast" class="toast"></div>
 
-        function showToast(msg, err = false) { 
-            let t = $('#toastMessage'); 
-            t.find('.border-l-4').removeClass('border-green-500 border-red-500').addClass(err ? 'border-red-500' : 'border-green-500'); 
-            $('#toastText').text(msg); 
-            t.removeClass('hidden'); 
-            setTimeout(() => t.addClass('hidden'), 3000); 
+<script>
+    // ---------- GLOBAL STATE ----------
+    let currentPath = [];           // [{type, id, name}]
+    let practiceData = null;        // { questions, userAnswers, currentIndex, levelKey, levelName, randomMode, originalQuestionsIds }
+    let csrfToken = '{{ csrf_token }}';
+
+    // helpers
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    async function fetchWithLoader(loaderId, fn) {
+        const container = document.getElementById(loaderId);
+        if(container && loaderId === 'content-list') container.innerHTML = '<div class="loader"></div>';
+        await fn();
+    }
+
+    // fetch content tree
+    async function fetchContent() {
+        let params = new URLSearchParams();
+        for (let item of currentPath) params.set(`${item.type}_id`, item.id);
+        try {
+            const resp = await fetch(`/api/practice/content/?${params.toString()}`);
+            const data = await resp.json();
+            renderContent(data);
+            updateBreadcrumb();
+        } catch(e) {
+            document.getElementById('content-list').innerHTML = '<div style="padding:2rem;text-align:center;">⚠️ Error loading content</div>';
+            showToast('Network error', 'error');
         }
+    }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            return String(text).replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        function updateSelectionSummary() {
-            $('#selectedSubject').text($('#subjectSelect option:selected').text() || '--');
-            $('#selectedChapter').text($('#chaptersContainer .chapter-radio:checked').closest('label').find('span').text() || '--');
-            $('#selectedLesson').text($('#lessonsContainer .lesson-radio:checked').closest('label').find('span').text() || '--');
-            
-            if (selectedSubLesson) {
-                $('#selectedSubLesson').text(selectedSubLesson.name);
-                $('#mcqCountBadge').text(`${selectedSubLesson.mcqCount} MCQs`);
-            } else {
-                $('#selectedSubLesson').text('--');
-                $('#mcqCountBadge').text('');
-            }
-            
-            let canStart = selectedSubLesson !== null;
-            $('#startPracticeBtn').prop('disabled', !canStart);
-        }
-
-        // Load Chapters (Radio buttons - single selection)
-        $('#subjectSelect').change(function() {
-            let sid = $(this).val(); 
-            if (!sid) {
-                $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">Select a subject first</div>');
-                $('#lessonsContainer, #subLessonsContainer').html('<div class="text-center py-6 text-slate-400">--</div>');
-                selectedChapterId = null;
-                selectedLessonId = null;
-                selectedSubLesson = null;
-                updateSelectionSummary();
+    function renderContent(data) {
+        const container = document.getElementById('content-list');
+        if (!container) return;
+        if (data.type === 'subjects' || data.type === 'chapters' || data.type === 'lessons' || data.type === 'sublessons') {
+            let itemsList = data.items || [];
+            if (itemsList.length === 0) {
+                container.innerHTML = '<div style="padding:2rem;text-align:center;">✨ No content yet</div>';
                 return;
             }
-            $('#chaptersContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
-            $.ajax({
-                url: '/api/chapters/',
-                data: { subject_id: sid },
-                success: function(chs) {
-                    if (!chs.length) {
-                        $('#chaptersContainer').html('<div class="text-center py-6 text-slate-400">No chapters</div>');
-                        return;
-                    }
-                    let html = '<div class="space-y-2">';
-                    chs.forEach(ch => {
-                        html += `<label class="flex items-center gap-2 p-2 hover:bg-green-50 rounded-lg cursor-pointer">
-                            <input type="radio" name="chapter" value="${ch.id}" class="chapter-radio"> 
-                            <span class="text-sm">${escapeHtml(ch.name)}</span>
-                        </label>`;
-                    });
-                    html += '</div>';
-                    $('#chaptersContainer').html(html);
-                    bindChapters();
-                }
-            });
-        });
-
-        function bindChapters() {
-            $('.chapter-radio').off('change').on('change', function() {
-                selectedChapterId = $(this).val();
-                $('#lessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
-                $.ajax({
-                    url: '/api/lessons/',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ chapter_ids: [selectedChapterId] }),
-                    success: function(less) {
-                        if (!less.length) {
-                            $('#lessonsContainer').html('<div class="text-center py-6 text-slate-400">No lessons</div>');
-                            return;
-                        }
-                        let html = '<div class="space-y-2">';
-                        less.forEach(l => {
-                            html += `<label class="flex items-center gap-2 p-2 hover:bg-green-50 rounded-lg cursor-pointer">
-                                <input type="radio" name="lesson" value="${l.id}" class="lesson-radio"> 
-                                <span class="text-sm">${escapeHtml(l.name)}</span>
-                            </label>`;
-                        });
-                        html += '</div>';
-                        $('#lessonsContainer').html(html);
-                        bindLessons();
-                    }
-                });
-            });
-        }
-
-        function bindLessons() {
-            $('.lesson-radio').off('change').on('change', function() {
-                selectedLessonId = $(this).val();
-                $('#subLessonsContainer').html('<div class="flex justify-center py-6"><div class="loading-spinner"></div></div>');
-                $.ajax({
-                    url: '/api/sub-lessons/',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ lesson_ids: [selectedLessonId] }),
-                    success: function(subs) {
-                        if (!subs.length) {
-                            $('#subLessonsContainer').html('<div class="text-center py-6 text-slate-400">No sub-lessons</div>');
-                            return;
-                        }
-                        let html = '<div class="space-y-2">';
-                        subs.forEach(s => {
-                            html += `<label class="flex items-center justify-between p-2 hover:bg-green-50 rounded-lg cursor-pointer">
-                                <div class="flex items-center gap-2">
-                                    <input type="radio" name="sub_lesson" value="${s.id}" data-mcq-count="${s.mcq_count}" class="sub-lesson-radio"> 
-                                    <span class="text-sm">${escapeHtml(s.name)}</span>
-                                </div>
-                                <span class="text-xs text-green-600 font-semibold">📊 ${s.mcq_count || 0} MCQ</span>
-                            </label>`;
-                        });
-                        html += '</div>';
-                        $('#subLessonsContainer').html(html);
-                        bindSubLessons();
-                    }
-                });
-            });
-        }
-
-        function bindSubLessons() {
-            $('.sub-lesson-radio').off('change').on('change', function() {
-                selectedSubLesson = {
-                    id: $(this).val(),
-                    name: $(this).closest('label').find('span:first').text(),
-                    mcqCount: $(this).data('mcq-count') || 0
-                };
-                updateSelectionSummary();
-                checkSavedProgress(selectedSubLesson.id);
-            });
-        }
-
-        async function checkSavedProgress(subLessonId) {
-            $('#savedProgressCard').addClass('hidden');
-            savedProgressData = null;
-            if (!subLessonId) return;
-            try {
-                let response = await fetch(`/api/practice/progress/?sub_lesson_id=${subLessonId}`);
-                let data = await response.json();
-                if (data.exists && data.answered_questions > 0 && data.answered_questions < data.total_questions) {
-                    savedProgressData = data;
-                    let percentage = data.progress_percentage.toFixed(1);
-                    $('#savedProgressContent').html(`
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Progress: ${data.answered_questions}/${data.total_questions}</span>
-                            <span class="font-bold text-green-700">${percentage}%</span>
+            container.innerHTML = itemsList.map(item => {
+                let badge = item.has_children ? '<i class="fas fa-folder-open"></i> has nested' : '<i class="fas fa-bolt"></i> practice ready';
+                return `
+                    <div class="content-card" onclick="selectNode('${data.type}', ${item.id}, '${escapeHtml(item.name)}', ${item.has_children}, ${item.mcq_count || 0})">
+                        <div class="flex-between">
+                            <div><strong>📘 ${escapeHtml(item.name)}</strong></div>
+                            <div style="color:#2dd4bf;">📊 ${item.mcq_count || 0} Qs</div>
                         </div>
-                        <div class="w-full bg-green-200 rounded-full h-2">
-                            <div class="bg-green-600 h-2 rounded-full" style="width: ${percentage}%"></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-center text-xs mt-2">
-                            <div class="bg-white rounded p-1"><span class="text-green-600">✓ ${data.correct_count}</span> Correct</div>
-                            <div class="bg-white rounded p-1"><span class="text-red-600">✗ ${data.wrong_count}</span> Wrong</div>
-                        </div>
-                    `);
-                    $('#savedDate').text(`Last: ${data.last_updated}`);
-                    $('#savedProgressCard').removeClass('hidden');
-                }
-            } catch(e) {
-                console.error('Error checking progress:', e);
-            }
-        }
-
-        $('#startPracticeBtn').click(async function() {
-            if (!selectedSubLesson) {
-                showToast('Please select a sub-lesson', true);
-                return;
-            }
-            currentSubLessonId = selectedSubLesson.id;
-            if (savedProgressData && savedProgressData.answered_questions > 0 && savedProgressData.answered_questions < savedProgressData.total_questions) {
-                $('#savedProgressCard').removeClass('hidden');
-                return;
-            }
-            await startFreshPractice();
-        });
-
-        $('#resumeBtn').click(async function() {
-            $('#savedProgressCard').addClass('hidden');
-            await startWithSavedProgress();
-        });
-
-        $('#freshStartBtn').click(async function() {
-            $('#savedProgressCard').addClass('hidden');
-            await deleteSavedProgress();
-            await startFreshPractice();
-        });
-
-        async function deleteSavedProgress() {
-            if (currentSubLessonId) {
-                await fetch('/api/practice/delete/', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sub_lesson_id: currentSubLessonId})
-                });
-            }
-        }
-
-        async function startWithSavedProgress() {
-            if (!savedProgressData) return;
-            try {
-                let response = await fetch('/api/practice/mcqs-by-ids/', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mcq_ids: savedProgressData.questions_order})
-                });
-                let data = await response.json();
-                questionsData = data.questions;
-                userAnswers = savedProgressData.user_answers;
-                currentQ = savedProgressData.current_index;
-                practiceStats.correct = savedProgressData.correct_count;
-                practiceStats.wrong = savedProgressData.wrong_count;
-                hasUnsavedChanges = false;
-                startPracticeSession();
-            } catch(e) {
-                showToast('Error loading saved progress', true);
-            }
-        }
-
-        async function startFreshPractice() {
-            try {
-                let response = await fetch('/api/mcq/practice/', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sub_lesson_ids: [currentSubLessonId], question_count: 999})
-                });
-                let data = await response.json();
-                if (!data.questions || data.questions.length === 0) {
-                    showToast('No questions found in this sub-lesson', true);
-                    return;
-                }
-                questionsData = data.questions;
-                userAnswers = new Array(questionsData.length).fill(null);
-                currentQ = 0;
-                practiceStats = { correct: 0, wrong: 0 };
-                hasUnsavedChanges = false;
-                startPracticeSession();
-            } catch(e) {
-                showToast('Error starting practice', true);
-            }
-        }
-
-        function startPracticeSession() {
-            $('#practiceTitle').text(selectedSubLesson.name);
-            $('#totalQuestions').text(questionsData.length);
-            $('#correctCount').text(practiceStats.correct);
-            $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
-            $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
-            $('#completionPanel').addClass('hidden');
-            $('#practicePanel').removeClass('hidden');
-            renderQuestion();
-            $('html, body').animate({ scrollTop: $('#practicePanel').offset().top - 80 }, 400);
-        }
-
-        function renderQuestion() {
-            if (!questionsData.length) return;
-            let q = questionsData[currentQ];
-            let selectedIdx = userAnswers[currentQ];
-            $('#currentQNum').text(currentQ + 1);
-            
-            let optionsHtml = '';
-            q.options.forEach((opt, idx) => {
-                let isSelected = (selectedIdx === idx);
-                let extraClass = '';
-                if (selectedIdx !== null) {
-                    if (idx === (q.correct_answer - 1)) extraClass = 'option-correct';
-                    else if (isSelected && idx !== (q.correct_answer - 1)) extraClass = 'option-wrong';
-                } else if (isSelected) {
-                    extraClass = 'option-selected';
-                }
-                let disabledAttr = (selectedIdx !== null) ? 'disabled' : '';
-                optionsHtml += `<label class="block rounded-xl border p-4 mb-3 cursor-pointer transition-all ${extraClass} ${!selectedIdx ? 'hover:border-green-300' : ''}">
-                    <input type="radio" name="qOption" value="${idx}" class="mr-3" ${isSelected ? 'checked' : ''} ${disabledAttr}>
-                    <span class="text-slate-700">${escapeHtml(opt)}</span>
-                </label>`;
-            });
-            
-            let explanationHtml = '';
-            if (selectedIdx !== null && q.explanation) {
-                let isCorrect = (selectedIdx + 1) === q.correct_answer;
-                explanationHtml = `<div class="mt-4 p-4 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} rounded-xl border text-sm">
-                    <i class="fas ${isCorrect ? 'fa-check-circle text-green-600' : 'fa-times-circle text-red-600'} mr-2"></i>
-                    <strong>${isCorrect ? 'Correct!' : 'Incorrect!'}</strong>
-                    <p class="mt-1 text-slate-600">${escapeHtml(q.explanation)}</p>
-                </div>`;
-            }
-            
-            $('#questionContainer').html(`<div class="rounded-2xl shadow-sm border p-4 sm:p-6 bg-white">
-                <div class="flex justify-between mb-3">
-                    <span class="text-green-600 text-sm font-bold">Question ${currentQ + 1}/${questionsData.length}</span>
+                        <small style="color:#9ca3af;">${badge}</small>
+                    </div>
+                `;
+            }).join('');
+        } 
+        else if (data.type === 'direct') {
+            container.innerHTML = `
+                <div class="content-card" onclick="startPractice('${data.level_type}', ${data.level_id}, '${escapeHtml(data.level_name)}')">
+                    <div class="flex-between">
+                        <div><strong>🎯 Practice: ${escapeHtml(data.level_name)}</strong></div>
+                        <div><i class="fas fa-play-circle"></i> ${data.mcq_count} questions</div>
+                    </div>
+                    <small>🔥 Click to ignite practice session</small>
                 </div>
-                <h3 class="text-base sm:text-xl font-bold text-slate-800 mb-5">${escapeHtml(q.question)}</h3>
-                ${optionsHtml}
-                ${explanationHtml}
-            </div>`);
-            
-            if (selectedIdx === null) {
-                $('input[name="qOption"]').change(function() {
-                    let val = parseInt($(this).val());
-                    let isCorrect = (val + 1) === q.correct_answer;
-                    userAnswers[currentQ] = val;
-                    if (isCorrect) practiceStats.correct++;
-                    else practiceStats.wrong++;
-                    $('#correctCount').text(practiceStats.correct);
-                    $('#answeredCount').text(userAnswers.filter(a => a !== null).length);
-                    $('#statsDisplay').text(`${practiceStats.correct}/${userAnswers.filter(a => a !== null).length}`);
-                    hasUnsavedChanges = true;
-                    let answered = userAnswers.filter(a => a !== null).length;
-                    let isCompleted = answered === questionsData.length;
-                    if (isCompleted) {
-                        saveProgress();
-                        showCompletion();
-                    } else if (answered % 5 === 0) {
-                        saveProgress();
-                    }
-                    renderQuestion();
-                });
-            }
-            $('#prevBtn').prop('disabled', currentQ === 0);
-            $('#nextBtn').prop('disabled', currentQ === questionsData.length - 1);
+            `;
+        } else {
+            container.innerHTML = '<div>Unsupported view</div>';
         }
+    }
 
-        async function saveProgress() {
-            let answered = userAnswers.filter(a => a !== null).length;
-            let correct = practiceStats.correct;
-            const saveData = {
-                sub_lesson_id: currentSubLessonId,
-                total_questions: questionsData.length,
-                answered_questions: answered,
-                current_index: currentQ,
-                user_answers: userAnswers,
-                questions_order: questionsData.map(q => q.id),
-                correct_count: correct,
-                wrong_count: answered - correct
-            };
-            try {
-                let response = await fetch('/api/practice/save/', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(saveData)
-                });
-                let data = await response.json();
-                if (data.success) {
-                    hasUnsavedChanges = false;
-                    showToast(`✅ Progress saved! ${answered}/${questionsData.length} completed`);
-                    $('#saveProgressBtn').html('<i class="fas fa-check"></i> Saved!');
-                    setTimeout(() => {
-                        $('#saveProgressBtn').html('<i class="fas fa-save"></i> Remember Me');
-                    }, 2000);
-                }
-            } catch(e) {
-                showToast('Error saving progress', true);
-            }
+    window.selectNode = (type, id, name, hasChildren, mcqCount) => {
+        let mappedType = type === 'subjects' ? 'subject' : (type === 'chapters' ? 'chapter' : (type === 'lessons' ? 'lesson' : 'sublesson'));
+        currentPath.push({ type: mappedType, id, name });
+        if (!hasChildren && mcqCount > 0) {
+            startPractice(mappedType, id, name);
+        } else {
+            fetchContent();
         }
+    };
 
-        function showCompletion() {
-            $('#practicePanel').addClass('hidden');
-            $('#finalCorrect').text(practiceStats.correct);
-            $('#finalWrong').text(practiceStats.wrong);
-            let accuracy = (practiceStats.correct / questionsData.length * 100).toFixed(1);
-            $('#finalAccuracy').text(accuracy);
-            $('#completionPanel').removeClass('hidden');
-            $('html, body').animate({ scrollTop: $('#completionPanel').offset().top - 80 }, 400);
-        }
-
-        $('#saveProgressBtn').click(saveProgress);
-        $('#prevBtn').click(() => { if (currentQ > 0) { currentQ--; renderQuestion(); } });
-        $('#nextBtn').click(() => { if (currentQ < questionsData.length - 1) { currentQ++; renderQuestion(); } });
-        $('#practiceAgainBtn').click(() => { location.reload(); });
-        
-        window.addEventListener('beforeunload', function(e) {
-            if (hasUnsavedChanges && questionsData.length > 0) {
-                e.preventDefault();
-                return 'You have unsaved progress. Click "Remember Me" to save before leaving.';
-            }
+    function updateBreadcrumb() {
+        const bread = document.getElementById('breadcrumb');
+        let html = `<span class="breadcrumb-item" onclick="navigateToLevel(-1)"><i class="fas fa-home"></i> All</span>`;
+        currentPath.forEach((item, idx) => {
+            html += `<span> › </span><span class="breadcrumb-item" onclick="navigateToLevel(${idx})">${escapeHtml(item.name)}</span>`;
         });
-        
-        updateSelectionSummary();
-    </script>
+        bread.innerHTML = html;
+    }
 
-    {% include "footer.html" %}
+    function navigateToLevel(levelIndex) {
+        if (levelIndex === -1) currentPath = [];
+        else currentPath = currentPath.slice(0, levelIndex + 1);
+        fetchContent();
+    }
+
+    // ---------- PRACTICE CORE ----------
+    async function startPractice(levelType, levelId, levelName) {
+        const randomOrder = document.getElementById('random-order-checkbox').checked;
+        try {
+            const resp = await fetch('/api/practice/start/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ level_type: levelType, level_id: levelId, random_order: randomOrder })
+            });
+            const data = await resp.json();
+            if (data.error) { showToast(data.error, 'error'); return; }
+            let questions = data.questions;
+            let userAnswers = data.saved_answers ? [...data.saved_answers] : new Array(questions.length).fill(null);
+            let currentIndex = data.saved_index !== undefined ? data.saved_index : 0;
+            practiceData = {
+                questions: questions,
+                userAnswers: userAnswers,
+                currentIndex: currentIndex,
+                levelKey: data.level_key,
+                levelName: data.level_name || levelName,
+                randomMode: data.random_order,
+                originalQuestionsOrder: questions.map(q => q.id)
+            };
+            renderPracticeInterface();
+            document.getElementById('setup-page').classList.add('hidden');
+            document.getElementById('practice-page').classList.remove('hidden');
+        } catch(err) { showToast('Failed to start practice', 'error'); }
+    }
+
+    // render practice with correct/wrong visual feedback & correct answer highlighting
+    function renderPracticeInterface() {
+        if (!practiceData) return;
+        const q = practiceData.questions[practiceData.currentIndex];
+        const currentAnswer = practiceData.userAnswers[practiceData.currentIndex];
+        const isAnswered = currentAnswer !== null;
+        const correctOption = q.correct;   // 1-indexed
+
+        document.getElementById('question-counter').innerHTML = `<i class="far fa-file-alt"></i> ${practiceData.currentIndex+1} / ${practiceData.questions.length}`;
+        let progressPercent = ((practiceData.currentIndex+1) / practiceData.questions.length) * 100;
+        document.getElementById('practice-progress').style.width = `${progressPercent}%`;
+        document.getElementById('level-title').innerHTML = `<i class="fas fa-gem"></i> ${escapeHtml(practiceData.levelName)} ${practiceData.randomMode ? '⚡ random mode' : '📘 tracked'}`;
+        document.getElementById('question-text').innerHTML = q.question;
+        document.getElementById('random-badge').innerHTML = practiceData.randomMode ? '🎲 Random: ON' : '🔒 Random: OFF';
+
+        // generate options with feedback
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const key = idx+1;
+            let additionalClass = '';
+            let icon = '';
+            // if answered, show correctness
+            if (isAnswered) {
+                if (key === correctOption) {
+                    additionalClass = 'correct-highlight';
+                    icon = '<i class="fas fa-check-circle" style="color:#10b981; margin-left:auto;"></i>';
+                } else if (key === currentAnswer && currentAnswer !== correctOption) {
+                    additionalClass = 'wrong-highlight';
+                    icon = '<i class="fas fa-times-circle" style="color:#ef4444; margin-left:auto;"></i>';
+                } else if (key === currentAnswer && currentAnswer === correctOption) {
+                    additionalClass = 'correct-highlight';
+                    icon = '<i class="fas fa-check-double" style="color:#10b981; margin-left:auto;"></i>';
+                }
+            }
+            const selectedClass = (currentAnswer === key && !isAnswered ? 'selected' : (currentAnswer === key && isAnswered ? 'selected' : ''));
+            optionsHtml += `<div class="option-btn ${additionalClass} ${selectedClass}" onclick="selectAnswer(${key})">
+                                <span class="option-key">${String.fromCharCode(64+key)}</span>
+                                <span style="flex:1;">${escapeHtml(opt)}</span>
+                                ${icon}
+                            </div>`;
+        });
+        document.getElementById('options-container').innerHTML = optionsHtml;
+
+        // explanation + show correct answer string
+        const explanationDiv = document.getElementById('explanation-container');
+        if (isAnswered) {
+            const isCorrect = currentAnswer === correctOption;
+            const correctLetter = String.fromCharCode(64+correctOption);
+            const correctText = q.options[correctOption-1];
+            explanationDiv.innerHTML = `
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:1.3rem;">${isCorrect ? '✅' : '❌'}</span>
+                    <strong>${isCorrect ? 'Correct!' : `Wrong — correct answer: ${correctLetter}. ${escapeHtml(correctText)}`}</strong>
+                </div>
+                <p style="margin-top:5px;">📖 <strong>Explanation:</strong> ${escapeHtml(q.explanation)}</p>
+            `;
+            explanationDiv.classList.remove('hidden');
+        } else {
+            explanationDiv.classList.add('hidden');
+        }
+
+        // dot navigation
+        const dotNav = document.getElementById('dot-nav');
+        if (practiceData.questions.length <= 50) {
+            dotNav.innerHTML = practiceData.questions.map((_, i) => {
+                let answeredClass = practiceData.userAnswers[i] !== null ? 'answered' : '';
+                let activeClass = practiceData.currentIndex === i ? 'active-dot' : '';
+                return `<div class="dot ${answeredClass} ${activeClass}" onclick="jumpToQuestion(${i})" title="Question ${i+1}"></div>`;
+            }).join('');
+        } else dotNav.innerHTML = `<span class="badge-neon">${practiceData.questions.length} questions — use Prev/Next</span>`;
+
+        document.getElementById('prev-question').disabled = practiceData.currentIndex === 0;
+    }
+
+    window.selectAnswer = (key) => {
+        if (practiceData.userAnswers[practiceData.currentIndex] !== null) return;
+        practiceData.userAnswers[practiceData.currentIndex] = key;
+        renderPracticeInterface();
+        // auto-save only if NOT random mode
+        if (!practiceData.randomMode) autoSaveProgress();
+    };
+
+    async function autoSaveProgress() {
+        if (!practiceData || practiceData.randomMode) return;
+        try {
+            const resp = await fetch('/api/practice/save/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({
+                    level_key: practiceData.levelKey,
+                    user_answers: practiceData.userAnswers,
+                    questions_order: practiceData.questions.map(q => q.id),
+                    current_index: practiceData.currentIndex,
+                    random_order: practiceData.randomMode,
+                    level_name: practiceData.levelName
+                })
+            });
+            if (resp.ok) { 
+                showToast('✨ Progress synced', 'info');
+                loadProgressList();
+            }
+        } catch(e) {}
+    }
+
+    window.rememberMeSave = async () => {
+        if (practiceData.randomMode) { showToast('Random mode active: progress cannot be saved', 'error'); return; }
+        await autoSaveProgress();
+        showToast('Saved checkpoint', 'success');
+    };
+
+    window.startFresh = async () => {
+        if (!practiceData) return;
+        if (!confirm(`Delete saved progress for "${practiceData.levelName}" and restart?`)) return;
+        try {
+            await fetch(`/api/practice/delete/?level_key=${practiceData.levelKey}`, { headers: { 'X-CSRFToken': csrfToken } });
+            practiceData.userAnswers = new Array(practiceData.questions.length).fill(null);
+            practiceData.currentIndex = 0;
+            renderPracticeInterface();
+            showToast('Fresh start — progress erased');
+            loadProgressList();
+        } catch(e) { showToast('Error resetting', 'error'); }
+    };
+
+    window.jumpToQuestion = (idx) => {
+        practiceData.currentIndex = idx;
+        renderPracticeInterface();
+    };
+    window.nextQuestion = () => {
+        if (practiceData.currentIndex < practiceData.questions.length - 1) {
+            practiceData.currentIndex++;
+            renderPracticeInterface();
+        } else showToast('🏁 End of set — review or return', 'info');
+    };
+    window.prevQuestion = () => {
+        if (practiceData.currentIndex > 0) {
+            practiceData.currentIndex--;
+            renderPracticeInterface();
+        }
+    };
+    window.backToSetup = () => {
+        document.getElementById('practice-page').classList.add('hidden');
+        document.getElementById('setup-page').classList.remove('hidden');
+        practiceData = null;
+        fetchContent();
+        loadProgressList();
+    };
+
+    // ---------- PROGRESS LIST & RESUME ----------
+    async function loadProgressList() {
+        try {
+            const resp = await fetch('/api/practice/progress-list/');
+            const data = await resp.json();
+            const container = document.getElementById('progress-list');
+            if (!data.progress || data.progress.length === 0) {
+                container.innerHTML = '<div style="padding:1rem; text-align:center; color:#6b7280;"><i class="far fa-folder-open"></i> No saved sessions</div>';
+                return;
+            }
+            container.innerHTML = data.progress.map(p => `
+                <div class="content-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.7rem;">
+                    <div>
+                        <strong><i class="fas fa-bookmark"></i> ${escapeHtml(p.level_name)}</strong><br>
+                        <small style="color:#9ca3af;">📌 ${p.answered}/${p.total} answered · ${new Date(p.last_updated).toLocaleTimeString()}</small>
+                    </div>
+                    <button class="btn btn-outline" style="padding:0.3rem 0.9rem;" onclick="resumeSaved('${p.level_key}', '${escapeHtml(p.level_name)}')">Resume →</button>
+                </div>
+            `).join('');
+        } catch(e) { console.warn(e); }
+    }
+
+    window.resumeSaved = async (levelKey, levelNameDisplay) => {
+        const parts = levelKey.split('_');
+        if (parts.length !== 2) return;
+        const levelType = parts[0];
+        const levelId = parseInt(parts[1]);
+        // force random mode off for resume to respect saved order
+        const randomCheck = document.getElementById('random-order-checkbox');
+        const wasRandom = randomCheck.checked;
+        if (wasRandom) randomCheck.checked = false;
+        await startPractice(levelType, levelId, levelNameDisplay);
+        if (wasRandom) randomCheck.checked = true; // revert checkbox but practice already started with random false (resume needs order)
+        showToast(`Resumed: ${levelNameDisplay}`, 'success');
+    };
+
+    window.resetAllProgress = async () => {
+        if (!confirm('⚠️ Permanently DELETE all practice progress across topics?')) return;
+        try {
+            const resp = await fetch('/api/practice/progress-list/');
+            const data = await resp.json();
+            for (let p of data.progress) {
+                await fetch(`/api/practice/delete/?level_key=${p.level_key}`, { headers: { 'X-CSRFToken': csrfToken } });
+            }
+            showToast('All progress wiped clean');
+            loadProgressList();
+            fetchContent();
+            if (practiceData) backToSetup();
+        } catch(e) { showToast('Reset error', 'error'); }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // EVENT LISTENERS
+    document.getElementById('back-to-setup').onclick = backToSetup;
+    document.getElementById('remember-me-btn').onclick = rememberMeSave;
+    document.getElementById('start-fresh-btn').onclick = startFresh;
+    document.getElementById('prev-question').onclick = prevQuestion;
+    document.getElementById('next-question').onclick = nextQuestion;
+    document.getElementById('reset-all-btn').onclick = resetAllProgress;
+
+    // initial data
+    fetchContent();
+    loadProgressList();
+</script>
 </body>
 </html>

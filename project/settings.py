@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+
 # settings.py - Add or update
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # Safe limit for admin
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
