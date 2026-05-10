@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Generate Exam Papers</title>
-    <style>
-        /* Fallback for older browsers */
-        .file-drop-area {
-            transition: all 0.2s ease;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 p-8 font-sans">
     <div class="max-w-3xl mx-auto">
@@ -18,31 +12,57 @@
             <h1 class="text-2xl font-bold text-gray-800 mb-2">📄 Exam Paper Generator</h1>
             <p class="text-gray-600 mb-6">Upload your MCQ JSON file to generate a professional question paper or answer sheet.</p>
 
-            <form method="post" enctype="multipart/form-data" class="space-y-6">
+            <form method="post" enctype="multipart/form-data" id="main-form" class="space-y-6">
                 {% csrf_token %}
-                
-                <!-- JSON file upload -->
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center file-drop-area hover:border-blue-400">
+
+                <!-- Drag & Drop Zone -->
+                <div id="drop-zone"
+                     class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer transition-all duration-200 hover:border-blue-400 hover:bg-blue-50">
                     <input type="file" name="json_file" id="json_file" class="hidden" accept=".json" required>
-                    <label for="json_file" class="cursor-pointer block">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    
+                    <!-- Default state -->
+                    <div id="drop-default">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                         </svg>
-                        <span class="mt-2 block text-sm font-medium text-gray-700">Click to select JSON file</span>
-                        <span id="file-name" class="text-xs text-gray-500">No file chosen</span>
-                    </label>
+                        <p class="text-sm font-medium text-gray-700">Drag & drop your JSON file here</p>
+                        <p class="text-xs text-gray-400 mt-1">or <span class="text-blue-500 underline">click to browse</span></p>
+                    </div>
+
+                    <!-- File selected state (hidden by default) -->
+                    <div id="drop-selected" class="hidden">
+                        <div class="flex items-center justify-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p id="file-name" class="text-sm font-semibold text-gray-800"></p>
+                                <p id="file-size" class="text-xs text-gray-500"></p>
+                            </div>
+                            <button type="button" id="clear-file"
+                                    class="ml-auto text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Institute & Exam Name -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Institute Name</label>
-                        <input type="text" name="institute_name" value="ABC College of Excellence" 
+                        <input type="text" name="institute_name" value="ABC College of Excellence"
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Exam Name</label>
-                        <input type="text" name="exam_name" value="Mid‑Term Examination 2026" 
+                        <input type="text" name="exam_name" value="Mid‑Term Examination 2026"
                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
@@ -63,15 +83,96 @@
 
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-sm text-yellow-700">
             <p class="font-medium">📌 JSON Format Reference</p>
-            <p class="mt-1">Each question can include <code class="bg-yellow-100 px-1">"previous_year": true</code> or <code class="bg-yellow-100 px-1">"previous_year": "2025"</code> to display a badge.</p>
+            <p class="mt-1">Each question can include <code class="bg-yellow-100 px-1">"previous_year": true</code> or
+               <code class="bg-yellow-100 px-1">"previous_year": "2025"</code> to display a badge.</p>
         </div>
     </div>
 
-    <script>
-        document.getElementById('json_file').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || 'No file chosen';
-            document.getElementById('file-name').innerText = fileName;
-        });
-    </script>
+<script>
+const dropZone   = document.getElementById('drop-zone');
+const fileInput  = document.getElementById('json_file');
+const dropDef    = document.getElementById('drop-default');
+const dropSel    = document.getElementById('drop-selected');
+const fileName   = document.getElementById('file-name');
+const fileSize   = document.getElementById('file-size');
+const clearBtn   = document.getElementById('clear-file');
+
+// Click zone → open file picker
+dropZone.addEventListener('click', (e) => {
+    if (e.target === clearBtn || clearBtn.contains(e.target)) return;
+    fileInput.click();
+});
+
+// File chosen via picker
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) showFile(fileInput.files[0]);
+});
+
+// Drag events
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-blue-500', 'bg-blue-50', 'scale-[1.01]');
+});
+
+dropZone.addEventListener('dragleave', (e) => {
+    // Only fire if leaving the zone entirely (not a child element)
+    if (!dropZone.contains(e.relatedTarget)) {
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'scale-[1.01]');
+    }
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'scale-[1.01]');
+
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+        showError('Please drop a .json file.');
+        return;
+    }
+
+    // Assign dropped file to the input so the form submits it
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    showFile(file);
+});
+
+// Clear button
+clearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.value = '';
+    dropDef.classList.remove('hidden');
+    dropSel.classList.add('hidden');
+    dropZone.classList.remove('border-green-400', 'bg-green-50');
+    dropZone.classList.add('border-gray-300');
+});
+
+function showFile(file) {
+    fileName.textContent = file.name;
+    fileSize.textContent = formatBytes(file.size);
+    dropDef.classList.add('hidden');
+    dropSel.classList.remove('hidden');
+    dropZone.classList.remove('border-gray-300', 'border-blue-500');
+    dropZone.classList.add('border-green-400', 'bg-green-50');
+}
+
+function showError(msg) {
+    dropZone.classList.add('border-red-400', 'bg-red-50');
+    setTimeout(() => {
+        dropZone.classList.remove('border-red-400', 'bg-red-50');
+        dropZone.classList.add('border-gray-300');
+    }, 1500);
+    alert(msg);
+}
+
+function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+</script>
 </body>
 </html>

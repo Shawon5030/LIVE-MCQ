@@ -562,18 +562,22 @@ details[open]>summary>.group-header .chevron{transform:rotate(90deg);}
         Build Your Exam
       </h1>
     </div>
+    
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        
       <button id="download-json-btn" onclick="downloadExamJSON()"
         class="btn btn-admin hidden" disabled>
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:15px;height:15px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         Export JSON
       </button>
       <!-- Client-side JSON download (no backend required) -->
+   
       <button id="client-download-btn" onclick="downloadSelectionJSON()"
         class="btn btn-outline hidden" disabled title="Download selected topics as JSON">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:15px;height:15px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         Save Selection
       </button>
+  
       <div id="mcq-badge">
         <div id="badge-count">0</div>
         <div style="font-size:11px;color:var(--dim);margin-top:2px;">questions available</div>
@@ -674,6 +678,17 @@ details[open]>summary>.group-header .chevron{transform:rotate(90deg);}
     </button>
   </div>
 
+  <!-- Add this button next to "Submit Exam" in the exam top bar -->
+<button id="exam-download-btn" onclick="downloadExamQuestions()"
+  class="btn btn-admin btn-sm hidden"
+  title="Download all loaded questions as JSON">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+  </svg>
+  Download All
+</button>
+
   <!-- Question card -->
   <div class="glass" style="padding:28px;margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -770,7 +785,8 @@ details[open]>summary>.group-header .chevron{transform:rotate(90deg);}
 // ═══════════════════════════════════════════
 // CONFIG — injected by Django template
 // ═══════════════════════════════════════════
-const IS_ADMIN = false; // ← Django will set this
+const IS_ADMIN = {{ request.user.is_staff|yesno:"true,false" }};
+const IS_AUTHENTICATED = {{ request.user.is_authenticated|yesno:"true,false" }};
 
 const API = {
   subjects:   '/api/subjects/',
@@ -791,7 +807,28 @@ function getCsrf() {
 // ADMIN UI INIT
 // ═══════════════════════════════════════════
 function initAdminUI() {
-  if (!IS_ADMIN) return;
+  if (!IS_ADMIN) {
+    // Hide admin-specific elements for regular users
+    const adminBar = document.getElementById('admin-nav-bar');
+    const downloadBtn = document.getElementById('download-json-btn');
+    const adminResults = document.getElementById('admin-result-actions');
+    const clientDownloadBtn = document.getElementById('client-download-btn');
+    
+    if (adminBar) adminBar.style.display = 'none';
+    if (downloadBtn) {
+      downloadBtn.classList.add('hidden');
+      downloadBtn.style.display = 'none';
+    }
+    if (adminResults) adminResults.classList.add('hidden');
+    // Regular users should never see download buttons
+    if (clientDownloadBtn) {
+      clientDownloadBtn.classList.add('hidden');
+      clientDownloadBtn.style.display = 'none';
+    }
+    return;
+  }
+  
+  // Show admin features for staff users
   document.getElementById('admin-nav-bar').classList.remove('hidden');
   document.getElementById('admin-nav-bar').style.display = 'flex';
   document.getElementById('download-json-btn').classList.remove('hidden');
@@ -822,6 +859,8 @@ let lastResultData = null;
 // ═══════════════════════════════════════════
 async function init() {
   initAdminUI();
+  updateUIForPermissions();
+  
   try {
     const res = await fetch(API.subjects);
     const ct = res.headers.get('content-type') || '';
@@ -834,7 +873,6 @@ async function init() {
     });
   } catch(e) {
     console.warn('Init failed:', e.message);
-    // Show a soft warning in the tree area instead of crashing
     document.getElementById('tree-area').innerHTML = `
       <div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;line-height:1.7;">
         <div style="font-size:26px;margin-bottom:8px;">⚠️</div>
@@ -846,19 +884,70 @@ async function init() {
 init();
 
 // ═══════════════════════════════════════════
-// DOWNLOAD MCQs — calls /api/exam/start/ with count=9999
-// to fetch ALL questions for the selection, then downloads as JSON.
-// No extra endpoint needed.
+// PERMISSION-BASED UI UPDATES
+// ═══════════════════════════════════════════
+function updateUIForPermissions() {
+  // Add user role indicator
+  if (IS_AUTHENTICATED) {
+    const navBar = document.getElementById('app-nav');
+    if (navBar && !document.getElementById('user-role-badge')) {
+      const userBadge = document.createElement('span');
+      userBadge.id = 'user-role-badge';
+      userBadge.className = IS_ADMIN ? 'tag tag-subject' : 'tag tag-lesson';
+      userBadge.style.marginLeft = 'auto';
+      userBadge.style.fontSize = '11px';
+      userBadge.textContent = IS_ADMIN ? '👑 Admin' : '📚 Student';
+      navBar.appendChild(userBadge);
+    }
+  }
+  
+  // Ensure download buttons are hidden for non-admin users
+  if (!IS_ADMIN) {
+    const downloadBtns = [
+      'client-download-btn',
+      'download-json-btn'
+    ];
+    downloadBtns.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.classList.add('hidden');
+        btn.style.display = 'none';
+      }
+    });
+  }
+}
+
+// ═══════════════════════════════════════════
+// DOWNLOAD MCQs — Staff Only
 // ═══════════════════════════════════════════
 async function downloadSelectionJSON() {
+  // Permission check
+  if (!IS_AUTHENTICATED) {
+    showToast('✗ Please login to download MCQs');
+    return;
+  }
+  
+  if (!IS_ADMIN) {
+    showToast('✗ Only staff members can export JSON');
+    return;
+  }
+  
   const btn = document.getElementById('client-download-btn');
+  if (!btn) return;
+  
   const origHTML = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = `<svg style="width:14px;height:14px;animation:spin .8s linear infinite" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Fetching…`;
+  
   try {
     // Step 1: get real available count from preview endpoint
     const previewRes = await fetch(`${API.mcqPreview}?${buildIdsParam()}`);
     const previewCt = previewRes.headers.get('content-type') || '';
+    
+    if (previewRes.status === 403) {
+      throw new Error('You do not have permission to export data. Staff access required.');
+    }
+    
     if (!previewCt.includes('application/json')) throw new Error(`Not logged in or backend unreachable.`);
     const previewData = await previewRes.json();
     const totalAvailable = previewData.available_mcq_count || 0;
@@ -872,8 +961,6 @@ async function downloadSelectionJSON() {
     for (let i = 0; i < batches; i++) {
       const batchCount = Math.min(BATCH, totalAvailable - allQuestions.length);
       
-      // 🔥 FIX: Use ADMIN endpoint that includes correct_answer and explanation
-      // If you don't have a dedicated admin endpoint, modify the payload to request answer data
       const payload = {
         subject_ids:        [...sel.subjects.keys()],
         chapter_ids:        [...sel.chapters.keys()],
@@ -882,8 +969,8 @@ async function downloadSelectionJSON() {
         question_count:     batchCount,
         time_limit_minutes: 1,
         random_order:       false,
-        include_answers:    true,  // 🔥 ADD THIS FLAG to request answers
-        include_metadata:   true,  // 🔥 ADD THIS for previous year data
+        include_answers:    true,
+        include_metadata:   true,
       };
       
       const res = await fetch(API.startExam, {
@@ -892,15 +979,17 @@ async function downloadSelectionJSON() {
         body: JSON.stringify(payload),
       });
       
+      if (res.status === 403) {
+        throw new Error('Staff access required for data export');
+      }
+      
       const ct = res.headers.get('content-type') || '';
       if (!ct.includes('application/json')) throw new Error(`Server returned non-JSON (${res.status}).`);
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || `HTTP ${res.status}`); }
       const data = await res.json();
       
-      // 🔥 Process questions to ensure all metadata is included
       const questionsWithMeta = (data.questions || []).map(q => ({
         ...q,
-        // Preserve existing fields or add defaults
         correct_answer: q.correct_answer || q.correctAnswer || null,
         explanation: q.explanation || null,
         previous_year: q.previous_year || q.previousYear || null,
@@ -911,7 +1000,6 @@ async function downloadSelectionJSON() {
       
       allQuestions = allQuestions.concat(questionsWithMeta);
       
-      // Stop if backend returned fewer than requested
       if ((data.questions || []).length < batchCount) break;
     }
 
@@ -928,6 +1016,7 @@ async function downloadSelectionJSON() {
       exported_at: new Date().toISOString(),
       total: unique.length,
       export_type: "complete_mcq_bank",
+      exported_by: "{{ request.user.username }}",
       selection: {
         subjects:   [...sel.subjects.values()],
         chapters:   [...sel.chapters.values()],
@@ -940,12 +1029,8 @@ async function downloadSelectionJSON() {
         options:        q.options,
         correct_answer: q.correct_answer ?? null,
         explanation:    q.explanation ?? null,
-        // 🔥 NEW: Previous year information
         previous_year:  q.previous_year ?? q.previousYear ?? null,
         has_previous_year: !!(q.previous_year || q.previousYear),
-        // Additional metadata
-        difficulty:     q.difficulty ?? null,
-        topic:          q.topic ?? null,
         subject_id:     q.subject_id ?? null,
         chapter_id:     q.chapter_id ?? null,
       })),
@@ -968,17 +1053,45 @@ async function downloadSelectionJSON() {
 }
 
 // ═══════════════════════════════════════════
-// ADMIN: DOWNLOAD JSON
+// ADMIN: DOWNLOAD JSON (Staff Only)
 // ═══════════════════════════════════════════
 async function downloadExamJSON() {
-  if (!IS_ADMIN) return;
-  // Admin export reuses the same logic as the main download button
+  if (!IS_AUTHENTICATED) {
+    showToast('✗ Please login to access this feature');
+    return;
+  }
+  
+  if (!IS_ADMIN) {
+    showToast('✗ Only staff members can export exam JSON');
+    return;
+  }
+  
   downloadSelectionJSON();
 }
 
 function downloadResultJSON() {
-  if (!IS_ADMIN || !lastResultData) return;
-  const blob = new Blob([JSON.stringify(lastResultData, null, 2)], { type: 'application/json' });
+  if (!IS_AUTHENTICATED) {
+    showToast('✗ Please login to download results');
+    return;
+  }
+  
+  if (!IS_ADMIN) {
+    showToast('✗ Only staff members can download result JSON');
+    return;
+  }
+  
+  if (!lastResultData) {
+    showToast('✗ No result data available');
+    return;
+  }
+  
+  const exportData = {
+    ...lastResultData,
+    exported_at: new Date().toISOString(),
+    exported_by: "{{ request.user.username }}",
+  };
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1134,15 +1247,65 @@ function removeTag(type, id) {
   renderTree(); renderTags(); scheduleMcqPreview();
 }
 
+// ═══════════════════════════════════════════
+// DOWNLOAD EXAM QUESTIONS — Admin only, uses already-loaded examData
+// ═══════════════════════════════════════════
+function downloadExamQuestions() {
+  if (!IS_ADMIN) { showToast('✗ Staff only'); return; }
+  if (!examData || !examData.questions) { showToast('✗ No exam loaded'); return; }
+
+  const questions = examData.questions.map(q => {
+    const obj = {
+      question:      q.question,
+      option_1:      q.options[0]?.text ?? "",
+      option_2:      q.options[1]?.text ?? "",
+      option_3:      q.options[2]?.text ?? "",
+      option_4:      q.options[3]?.text ?? "",
+      correct_answer: q.correct_answer ?? null,
+      previous_year:  q.previous_year  || null,
+      explanation:    q.explanation    || null,
+    };
+    
+    if (!obj.previous_year) delete obj.previous_year;
+    if (!obj.explanation)   delete obj.explanation;
+    return obj;
+  });
+
+  const blob = new Blob([JSON.stringify(questions, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `mcq_export_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✓ ${questions.length} questions exported`);
+}
+
+// Show download button for admins after exam loads
+if (IS_ADMIN) {
+  const examDlBtn = document.getElementById('exam-download-btn');
+  if (examDlBtn) examDlBtn.classList.remove('hidden');
+}
+
 function clearAll() {
   sel.subjects.clear(); sel.chapters.clear(); sel.lessons.clear(); sel.sublessons.clear();
   loadedTree = {};
   renderTree(); renderTags();
   document.getElementById('mcq-badge').classList.remove('visible');
   document.getElementById('start-btn').disabled = true;
-  document.getElementById('client-download-btn').disabled = true;
-  document.getElementById('client-download-btn').classList.add('hidden');
-  if (IS_ADMIN) document.getElementById('download-json-btn').disabled = true;
+  
+  // Only hide download buttons if they exist and user is not admin
+  const clientBtn = document.getElementById('client-download-btn');
+  if (clientBtn && !IS_ADMIN) {
+    clientBtn.disabled = true;
+    clientBtn.classList.add('hidden');
+  }
+  
+  if (IS_ADMIN) {
+    const downloadBtn = document.getElementById('download-json-btn');
+    if (downloadBtn) downloadBtn.disabled = true;
+    if (clientBtn) clientBtn.disabled = true;
+  }
 }
 
 function renderTags() {
@@ -1176,17 +1339,33 @@ function scheduleMcqPreview() {
 async function fetchMcqPreview() {
   const hasAny = sel.subjects.size || sel.chapters.size || sel.lessons.size || sel.sublessons.size;
   const clientBtn = document.getElementById('client-download-btn');
+  
   if (!hasAny) {
     document.getElementById('mcq-badge').classList.remove('visible');
     document.getElementById('start-btn').disabled = true;
-    clientBtn.disabled = true;
-    clientBtn.classList.add('hidden');
-    if (IS_ADMIN) document.getElementById('download-json-btn').disabled = true;
+    
+    // Only show download button for admin users
+    if (clientBtn) {
+      if (!IS_ADMIN) {
+        clientBtn.disabled = true;
+        clientBtn.classList.add('hidden');
+      } else {
+        clientBtn.disabled = true;
+      }
+    }
+    
+    if (IS_ADMIN) {
+      const downloadBtn = document.getElementById('download-json-btn');
+      if (downloadBtn) downloadBtn.disabled = true;
+    }
     return;
   }
-  // Show client download button whenever there's a selection
-  clientBtn.classList.remove('hidden');
-  clientBtn.disabled = false;
+  
+  // Show client download button only for admin users
+  if (IS_ADMIN && clientBtn) {
+    clientBtn.classList.remove('hidden');
+    clientBtn.disabled = false;
+  }
 
   const params = buildIdsParam();
   const res  = await fetch(`${API.mcqPreview}?${params}`);
@@ -1195,7 +1374,12 @@ async function fetchMcqPreview() {
   document.getElementById('badge-count').textContent = count;
   document.getElementById('mcq-badge').classList.add('visible');
   document.getElementById('start-btn').disabled = count === 0;
-  if (IS_ADMIN) document.getElementById('download-json-btn').disabled = count === 0;
+  
+  if (IS_ADMIN) {
+    const downloadBtn = document.getElementById('download-json-btn');
+    if (downloadBtn) downloadBtn.disabled = count === 0;
+    if (clientBtn) clientBtn.disabled = count === 0;
+  }
 }
 
 function buildIdsParam() {
@@ -1208,9 +1392,14 @@ function buildIdsParam() {
 }
 
 // ═══════════════════════════════════════════
-// START EXAM
+// START EXAM - Available to all authenticated users
 // ═══════════════════════════════════════════
 async function startExam() {
+  if (!IS_AUTHENTICATED) {
+    showToast('✗ Please login to start exam');
+    return;
+  }
+  
   const btn = document.getElementById('start-btn');
   const err = document.getElementById('start-err');
   btn.disabled = true; btn.innerHTML = 'Loading…';
@@ -1223,6 +1412,7 @@ async function startExam() {
     question_count: parseInt(document.getElementById('q-count').value) || 20,
     time_limit_minutes: parseInt(document.getElementById('time-limit').value) || 20,
     random_order:   document.getElementById('random-order').checked,
+    include_answers:    IS_ADMIN,  
   };
   try {
     const res  = await fetch(API.startExam, {
@@ -1314,7 +1504,7 @@ function startTimer(seconds) {
 }
 
 // ═══════════════════════════════════════════
-// SUBMIT
+// SUBMIT - Available to all authenticated users
 // ═══════════════════════════════════════════
 function confirmSubmit() {
   const unanswered = userAnswers.filter(a => a === null).length;
@@ -1345,6 +1535,7 @@ function renderResultPage(data) {
   document.getElementById('res-correct').textContent = data.correct_answers;
   document.getElementById('res-wrong').textContent   = data.wrong_answers;
   document.getElementById('res-skip').textContent    = data.skipped_answers;
+  
   // Animate score ring
   const ring = document.querySelector('.score-ring');
   if (ring) ring.style.setProperty('--pct', pct + '%');
@@ -1380,6 +1571,16 @@ function renderResultPage(data) {
       ${d.explanation ? `<div class="explanation"><strong>Explanation: </strong>${d.explanation}</div>` : ''}
     </div>`;
   }).join('');
+  
+  // Show/hide admin result actions based on permissions
+  const adminResults = document.getElementById('admin-result-actions');
+  if (adminResults) {
+    if (IS_ADMIN) {
+      adminResults.classList.remove('hidden');
+    } else {
+      adminResults.classList.add('hidden');
+    }
+  }
 }
 
 function toggleReview() {
@@ -1400,7 +1601,6 @@ function resetAll() {
   document.getElementById('start-btn').innerHTML = 'Launch Exam <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>';
 }
 </script>
-
 
 </body>
 </html>

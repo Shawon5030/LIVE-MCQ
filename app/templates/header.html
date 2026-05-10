@@ -10,15 +10,15 @@
             <!-- Desktop Navigation -->
             <nav class="hidden lg:flex space-x-8">
                 <div class="relative group">
-                    <a href="index.html" class="text-headline hover:text-primary font-medium transition flex items-center gap-1">
+                    <a  class="text-headline hover:text-primary font-medium transition flex items-center gap-1">
                         আমাদের সম্পর্কে
                         <i class="fas fa-chevron-down text-sm transition-transform group-hover:rotate-180"></i>
                     </a>
                     <div class="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <a href="mentors.html" class="block px-4 py-2 text-sm text-body hover:bg-gray-50 hover:text-primary transition">সকল মেন্টর</a>
-                        <a href="feedback.html" class="block px-4 py-2 text-sm text-body hover:bg-gray-50 hover:text-primary transition">ফিডব্যাকস</a>
-                        <a href="faq.html" class="block px-4 py-2 text-sm text-body hover:bg-gray-50 hover:text-primary transition">সাধারণ জিজ্ঞাসা</a>
-                        <a href="gallery.html" class="block px-4 py-2 text-sm text-body hover:bg-gray-50 hover:text-primary transition">অ্যাপ গ্যালারি</a>
+                 
+                       
+                        <a href="{% url 'faq' %}" class="block px-4 py-2 text-sm text-body hover:bg-gray-50 hover:text-primary transition">সাধারণ জিজ্ঞাসা</a>
+                       
                     </div>
                 </div>
                 <a href="{% url 'features' %}" class="text-headline hover:text-primary font-medium transition">ফিচারসমূহ</a>
@@ -26,7 +26,12 @@
                 <a href="{% url 'contact' %}" class="text-headline hover:text-primary font-medium transition">যোগাযোগ</a>
                 {% if request.user.is_authenticated %}
                 <a href="{% url 'exam_home' %}" class="text-headline hover:text-primary font-medium transition">পরীক্ষা</a>
-                <a href="{% url 'practice_page' %}" class="text-headline hover:text-primary font-medium transition">practice</a>
+                {% if request.user.is_staff %}
+                  <a href="{% url 'practice_page' %}" class="text-headline hover:text-primary font-medium transition">practice</a>
+                <a href="{% url 'upload' %}" class="text-headline hover:text-primary font-medium transition">Upload Question</a>
+                <a href="{% url 'generate_question_pdf' %}" class="text-headline hover:text-primary font-medium transition">Question Paper</a>
+
+                {% endif %}
                 {% endif %}
             </nav>
             <!-- Right side actions -->
@@ -63,10 +68,10 @@
     <!-- Mobile Menu (hidden by default, simple toggle via JS if needed) -->
     <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-gray-100 py-4 px-4 shadow-md">
         <div class="flex flex-col space-y-3">
-            <a href="index.html" class="text-headline hover:text-primary font-medium py-2">আমাদের সম্পর্কে</a>
-            <a href="mentors.html" class="text-body hover:text-primary pl-4 text-sm">সকল মেন্টর</a>
-            <a href="feedback.html" class="text-body hover:text-primary pl-4 text-sm">ফিডব্যাকস</a>
-            <a href="faq.html" class="text-body hover:text-primary pl-4 text-sm">সাধারণ জিজ্ঞাসা</a>
+            <a  class="text-headline hover:text-primary font-medium py-2">আমাদের সম্পর্কে</a>
+        
+            
+            <a href="{% url 'faq' %}" class="text-body hover:text-primary pl-4 text-sm">সাধারণ জিজ্ঞাসা</a>
             <a href="gallery.html" class="text-body hover:text-primary pl-4 text-sm">অ্যাপ গ্যালারি</a>
             <a href="features.html" class="text-headline hover:text-primary font-medium py-2">ফিচারসমূহ</a>
             <a href="{% url 'course_list_page' %}" class="text-headline hover:text-primary font-medium py-2">প্যাকেজসমূহ</a>

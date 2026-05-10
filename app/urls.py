@@ -16,12 +16,8 @@ urlpatterns = [
     path('contact/',Contact_page,name='contact'),
     path('features/',Features_page,name='features'),
     path('faq/',Faq_page,name='faq'),
-    path('upload-mcq/', upload_mcq, name='upload_mcq'),
 
 
-    
-  
-    
     path('accounts/login/', views.login_page, name='login_page'),
     path('register/', views.register_page, name='register_page'),
     path('api/login/', views.login_api, name='login_api'),
@@ -65,12 +61,22 @@ urlpatterns = [
         name="submit_payment"
     ),
     
+    
+    path('upload/', views.upload_mcq_page, name='upload'),
+    path('api/subjects/upload/', views.api_subjects, name='api_subjects'),
+    path('api/chapters/upload/', views.api_chapters, name='api_chapters'),
+    path('api/lessons/upload/', views.api_lessons, name='api_lessons'),
+    path('api/sub_lessons/upload/', views.api_sub_lessons, name='api_sub_lessons'),
+    path('api/bulk-upload/', views.api_bulk_upload_mcq),
+   
+    
     path("exam/",views.exam_home,name="exam_home"),
     path('api/subjects/',    views.get_subjects,   name='api_subjects'),
     path('api/chapters/',    views.get_chapters,   name='api_chapters'),
     path('api/lessons/',    views.get_lessons,    name='api_lessons'),
     path('api/sublessons/',  views.get_sublessons, name='api_sublessons'),
- 
+    
+     
     # Exam
     path('api/exam/preview/', views.preview_mcq_count, name='api_exam_preview'),
     path('api/exam/start/',  views.start_exam,         name='api_exam_start'),
@@ -82,7 +88,7 @@ urlpatterns = [
     path('payment/<int:payment_id>/', views.payment_detail, name='payment_detail'),
     
     # Admin payment verification
-    path('admin/payment/verify/<int:payment_id>/', views.verify_payment, name='verify_payment'),
+    path('payment/verify/<int:payment_id>/', views.verify_payment, name='verify_payment'),
     
     path('profile/', views.user_profile, name='profile'),
     path('change-password/', views.change_password, name='change_password'),
@@ -117,6 +123,14 @@ urlpatterns1 =  [
 ]
 
 urlpatterns += urlpatterns1
+
+
+upload_que = [
+    # Page
+   
+]
+
+urlpatterns+=upload_que
 
 if settings.DEBUG:
     urlpatterns += static(

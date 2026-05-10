@@ -2,397 +2,419 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Paper - Student Assessment</title>
+    <title>Exam Paper</title>
     <style>
-        /* Extremely safe CSS - no @page with complex content, no calc, no variables */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif;
+            font-family: 'Times New Roman', Times, serif;
             background: #ffffff;
-            color: #1a2c3e;
+            color: #000000;
             font-size: 11pt;
             line-height: 1.5;
-            padding: 1.5cm;
+            padding: 1.8cm 2cm;
         }
-        
-        /* Simple page break control */
-        .page-break {
-            page-break-before: always;
+
+        /* ── PAGE BREAK ── */
+        .page-break { page-break-before: always; }
+        .no-break    { page-break-inside: avoid; break-inside: avoid; }
+
+        /* ══════════════════════════════
+           HEADER
+        ══════════════════════════════ */
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 3px double #000;
         }
-        
-        .question-item {
+
+        .institute-name {
+            font-size: 20pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .exam-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 6px 0 2px;
+            text-transform: uppercase;
+        }
+
+        .affiliated {
+            font-size: 9pt;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        /* Info strip */
+        .info-strip {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 6px;
+            font-size: 10pt;
+        }
+        .info-strip td {
+            border: 1px solid #000;
+            padding: 6px 10px;
+            text-align: center;
+            width: 25%;
+        }
+        .info-strip td strong { display: block; font-size: 13pt; }
+
+        .exam-meta {
+            font-size: 9pt;
+            color: #555;
+            margin-top: 6px;
+        }
+
+        /* ══════════════════════════════
+           CANDIDATE BOX
+        ══════════════════════════════ */
+        .candidate-box {
+            border: 1px solid #000;
+            padding: 10px 14px;
+            margin: 14px 0;
+            display: table;
+            width: 100%;
+        }
+        .candidate-row {
+            display: table-row;
+        }
+        .candidate-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 4px 8px 4px 0;
+            font-size: 10pt;
+        }
+        .candidate-line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        /* ══════════════════════════════
+           INSTRUCTIONS
+        ══════════════════════════════ */
+        .instructions {
+            border: 1px solid #000;
+            padding: 10px 14px;
+            margin: 10px 0 16px;
+            font-size: 9.5pt;
+        }
+        .instructions-title {
+            font-weight: bold;
+            font-size: 10pt;
+            text-decoration: underline;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li { margin: 3px 0; }
+
+        /* ══════════════════════════════
+           SECTION DIVIDER
+        ══════════════════════════════ */
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 5px 0;
+            margin: 14px 0 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        /* ══════════════════════════════
+           QUESTION
+        ══════════════════════════════ */
+        .question-block {
+            margin-bottom: 14px;
             page-break-inside: avoid;
             break-inside: avoid;
         }
-        
-        /* Header styles */
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #1e3a8a;
-            padding-bottom: 15px;
-        }
-        
-        .institute-name {
-            font-size: 24pt;
-            font-weight: bold;
-            color: #1e3a8a;
-            margin-bottom: 5px;
-        }
-        
-        .exam-title {
-            font-size: 18pt;
-            font-weight: 600;
-            color: #374151;
-            margin: 10px 0;
-        }
-        
-        /* Info boxes */
-        .info-grid {
+
+        .question-row {
+            display: table;
             width: 100%;
-            margin: 15px 0;
-            border-collapse: collapse;
         }
-        
-        .info-grid td {
-            background: #f3f4f6;
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
-            width: 25%;
-        }
-        
-        /* Instructions */
-        .instructions {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        
-        .instructions h3 {
-            color: #1e40af;
-            margin-bottom: 8px;
-            font-size: 12pt;
-        }
-        
-        .instructions ul {
-            margin-left: 25px;
-            font-size: 10pt;
-        }
-        
-        .instructions li {
-            margin: 5px 0;
-        }
-        
-        /* Question card */
-        .question-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-left: 4px solid;
-            padding: 12px;
-            margin-bottom: 15px;
-            page-break-inside: avoid;
-        }
-        
-        .border-blue { border-left-color: #3b82f6; }
-        .border-green { border-left-color: #10b981; }
-        .border-orange { border-left-color: #f59e0b; }
-        .border-red { border-left-color: #ef4444; }
-        .border-purple { border-left-color: #8b5cf6; }
-        
-        .question-header {
-            margin-bottom: 10px;
-        }
-        
-        .question-number {
-            display: inline-block;
-            background: #e5e7eb;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            line-height: 30px;
-            border-radius: 15px;
+        .q-num-cell {
+            display: table-cell;
+            width: 32px;
+            vertical-align: top;
             font-weight: bold;
-            margin-right: 10px;
-            font-size: 11pt;
+            font-size: 10.5pt;
+            padding-top: 1px;
         }
-        
+        .q-body-cell {
+            display: table-cell;
+            vertical-align: top;
+        }
+
         .question-text {
+            font-size: 10.5pt;
             font-weight: 500;
-            font-size: 11pt;
-            line-height: 1.4;
+            line-height: 1.5;
+            margin-bottom: 6px;
         }
-        
-        .marks {
-            float: right;
-            background: #e0e7ff;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 9pt;
-            font-weight: bold;
-            color: #3730a3;
-        }
-        
+
+        /* PYQ badge */
         .pyq-badge {
             display: inline-block;
-            background: #fef3c7;
-            color: #92400e;
-            font-size: 8pt;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-left: 40px;
-            margin-bottom: 8px;
+            font-size: 7.5pt;
+            border: 1px solid #000;
+            padding: 0px 5px;
+            margin-left: 6px;
+            vertical-align: middle;
+            font-style: italic;
         }
-        
-        /* Options */
-        .options {
-            margin-top: 10px;
-            margin-left: 40px;
+
+        /* ── Options grid: 2 per row ── */
+        .options-grid {
+            display: table;
+            width: 100%;
+            margin-top: 4px;
         }
-        
-        .option {
-            display: inline-block;
-            margin-right: 25px;
-            margin-bottom: 5px;
-            font-size: 10.5pt;
+        .options-row {
+            display: table-row;
         }
-        
-        .option-letter {
+        .option-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 2px 6px 2px 0;
+            font-size: 10pt;
+            vertical-align: top;
+        }
+        .opt-letter {
             font-weight: bold;
-            color: #4f46e5;
+            min-width: 20px;
+            display: inline-block;
         }
-        
-        /* Answer space */
-        .answer-space {
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed #d1d5db;
-            text-align: right;
-            font-size: 9pt;
-            color: #9ca3af;
+
+        /* divider between questions */
+        .q-divider {
+            border: none;
+            border-top: 1px dashed #bbb;
+            margin: 10px 0;
         }
-        
-        /* Footer */
+
+        /* marks badge */
+        .marks-badge {
+            float: right;
+            font-size: 8.5pt;
+            border: 1px solid #555;
+            padding: 0 5px;
+            color: #333;
+        }
+
+        /* ══════════════════════════════
+           ROUGH WORK
+        ══════════════════════════════ */
+        .rough-work {
+            margin-top: 22px;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        .rough-title {
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: center;
+            text-decoration: underline;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .rough-lines { margin-top: 6px; }
+        .rough-line {
+            border-bottom: 1px solid #ccc;
+            height: 22px;
+            margin-bottom: 4px;
+        }
+
+        /* ══════════════════════════════
+           SIGNATURES + FOOTER
+        ══════════════════════════════ */
+        .sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            font-size: 9.5pt;
+        }
+        .sig-table td {
+            width: 50%;
+            padding: 4px 8px;
+            border-top: 1px solid #000;
+        }
+
         .footer {
             text-align: center;
             font-size: 8pt;
-            color: #6b7280;
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
+            color: #555;
+            margin-top: 16px;
+            padding-top: 8px;
+            border-top: 2px double #000;
         }
-        
-        /* Signature section */
-        .signature-section {
-            margin-top: 30px;
-            display: table;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .signature-box {
-            display: table-cell;
-            width: 50%;
-            padding: 10px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 9pt;
-        }
-        
-        /* Rough work */
-        .rough-work {
-            margin-top: 20px;
-            background: #fafafa;
-            border: 1px solid #e5e7eb;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        
-        .rough-work-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 10pt;
-        }
-        
-        .rough-work-area {
-            height: 80px;
-            border: 1px dashed #d1d5db;
-            background: #ffffff;
-            margin-top: 5px;
-        }
-        
-        /* Utility classes */
-        .text-center { text-align: center; }
-        .mt-20 { margin-top: 20px; }
-        .mb-10 { margin-bottom: 10px; }
-        .clearfix { clear: both; }
-        hr {
-            margin: 10px 0;
-            border: none;
-            border-top: 1px solid #e5e7eb;
-        }
+
+        .clearfix::after { content: ''; display: table; clear: both; }
     </style>
 </head>
 <body>
 
-<!-- Header -->
+<!-- ═══════════ HEADER ═══════════ -->
 <div class="header">
-    <div class="institute-name">{{ institute_name|default:"SHIKSHA NIKETAN VIDYALAYA" }}</div>
-    <div class="exam-title">{{ exam_name|default:"ANNUAL EXAMINATION 2026" }}</div>
-    <div style="font-size: 9pt; color: #6b7280;">(Affiliated to Central Board of Secondary Education, Delhi)</div>
-    
-    <table class="info-grid">
+    <div class="institute-name">{{ institute_name|default:"Shiksha Niketan Vidyalaya" }}</div>
+    <div class="affiliated">(Affiliated to Central Board of Secondary Education, Delhi)</div>
+    <div class="exam-title">{{ exam_name|default:"Annual Examination 2026" }}</div>
+    <div style="font-size:10pt; font-weight:bold; margin-top:4px;">
+        Subject: MCQ Paper &nbsp;|&nbsp; Class: _____ &nbsp;|&nbsp; Set: A
+    </div>
+
+    <table class="info-strip">
         <tr>
-            <td><strong>{{ total_questions|default:"45" }}</strong><br>Total Questions</td>
-            <td><strong>{{ total_marks|default:"45" }}</strong><br>Maximum Marks</td>
-            <td><strong>90</strong><br>Time Allowed</td>
-            <td><strong>1 Mark Each</strong><br>Per Question</td>
+            <td><strong>{{ total_questions|default:"—" }}</strong>Total Questions</td>
+            <td><strong>{{ total_marks|default:"—" }}</strong>Maximum Marks</td>
+            <td><strong>90 min</strong>Time Allowed</td>
+            <td><strong>1 Mark</strong>Per Question</td>
         </tr>
     </table>
-    
-    <div style="font-size: 8pt; color: #9ca3af;">
-        Exam Date: _______________ | Generated: {{ generated_at|default:"May 10, 2026" }}
+
+    <div class="exam-meta">
+        Exam Date: ___________________ &nbsp;&nbsp; Generated: {{ generated_at|default:"—" }}
     </div>
 </div>
 
-<!-- Instructions -->
+<!-- ═══════════ CANDIDATE BOX ═══════════ -->
+<div class="candidate-box">
+    <div class="candidate-row">
+        <div class="candidate-cell">
+            Name: <span class="candidate-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+        <div class="candidate-cell">
+            Roll No.: <span class="candidate-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+    </div>
+    <div class="candidate-row" style="margin-top:6px;">
+        <div class="candidate-cell">
+            Section / Class: <span class="candidate-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+        <div class="candidate-cell">
+            Date: <span class="candidate-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ INSTRUCTIONS ═══════════ -->
 <div class="instructions">
-    <h3>📖 IMPORTANT INSTRUCTIONS FOR CANDIDATES:</h3>
-    <ul>
-        <li>This question paper contains <strong>{{ total_questions|default:"45" }}</strong> compulsory questions.</li>
-        <li>Each question carries <strong>1 (one) mark</strong>. No negative marking for wrong answers.</li>
-        <li>Read each question carefully and select the most appropriate option.</li>
-        <li>Use <strong>blue or black pen</strong> only to mark your answers.</li>
+    <div class="instructions-title">Important Instructions for Candidates</div>
+    <ol>
+        <li>This paper contains <strong>{{ total_questions|default:"—" }}</strong> compulsory multiple-choice questions.</li>
+        <li>Each question carries <strong>1 (one) mark</strong>. There is <strong>no negative marking</strong>.</li>
+        <li>Read each question carefully before selecting your answer.</li>
+        <li>Write your answer (A / B / C / D) clearly in the box provided after each question.</li>
+        <li>Use <strong>blue or black ballpoint pen</strong> only. Pencil is not allowed.</li>
         <li>Rough work must be done only in the space provided at the end of the paper.</li>
-        <li>Write your roll number and sign on the answer sheet before starting the examination.</li>
-    </ul>
+        <li>Return this paper along with the answer sheet to the invigilator after the examination.</li>
+    </ol>
 </div>
 
-<!-- Questions -->
+<!-- ═══════════ SECTION TITLE ═══════════ -->
+<div class="section-title">Section — A &nbsp;|&nbsp; Multiple Choice Questions (MCQ)</div>
+
+<!-- ═══════════ QUESTIONS ═══════════ -->
 {% for q in questions %}
-<div class="question-card {% cycle 'border-blue' 'border-green' 'border-orange' 'border-red' 'border-purple' %} question-item">
-    <div class="question-header">
-        <span class="question-number">{{ forloop.counter }}</span>
-        <span class="marks">[1 Mark]</span>
-        <div class="clearfix"></div>
-        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
-            {{ q.question }}
-        </div>
-    </div>
-    
-    <!-- Previous Year Badge -->
-    {% if q.has_previous_year or q.previous_year %}
-    <div class="pyq-badge">
-        ★ {% if q.previous_year and q.previous_year != true %}Previous Year ({{ q.previous_year }}){% else %}Previous Year Question{% endif %}
-    </div>
-    {% endif %}
-    
-    <!-- Options -->
-    <div class="options">
-        {% for opt in q.options %}
-        <div class="option">
-            <span class="option-letter">{{ opt.key }}.</span> {{ opt.text }}
-        </div>
-        {% endfor %}
-    </div>
-    
-    <!-- Answer Space -->
-    <div class="answer-space">
-        Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    </div>
+<div class="question-block no-break">
+
+    <div class="question-row">
+        <div class="q-num-cell">{{ forloop.counter }}.</div>
+        <div class="q-body-cell">
+
+            <div class="question-text">
+                <span class="marks-badge">1 M</span>
+                {{ q.question }}
+                {% if q.has_previous_year or q.previous_year %}
+                    <span class="pyq-badge">
+                        ★ PYQ{% if q.previous_year and q.previous_year != True %} — {{ q.previous_year }}{% endif %}
+                    </span>
+                {% endif %}
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- Options: support both flat fields and list format -->
+            <div class="options-grid">
+                {% if q.option_1 %}
+                    <!-- Flat format: option_1 … option_4 -->
+                    <div class="options-row">
+                        <div class="option-cell"><span class="opt-letter">(A)</span> {{ q.option_1 }}</div>
+                        <div class="option-cell"><span class="opt-letter">(B)</span> {{ q.option_2 }}</div>
+                    </div>
+                    <div class="options-row">
+                        <div class="option-cell"><span class="opt-letter">(C)</span> {{ q.option_3 }}</div>
+                        <div class="option-cell"><span class="opt-letter">(D)</span> {{ q.option_4 }}</div>
+                    </div>
+                {% else %}
+                    <!-- List format: q.options = [{key,text}, …] -->
+                    {% for opt in q.options %}
+                        {% if forloop.counter == 1 or forloop.counter == 3 %}
+                            <div class="options-row">
+                        {% endif %}
+                        <div class="option-cell">
+                            <span class="opt-letter">
+                                {% if opt.key == 1 %}(A){% elif opt.key == 2 %}(B){% elif opt.key == 3 %}(C){% else %}(D){% endif %}
+                            </span> {{ opt.text }}
+                        </div>
+                        {% if forloop.counter == 2 or forloop.counter == 4 or forloop.last %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Answer box -->
+            <div style="margin-top:7px; font-size:9.5pt;">
+                Answer: <span style="display:inline-block; border:1px solid #000; min-width:50px; height:18px; vertical-align:middle; padding:0 6px;">&nbsp;</span>
+            </div>
+
+        </div><!-- /q-body-cell -->
+    </div><!-- /question-row -->
+
+    {% if not forloop.last %}<hr class="q-divider">{% endif %}
 </div>
 {% empty %}
-
-<!-- Demo Questions (if no data) -->
-<div class="question-card border-blue question-item">
-    <div class="question-header">
-        <span class="question-number">1</span>
-        <span class="marks">[1 Mark]</span>
-        <div class="clearfix"></div>
-        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
-            Which of the following is a renewable source of energy?
-        </div>
-    </div>
-    <div class="options">
-        <div class="option"><span class="option-letter">A.</span> Coal</div>
-        <div class="option"><span class="option-letter">B.</span> Natural Gas</div>
-        <div class="option"><span class="option-letter">C.</span> Solar Power</div>
-        <div class="option"><span class="option-letter">D.</span> Diesel</div>
-    </div>
-    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-</div>
-
-<div class="question-card border-green question-item">
-    <div class="question-header">
-        <span class="question-number">2</span>
-        <span class="marks">[1 Mark]</span>
-        <div class="clearfix"></div>
-        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
-            What is the chemical symbol for Gold?
-        </div>
-    </div>
-    <div class="pyq-badge">★ Previous Year Question (2024)</div>
-    <div class="options">
-        <div class="option"><span class="option-letter">A.</span> Go</div>
-        <div class="option"><span class="option-letter">B.</span> Gd</div>
-        <div class="option"><span class="option-letter">C.</span> Au</div>
-        <div class="option"><span class="option-letter">D.</span> Ag</div>
-    </div>
-    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-</div>
-
-<div class="question-card border-orange question-item">
-    <div class="question-header">
-        <span class="question-number">3</span>
-        <span class="marks">[1 Mark]</span>
-        <div class="clearfix"></div>
-        <div class="question-text" style="margin-left: 40px; margin-top: 5px;">
-            The capital city of France is:
-        </div>
-    </div>
-    <div class="options">
-        <div class="option"><span class="option-letter">A.</span> Berlin</div>
-        <div class="option"><span class="option-letter">B.</span> Madrid</div>
-        <div class="option"><span class="option-letter">C.</span> Paris</div>
-        <div class="option"><span class="option-letter">D.</span> Lisbon</div>
-    </div>
-    <div class="answer-space">Answer: <span style="border-bottom: 1px solid #9ca3af; min-width: 80px; display: inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-</div>
-
-<div class="text-center" style="padding: 10px; color: #6b7280; font-style: italic;">
-    <hr>📝 Sample questions shown above. Upload your data to customize.<hr>
+<div style="text-align:center; padding:30px; color:#777; font-style:italic;">
+    No questions found. Please upload a valid JSON file.
 </div>
 {% endfor %}
 
-<!-- Rough Work Section -->
+<!-- ═══════════ ROUGH WORK ═══════════ -->
 <div class="rough-work">
-    <div class="rough-work-title">📝 ROUGH WORK / CALCULATIONS SPACE</div>
-    <div class="rough-work-area"></div>
-    <div class="rough-work-area" style="margin-top: 10px;"></div>
-    <div class="rough-work-area" style="margin-top: 10px;"></div>
-</div>
-
-<!-- Signatures -->
-<div class="signature-section">
-    <div class="signature-box">
-        <strong>Candidate's Signature:</strong> _________________________
-    </div>
-    <div class="signature-box" style="text-align: right;">
-        <strong>Invigilator's Signature:</strong> _________________________
+    <div class="rough-title">Rough Work / Calculations Space</div>
+    <div class="rough-lines">
+        {% for i in "123456789012" %}
+        <div class="rough-line"></div>
+        {% endfor %}
     </div>
 </div>
 
-<!-- Footer -->
+<!-- ═══════════ SIGNATURES ═══════════ -->
+<table class="sig-table">
+    <tr>
+        <td>Candidate's Signature: _______________________________</td>
+        <td style="text-align:right;">Invigilator's Signature: _______________________________</td>
+    </tr>
+</table>
+
+<!-- ═══════════ FOOTER ═══════════ -->
 <div class="footer">
-    <hr>
-    <div>Page 1 of 1 | Best of Luck! | This paper contains {{ total_questions|default:"45" }} questions</div>
+    *** End of Question Paper *** &nbsp;|&nbsp;
+    Total Questions: {{ total_questions|default:"—" }} &nbsp;|&nbsp;
+    {{ institute_name|default:"Institution" }} &nbsp;|&nbsp;
+    Generated: {{ generated_at|default:"—" }}
 </div>
 
 </body>

@@ -157,6 +157,6 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "haquemahmudul600@gmail.com"
-EMAIL_HOST_PASSWORD = "abchuphxzksfffit"
+EMAIL_HOST_PASSWORD = "geps nbfl oouw xnqf"
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

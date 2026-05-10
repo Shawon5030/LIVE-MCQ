@@ -1,71 +1,517 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Answer Sheet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 1.5cm 2cm;
             @frame footer {
                 -pdf-frame-content: footerContent;
                 bottom: 0cm;
                 height: 1cm;
             }
         }
+
         body {
-            font-family: 'Helvetica', sans-serif;
+            font-family: 'Times New Roman', Times, serif;
+            background: #fff;
+            color: #000;
+            font-size: 10.5pt;
+            line-height: 1.5;
         }
-        .answer-row {
-            border-bottom: 1px dashed #d1d5db;
-            padding: 0.75rem 0;
+
+        /* ══════════════════════════
+           HEADER
+        ══════════════════════════ */
+        .header {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .header-top {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .header-logo-left,
+        .header-logo-right {
+            display: table-cell;
+            width: 70px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .logo-circle {
+            width: 56px;
+            height: 56px;
+            border: 2px solid #000;
+            border-radius: 50%;
+            display: inline-block;
+            line-height: 56px;
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-center {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .institute-name {
+            font-size: 18pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .affiliated {
+            font-size: 8.5pt;
+            color: #444;
+            margin: 2px 0 4px;
+        }
+
+        .doc-title {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 4px 0;
+            margin-top: 4px;
+        }
+
+        .exam-name {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        /* Info strip */
+        .info-strip {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 4px;
+            font-size: 9.5pt;
+        }
+        .info-strip td {
+            border: 1px solid #000;
+            padding: 5px 8px;
+            text-align: center;
+            width: 33.33%;
+        }
+        .info-strip td strong {
+            display: block;
+            font-size: 12pt;
+        }
+
+        .meta-line {
+            font-size: 8.5pt;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        /* ══════════════════════════
+           CONFIDENTIAL BANNER
+        ══════════════════════════ */
+        .confidential-banner {
+            background: #000;
+            color: #fff;
+            text-align: center;
+            font-size: 9pt;
+            font-weight: bold;
+            letter-spacing: 3px;
+            padding: 4px 0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        /* ══════════════════════════
+           SECTION LABEL
+        ══════════════════════════ */
+        .section-label {
+            font-size: 10pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 4px 0;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        /* ══════════════════════════
+           ANSWER TABLE
+        ══════════════════════════ */
+        .answer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+
+        .answer-table thead tr {
+            background: #000;
+            color: #fff;
+        }
+
+        .answer-table thead th {
+            padding: 7px 10px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .answer-table tbody tr {
+            page-break-inside: avoid;
             break-inside: avoid;
         }
-        .correct-badge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 0.2rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
+
+        .answer-table tbody tr:nth-child(even) {
+            background: #f5f5f5;
         }
+
+        .answer-table tbody td {
+            padding: 7px 10px;
+            vertical-align: top;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .q-num {
+            font-weight: bold;
+            text-align: center;
+            width: 40px;
+            font-size: 10pt;
+        }
+
+        .q-text {
+            font-size: 10pt;
+            line-height: 1.45;
+        }
+
+        .pyq-inline {
+            font-size: 7.5pt;
+            font-style: italic;
+            border: 1px solid #888;
+            padding: 0 4px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        /* Answer key cell */
+        .ans-cell {
+            width: 110px;
+            text-align: center;
+        }
+
+        .ans-box {
+            display: inline-block;
+            border: 1.5px solid #000;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            background: #fff;
+        }
+
+        .ans-box.ans-a { border-color: #1a1a8c; color: #1a1a8c; }
+        .ans-box.ans-b { border-color: #166534; color: #166534; }
+        .ans-box.ans-c { border-color: #92400e; color: #92400e; }
+        .ans-box.ans-d { border-color: #7c2d12; color: #7c2d12; }
+        .ans-box.ans-none { border-color: #999; color: #999; font-size: 8pt; line-height: 26px; }
+
+        /* options compact */
+        .options-compact {
+            margin-top: 4px;
+            font-size: 9pt;
+            color: #444;
+        }
+        .opt-item {
+            display: inline-block;
+            margin-right: 12px;
+        }
+        .opt-item.correct-opt {
+            font-weight: bold;
+            color: #000;
+            text-decoration: underline;
+        }
+
+        /* explanation */
+        .explanation-row td {
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+            padding: 5px 10px 8px 52px;
+            font-size: 9pt;
+            color: #333;
+            font-style: italic;
+        }
+        .expl-label {
+            font-weight: bold;
+            font-style: normal;
+            color: #000;
+        }
+
+        /* ══════════════════════════
+           SUMMARY BOX
+        ══════════════════════════ */
+        .summary-box {
+            border: 1.5px solid #000;
+            margin-top: 20px;
+            page-break-inside: avoid;
+        }
+        .summary-title {
+            background: #000;
+            color: #fff;
+            font-weight: bold;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 10px;
+        }
+        .summary-inner {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-cell {
+            display: table-cell;
+            width: 33.33%;
+            text-align: center;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+            font-size: 9.5pt;
+        }
+        .summary-cell:last-child { border-right: none; }
+        .summary-num {
+            font-size: 20pt;
+            font-weight: bold;
+            display: block;
+            line-height: 1.2;
+        }
+
+        /* ══════════════════════════
+           SIGNATURES
+        ══════════════════════════ */
+        .sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 22px;
+            font-size: 9.5pt;
+        }
+        .sig-table td {
+            width: 50%;
+            padding: 6px 10px 4px;
+            border-top: 1px solid #000;
+        }
+
+        /* ══════════════════════════
+           FOOTER
+        ══════════════════════════ */
+        #footerContent {
+            text-align: center;
+            font-size: 7.5pt;
+            color: #555;
+            border-top: 1px solid #aaa;
+            padding-top: 4px;
+            margin-top: 10px;
+        }
+
+        .clearfix::after { content:''; display:table; clear:both; }
     </style>
 </head>
 <body>
-    <div class="text-center border-b pb-4 mb-6">
-        <h1 class="text-2xl font-bold">{{ institute_name }}</h1>
-        <h2 class="text-xl font-semibold mt-1">Answer Sheet – {{ exam_name }}</h2>
-        <p class="text-sm text-gray-600 mt-2">Generated: {{ generated_at }} | Exported: {{ exported_at|default:"—" }}</p>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div class="header">
+    <div class="header-top">
+        <div class="header-logo-left">
+            <div class="logo-circle">LOGO</div>
+        </div>
+        <div class="header-center">
+            <div class="institute-name">{{ institute_name|default:"Shiksha Niketan Vidyalaya" }}</div>
+            <div class="affiliated">(Affiliated to Central Board of Secondary Education, Delhi)</div>
+            <div class="doc-title">Official Answer Key / Mark Sheet</div>
+            <div class="exam-name">{{ exam_name|default:"Annual Examination 2026" }}</div>
+        </div>
+        <div class="header-logo-right">
+            <div class="logo-circle">LOGO</div>
+        </div>
     </div>
 
-    <table class="w-full border-collapse">
-        <thead>
-            <tr class="bg-gray-100 text-left">
-                <th class="p-2 w-16">Q.No</th>
-                <th class="p-2">Question</th>
-                <th class="p-2 w-36">Correct Answer</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for q in questions %}
-            <tr class="answer-row">
-                <td class="p-2 align-top font-medium">{{ forloop.counter }}</td>
-                <td class="p-2 align-top">{{ q.question }}</td>
-                <td class="p-2 align-top">
-                    <span class="correct-badge">
-                        {{ q.correct_answer|default:"Not Provided" }}
-                    </span>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="3" class="text-center p-4 text-red-500">No questions in JSON.</td></tr>
-            {% endfor %}
-        </tbody>
+    <table class="info-strip">
+        <tr>
+            <td><strong>{{ questions|length }}</strong>Total Questions</td>
+            <td><strong>{{ questions|length }}</strong>Maximum Marks</td>
+            <td><strong>1 Mark</strong>Per Question</td>
+        </tr>
     </table>
 
-    <div id="footerContent" class="text-center text-xs text-gray-400 mt-8">
-        <hr class="my-2"> Answer Key – Page <pdf:pagenumber> of <pdf:pagecount>
+    <div class="meta-line">
+        Generated: {{ generated_at|default:"—" }}
+        &nbsp;|&nbsp;
+        Exported: {{ exported_at|default:"—" }}
     </div>
+</div>
+
+<!-- ═══════════ CONFIDENTIAL ═══════════ -->
+<div class="confidential-banner">
+    ★ &nbsp; Strictly Confidential — For Examiner's Use Only &nbsp; ★
+</div>
+
+<!-- ═══════════ SECTION LABEL ═══════════ -->
+<div class="section-label">
+    Section A — Multiple Choice Questions &nbsp;|&nbsp; Answer Key
+</div>
+
+<!-- ═══════════ ANSWER TABLE ═══════════ -->
+<table class="answer-table">
+    <thead>
+        <tr>
+            <th style="width:40px; text-align:center;">Q.No</th>
+            <th>Question &amp; Options</th>
+            <th style="width:110px; text-align:center;">Correct Answer</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for q in questions %}
+
+        {% comment %}Determine correct answer letter{% endcomment %}
+        {% with ca=q.correct_answer %}
+
+        <tr>
+            <!-- Number -->
+            <td class="q-num">{{ forloop.counter }}</td>
+
+            <!-- Question + options -->
+            <td class="q-text">
+                {{ q.question }}
+                {% if q.has_previous_year or q.previous_year %}
+                    <span class="pyq-inline">
+                        ★ PYQ{% if q.previous_year and q.previous_year != True %} — {{ q.previous_year }}{% endif %}
+                    </span>
+                {% endif %}
+
+                <!-- Options inline (underline the correct one) -->
+                <div class="options-compact">
+                    {% if q.option_1 %}
+                        <!-- Flat format -->
+                        <span class="opt-item {% if ca == 1 %}correct-opt{% endif %}">(A) {{ q.option_1 }}</span>
+                        <span class="opt-item {% if ca == 2 %}correct-opt{% endif %}">(B) {{ q.option_2 }}</span>
+                        <span class="opt-item {% if ca == 3 %}correct-opt{% endif %}">(C) {{ q.option_3 }}</span>
+                        <span class="opt-item {% if ca == 4 %}correct-opt{% endif %}">(D) {{ q.option_4 }}</span>
+                    {% else %}
+                        <!-- List format -->
+                        {% for opt in q.options %}
+                            <span class="opt-item {% if opt.key == ca %}correct-opt{% endif %}">
+                                {% if opt.key == 1 %}(A){% elif opt.key == 2 %}(B){% elif opt.key == 3 %}(C){% else %}(D){% endif %}
+                                {{ opt.text }}
+                            </span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </td>
+
+            <!-- Answer box -->
+            <td class="ans-cell">
+                {% if ca == 1 %}
+                    <div class="ans-box ans-a">A</div>
+                {% elif ca == 2 %}
+                    <div class="ans-box ans-b">B</div>
+                {% elif ca == 3 %}
+                    <div class="ans-box ans-c">C</div>
+                {% elif ca == 4 %}
+                    <div class="ans-box ans-d">D</div>
+                {% else %}
+                    <div class="ans-box ans-none">N/A</div>
+                {% endif %}
+            </td>
+        </tr>
+
+        <!-- Explanation row (only if present) -->
+        {% if q.explanation %}
+        <tr class="explanation-row">
+            <td colspan="3">
+                <span class="expl-label">Explanation:</span> {{ q.explanation }}
+            </td>
+        </tr>
+        {% endif %}
+
+        {% endwith %}
+
+    {% empty %}
+        <tr>
+            <td colspan="3" style="text-align:center; padding:20px; color:#c00; font-style:italic;">
+                No questions found. Please upload a valid JSON file.
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="summary-box">
+    <div class="summary-title">📊 Answer Key Summary</div>
+    <div class="summary-inner">
+        <div class="summary-cell">
+            <span class="summary-num">{{ questions|length }}</span>
+            Total Questions
+        </div>
+        <div class="summary-cell">
+            <span class="summary-num">{{ questions|length }}</span>
+            Total Marks
+        </div>
+        <div class="summary-cell">
+            <span class="summary-num">1</span>
+            Mark Per Question
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ SIGNATURES ═══════════ -->
+<table class="sig-table">
+    <tr>
+        <td>
+            <strong>Prepared By:</strong> _______________________________<br>
+            <span style="font-size:8.5pt; color:#555;">Name &amp; Designation</span>
+        </td>
+        <td style="text-align:right;">
+            <strong>Approved By:</strong> _______________________________<br>
+            <span style="font-size:8.5pt; color:#555;">Head of Department / Principal</span>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-top:14px;">
+            <strong>Date:</strong> ___________________
+        </td>
+        <td style="text-align:right; padding-top:14px;">
+            <strong>Official Stamp:</strong>
+            <span style="display:inline-block; border:1px solid #aaa; width:80px; height:30px; vertical-align:middle;"></span>
+        </td>
+    </tr>
+</table>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<div id="footerContent">
+    *** End of Answer Key *** &nbsp;|&nbsp;
+    {{ institute_name|default:"Institution" }} &nbsp;|&nbsp;
+    {{ exam_name|default:"Examination" }} &nbsp;|&nbsp;
+    Generated: {{ generated_at|default:"—" }} &nbsp;|&nbsp;
+    Page <pdf:pagenumber> of <pdf:pagecount>
+</div>
+
 </body>
 </html>

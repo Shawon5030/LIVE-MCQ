@@ -584,6 +584,10 @@ def create_user_master_progress(sender, instance, created, **kwargs):
     if created:
         UserMasterProgress.objects.get_or_create(user=instance)
 
+from datetime import timedelta
+from django.db import models
+from django.utils import timezone
+
 
 class TransactionVerification(models.Model):
     PAYMENT_SYSTEM_CHOICES = (
@@ -591,7 +595,9 @@ class TransactionVerification(models.Model):
         ("nagad", "Nagad"),
         ("rocket", "Rocket"),
     )
+
     is_complete = models.BooleanField(default=False)
+
     payment_system = models.CharField(
         max_length=20,
         choices=PAYMENT_SYSTEM_CHOICES
@@ -609,9 +615,10 @@ class TransactionVerification(models.Model):
     )
 
     def save(self, *args, **kwargs):
- 
+        # first save TransactionVerification
         super().save(*args, **kwargs)
 
+        # find matching pending payments
         matching_payments = Payment.objects.filter(
             payment_system=self.payment_system,
             transaction_id=self.transaction_id,
@@ -620,38 +627,54 @@ class TransactionVerification(models.Model):
         )
 
         for payment in matching_payments:
+            # approve payment
             payment.status = "approved"
+            payment.verified_transaction = self
             payment.save()
-            payment.verified_transaction=self
-            payment.save()
-            self.is_complete=True
-            self.save()
-            
 
-            # create enrollment if not exists
-            if not UserCourseEnrollment.objects.filter(
+            # enrollment duration by month
+            start_time = timezone.now()
+
+            if payment.month == 1:
+                end_time = start_time + timedelta(days=30)
+
+            elif payment.month == 6:
+                end_time = start_time + timedelta(days=180)
+
+            else:
+                end_time = start_time + timedelta(days=365)
+
+            # create or update enrollment
+            enrollment, created = UserCourseEnrollment.objects.get_or_create(
                 user=payment.user,
-                course=payment.course
-            ).exists():
+                course=payment.course,
+                defaults={
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "status": "active"
+                }
+            )
 
-                start_time = timezone.now()
-
-                if payment.month == 1:
-                    end_time = start_time + timedelta(days=30)
-
-                elif payment.month == 6:
-                    end_time = start_time + timedelta(days=180)
-
+            # if already exists → extend time
+            if not created:
+                if enrollment.end_time > timezone.now():
+                    enrollment.end_time = enrollment.end_time + (
+                        end_time - start_time
+                    )
                 else:
-                    end_time = start_time + timedelta(days=365)
+                    enrollment.start_time = start_time
+                    enrollment.end_time = end_time
 
-                UserCourseEnrollment.objects.create(
-                    user=payment.user,
-                    course=payment.course,
-                    start_time=start_time,
-                    end_time=end_time,
-                    status="active"
-                )
+                enrollment.status = "active"
+                enrollment.save()
+
+        # mark verification complete
+        if matching_payments.exists():
+            self.is_complete = True
+            super().save(update_fields=["is_complete"])
+
+    def __str__(self):
+        return f"{self.payment_system} - {self.transaction_id}"
 
    
     

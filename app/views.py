@@ -34,72 +34,210 @@ def Faq_page(request):
 
 
 
+# views.py - Complete with all API functions
 
-# questine upload
-def upload_mcq(request):
-    if request.method == "POST":
-        sub_lesson_id = request.POST.get("sub_lesson")
-        json_data = request.POST.get("json_data")
+import json
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from .models import Subject, Chapter, Lesson, SubLesson, MCQ
 
+# ---------- PAGE VIEW ----------
+def upload_mcq_page(request):
+    """Render the Tailwind HTML page for MCQ upload."""
+    return render(request, 'upload.html')
+
+
+# ---------- API ENDPOINTS (with /upload/ suffix as per your URLs) ----------
+@require_http_methods(["GET"])
+def api_subjects(request):
+    """Return list of all subjects."""
+    subjects = Subject.objects.all().values('id', 'name')
+    return JsonResponse(list(subjects), safe=False)
+
+
+@require_http_methods(["GET"])
+def api_chapters(request):
+    """Return chapters for a given subject_id (GET param)."""
+    subject_id = request.GET.get('subject_id')
+    if not subject_id:
+        return JsonResponse([], safe=False)
+    chapters = Chapter.objects.filter(subject_id=subject_id).values('id', 'name')
+    return JsonResponse(list(chapters), safe=False)
+
+
+@require_http_methods(["GET"])
+def api_lessons(request):
+    """Return lessons for a given chapter_id (GET param)."""
+    chapter_id = request.GET.get('chapter_id')
+    if not chapter_id:
+        return JsonResponse([], safe=False)
+    lessons = Lesson.objects.filter(chapter_id=chapter_id).values('id', 'name')
+    return JsonResponse(list(lessons), safe=False)
+
+
+@require_http_methods(["GET"])
+def api_sub_lessons(request):
+    """Return sub-lessons for a given lesson_id (GET param)."""
+    lesson_id = request.GET.get('lesson_id')
+    if not lesson_id:
+        return JsonResponse([], safe=False)
+    sub_lessons = SubLesson.objects.filter(lesson_id=lesson_id).values('id', 'name')
+    return JsonResponse(list(sub_lessons), safe=False)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_bulk_upload_mcq(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON payload"}, status=400)
+
+    mcq_list = data.get("mcqs")
+    if not isinstance(mcq_list, list):
+        return JsonResponse({"error": "'mcqs' must be an array"}, status=400)
+
+    # Get defaults (should be integers or None)
+    defaults = data.get("defaults", {})
+    default_subject_id = defaults.get("subject_id")
+    default_chapter_id = defaults.get("chapter_id")
+    default_lesson_id = defaults.get("lesson_id")
+    default_sub_lesson_id = defaults.get("sub_lesson_id")
+
+    created_count = 0
+    errors = []
+
+    for idx, item in enumerate(mcq_list):
         try:
-            sub_lesson = SubLesson.objects.get(id=sub_lesson_id)
-            data = json.loads(json_data)
+            # Merge item with defaults (item takes precedence if not None)
+            sub_lesson_id = item.get("sub_lesson_id")
+            if sub_lesson_id is None:
+                sub_lesson_id = default_sub_lesson_id
+            lesson_id = item.get("lesson_id")
+            if lesson_id is None:
+                lesson_id = default_lesson_id
+            chapter_id = item.get("chapter_id")
+            if chapter_id is None:
+                chapter_id = default_chapter_id
+            subject_id = item.get("subject_id")
+            if subject_id is None:
+                subject_id = default_subject_id
 
-            if not isinstance(data, list):
-                raise ValueError("JSON must be a list")
+            # Extract MCQ fields
+            question = item.get("question", "").strip()
+            option_1 = item.get("option_1", "").strip()
+            option_2 = item.get("option_2", "").strip()
+            option_3 = item.get("option_3", "").strip()
+            option_4 = item.get("option_4", "").strip()
+            correct_answer = item.get("correct_answer")
+            previous_year = item.get("previous_year") or None
+            explanation = item.get("explanation") or None
 
-            # 🔥 Option mapping
-            option_map = {
-                "ক": 1,
-                "খ": 2,
-                "গ": 3,
-                "ঘ": 4
-            }
+            # Basic validation
+            if not all([question, option_1, option_2, option_3, option_4]):
+                errors.append(f"Row {idx+1}: Missing question or one of the options.")
+                continue
+            if correct_answer not in [1,2,3,4]:
+                errors.append(f"Row {idx+1}: correct_answer must be 1-4.")
+                continue
 
-            mcq_list = []
+            # Resolve hierarchy
+            final_subject = final_chapter = final_lesson = final_sub_lesson = None
 
-            for item in data:
-                options = item.get("options", {})
+            if sub_lesson_id:
+                try:
+                    sub_obj = SubLesson.objects.select_related('lesson__chapter__subject').get(id=sub_lesson_id)
+                except SubLesson.DoesNotExist:
+                    errors.append(f"Row {idx+1}: SubLesson id={sub_lesson_id} not found.")
+                    continue
+                final_sub_lesson = sub_obj
+                final_lesson = sub_obj.lesson
+                final_chapter = final_lesson.chapter
+                final_subject = final_chapter.subject
+                
+                if lesson_id and lesson_id != final_lesson.id:
+                    errors.append(f"Row {idx+1}: lesson_id mismatch with SubLesson.")
+                    continue
+                if chapter_id and chapter_id != final_chapter.id:
+                    errors.append(f"Row {idx+1}: chapter_id mismatch with SubLesson.")
+                    continue
+                if subject_id and subject_id != final_subject.id:
+                    errors.append(f"Row {idx+1}: subject_id mismatch with SubLesson.")
+                    continue
 
-                mcq_list.append(
-                    MCQ(
-                        sub_lesson=sub_lesson,
-                        question=item['question'],
+            elif lesson_id:
+                try:
+                    lesson_obj = Lesson.objects.select_related('chapter__subject').get(id=lesson_id)
+                except Lesson.DoesNotExist:
+                    errors.append(f"Row {idx+1}: Lesson id={lesson_id} not found.")
+                    continue
+                final_lesson = lesson_obj
+                final_chapter = lesson_obj.chapter
+                final_subject = final_chapter.subject
+                
+                if chapter_id and chapter_id != final_chapter.id:
+                    errors.append(f"Row {idx+1}: chapter_id mismatch with Lesson.")
+                    continue
+                if subject_id and subject_id != final_subject.id:
+                    errors.append(f"Row {idx+1}: subject_id mismatch with Lesson.")
+                    continue
 
-                        option_1=options.get("ক", ""),
-                        option_2=options.get("খ", ""),
-                        option_3=options.get("গ", ""),
-                        option_4=options.get("ঘ", ""),
+            elif chapter_id:
+                try:
+                    chapter_obj = Chapter.objects.select_related('subject').get(id=chapter_id)
+                except Chapter.DoesNotExist:
+                    errors.append(f"Row {idx+1}: Chapter id={chapter_id} not found.")
+                    continue
+                final_chapter = chapter_obj
+                final_subject = chapter_obj.subject
+                
+                if subject_id and subject_id != final_subject.id:
+                    errors.append(f"Row {idx+1}: subject_id mismatch with Chapter.")
+                    continue
 
-                        correct_answer=option_map.get(item.get("answer"), 1),
+            else:
+                if not subject_id:
+                    errors.append(f"Row {idx+1}: No subject_id provided (neither in item nor defaults).")
+                    continue
+                try:
+                    final_subject = Subject.objects.get(id=subject_id)
+                except Subject.DoesNotExist:
+                    errors.append(f"Row {idx+1}: Subject id={subject_id} not found.")
+                    continue
 
-                        explanation=item.get("explanation", ""),
-                        previous_year=item.get("previous_exam", "")
-                    )
-                )
-
-            with transaction.atomic():
-                MCQ.objects.bulk_create(mcq_list)
-
-            return render(request, 'upload.html', {
-                'subjects': Subject.objects.all(),
-                'success': "MCQs uploaded successfully!"
-            })
+            # Create MCQ
+            mcq = MCQ.objects.create(
+                subject=final_subject,
+                chapter=final_chapter,
+                lesson=final_lesson,
+                sub_lesson=final_sub_lesson,
+                question=question,
+                option_1=option_1,
+                option_2=option_2,
+                option_3=option_3,
+                option_4=option_4,
+                correct_answer=correct_answer,
+                previous_year=previous_year,
+                explanation=explanation,
+            )
+            
+            if final_sub_lesson:
+                final_sub_lesson.update_mcq_count()
+                
+            created_count += 1
 
         except Exception as e:
-            return render(request, 'upload.html', {
-                'subjects': Subject.objects.all(),
-                'error': str(e)
-            })
+            errors.append(f"Row {idx+1}: Unexpected error - {str(e)}")
 
-    return render(request, 'upload.html', {
-        'subjects': Subject.objects.all()
-    })
-  
-  
-
-
-
+    return JsonResponse({
+        "created": created_count,
+        "errors": errors,
+        "total_submitted": len(mcq_list)
+    }, status=200 if created_count > 0 else 400)
+    
+    
 def login_page(request):
     if request.user.is_authenticated:
         return redirect('exam_home')
@@ -196,7 +334,31 @@ from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
 # ─────────────────────────────────────────────
 @login_required
 def exam_home(request):
+    enrollments = UserCourseEnrollment.objects.filter(
+        user=request.user,
+        status="active",
+       
+    ).select_related(
+        'course'
+    ).prefetch_related(
+        'course__subjects'
+    )
+
+
+    subjects = Subject.objects.filter(
+        courses__enrollments__in=enrollments
+    ).distinct()
+
+    total_subject = subjects.count()
+    if total_subject==0:
+        
+        messages.error(
+        request,
+        "আপনার কোনো কোর্স অ্যাক্টিভ নেই"
+    )
+        return redirect("course_list_page")
     return render(request,"exam/home.html")
+
 import json
 import random
 
@@ -214,15 +376,31 @@ from .models import MCQ, Chapter, ExamAttempt, Lesson, Subject, SubLesson
 @login_required
 @require_GET
 def get_subjects(request):
-    """Return all subjects."""
-    subjects = Subject.objects.all().values("id", "name").order_by("name")
-    return JsonResponse({"subjects": list(subjects)})
+    enrollments = UserCourseEnrollment.objects.filter(
+        user=request.user,
+        status="active",
+    ).select_related(
+        "course"
+    ).prefetch_related(
+        "course__subjects"
+    )
+
+    subjects = Subject.objects.filter(
+        courses__enrollments__in=enrollments
+    ).distinct().values(
+        "id",
+        "name"
+    )
+
+    return JsonResponse({
+        "subjects": list(subjects)
+    })
 
 
 @login_required
 @require_GET
 def get_chapters(request):
-    """Return chapters for given subject IDs (comma-separated ?subject_ids=1,2)."""
+    
     ids = _parse_ids(request.GET.get("subject_ids", ""))
     if not ids:
         return JsonResponse({"error": "subject_ids required"}, status=400)
@@ -239,7 +417,7 @@ def get_chapters(request):
 @login_required
 @require_GET
 def get_lessons(request):
-    """Return lessons for given chapter IDs."""
+
     ids = _parse_ids(request.GET.get("chapter_ids", ""))
     if not ids:
         return JsonResponse({"error": "chapter_ids required"}, status=400)
@@ -256,7 +434,7 @@ def get_lessons(request):
 @login_required
 @require_GET
 def get_sublessons(request):
-    """Return sub-lessons for given lesson IDs."""
+
     ids = _parse_ids(request.GET.get("lesson_ids", ""))
     if not ids:
         return JsonResponse({"error": "lesson_ids required"}, status=400)
@@ -275,18 +453,11 @@ def get_sublessons(request):
     return JsonResponse({"sub_lessons": list(subs)})
 
 
-# ─────────────────────────────────────────────
-# 2. MCQ count preview (before starting exam)
-# ─────────────────────────────────────────────
+
 
 @login_required
 @require_GET
 def preview_mcq_count(request):
-    """
-    Returns how many MCQs are available for the given selection.
-    Pass any combination of subject_ids, chapter_ids, lesson_ids, sub_lesson_ids.
-    All selected IDs are unioned together.
-    """
     qs = _build_mcq_queryset(request.GET)
     return JsonResponse({"available_mcq_count": qs.count()})
 
@@ -365,9 +536,9 @@ def start_exam(request):
 
     # Only create ExamAttempt for actual exam sessions (not admin exports)
     attempt = None
-    if not include_answers:
+    
         # Create ExamAttempt (results empty – filled on submit)
-        attempt = ExamAttempt.objects.create(
+    attempt = ExamAttempt.objects.create(
             user=request.user,
             subject_id=primary_subject_id,
             time_limit_minutes=time_limit,
@@ -396,10 +567,13 @@ def start_exam(request):
         
         # Include correct_answer, explanation, and previous_year ONLY for admin exports
         if include_answers:
-            question_data["correct_answer"] = m["correct_answer"]
-            question_data["explanation"] = m["explanation"] if m["explanation"] else None
-            question_data["previous_year"] = m["previous_year"] if m["previous_year"] else None
-            question_data["has_previous_year"] = bool(m["previous_year"])
+            question_data["correct_answer"]  = m["correct_answer"]
+            question_data["explanation"]     = m["explanation"] or None
+            question_data["previous_year"]   = m["previous_year"] or None
+            question_data["subject_id"]      = m["subject_id"]       # already there
+            question_data["chapter_id"]      = m["chapter_id"]       # already there
+            question_data["lesson_id"]       = m["lesson_id"]        # ADD THIS
+            question_data["sub_lesson_id"]   = m["sub_lesson_id"]    # ADD THIS
         
         questions_for_client.append(question_data)
 
@@ -642,7 +816,29 @@ from .models import (MCQ, Chapter, Lesson, Subject, SubLesson,
 
 @login_required
 def practice_home(request):
-    """Render the practice page."""
+    enrollments = UserCourseEnrollment.objects.filter(
+        user=request.user,
+        status="active",
+       
+    ).select_related(
+        'course'
+    ).prefetch_related(
+        'course__subjects'
+    )
+
+
+    subjects = Subject.objects.filter(
+        courses__enrollments__in=enrollments
+    ).distinct()
+
+    total_subject = subjects.count()
+    if total_subject==0:
+        
+        messages.error(
+        request,
+        "আপনার কোনো কোর্স অ্যাক্টিভ নেই"
+    )
+        return redirect("course_list_page")
     return render(request, 'exam/practice.html')
 
 
@@ -1448,36 +1644,40 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 
-
 def generate_question_pdf(request):
-    """Generate question paper PDF from uploaded JSON"""
     if request.method == 'POST' and request.FILES.get('json_file'):
         json_file = request.FILES['json_file']
         data = json.load(json_file)
 
-        # Add 'previous_year' marker if present
-        for q in data.get('questions', []):
-            if 'previous_year' in q and q['previous_year']:
-                q['has_previous_year'] = True
-            else:
-                q['has_previous_year'] = False
+        # Handle both formats: bare list OR dict with 'questions' key
+        if isinstance(data, list):
+            questions = data
+            total = len(data)
+            exported_at = None
+            selection = {}
+        else:
+            questions = data.get('questions', [])
+            total = data.get('total', len(questions))
+            exported_at = data.get('exported_at')
+            selection = data.get('selection', {})
+
+        for q in questions:
+            q['has_previous_year'] = bool(q.get('previous_year'))
 
         context = {
-            'institute_name': request.POST.get('institute_name', 'Your Institute Name'),
-            'exam_name': request.POST.get('exam_name', 'MCQ Examination'),
-            'total_questions': data.get('total', len(data.get('questions', []))),
-            'total_marks': data.get('total', 0),
-            'exported_at': data.get('exported_at'),
-            'selection': data.get('selection', {}),
-            'questions': data.get('questions', []),
-            'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'institute_name':  request.POST.get('institute_name', 'Your Institute Name'),
+            'exam_name':       request.POST.get('exam_name', 'MCQ Examination'),
+            'total_questions': total,
+            'total_marks':     total,
+            'exported_at':     exported_at,
+            'selection':       selection,
+            'questions':       questions,
+            'generated_at':    datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         }
 
         html_string = render_to_string('pdf/question_paper.html', context)
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="question_paper.pdf"'
-
-        # Convert HTML to PDF
         pisa_status = pisa.CreatePDF(html_string, dest=response)
         if pisa_status.err:
             return HttpResponse('PDF generation error', status=500)
@@ -1487,23 +1687,29 @@ def generate_question_pdf(request):
 
 
 def generate_answer_pdf(request):
-    """Generate answer sheet PDF from uploaded JSON"""
     if request.method == 'POST' and request.FILES.get('json_file'):
         json_file = request.FILES['json_file']
         data = json.load(json_file)
 
+        # Handle both formats
+        if isinstance(data, list):
+            questions = data
+            exported_at = None
+        else:
+            questions = data.get('questions', [])
+            exported_at = data.get('exported_at')
+
         context = {
             'institute_name': request.POST.get('institute_name', 'Your Institute Name'),
-            'exam_name': request.POST.get('exam_name', 'MCQ Examination'),
-            'questions': data.get('questions', []),
-            'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'exported_at': data.get('exported_at'),
+            'exam_name':      request.POST.get('exam_name', 'MCQ Examination'),
+            'questions':      questions,
+            'generated_at':   datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'exported_at':    exported_at,
         }
 
         html_string = render_to_string('pdf/answer_sheet.html', context)
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="answer_sheet.pdf"'
-
         pisa_status = pisa.CreatePDF(html_string, dest=response)
         if pisa_status.err:
             return HttpResponse('PDF generation error', status=500)

@@ -1,467 +1,569 @@
+<!-- templates/mcq_upload.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Upload MCQ | Modern Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>Bulk MCQ Upload System</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        textarea.json-area { 
+            font-family: 'Courier New', monospace; 
+            font-size: 13px;
+            background-color: #f8f9fa;
         }
-
-        /* Import Google Fonts for cleaner typography */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
-
-        body {
-            background: radial-gradient(circle at 10% 30%, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
-            position: relative;
+        .json-error {
+            border-color: #dc2626 !important;
+            background-color: #fee2e2 !important;
         }
-
-        /* animated grain / noise overlay for premium texture */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 1;
+        .validation-error {
+            border-left: 4px solid #dc2626;
+            background-color: #fef2f2;
         }
-
-        .container {
-            width: 100%;
-            max-width: 580px;
-            background: rgba(22, 22, 35, 0.75);
-            backdrop-filter: blur(14px);
-            border-radius: 2rem;
-            padding: 2rem 1.8rem;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
-            transition: all 0.25s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .validation-success {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
         }
-
-        /* subtle glow on hover */
-        .container:hover {
-            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
-        }
-
-        h2 {
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.9rem;
-            background: linear-gradient(135deg, #FFFFFF, #c0b9ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        h2::before {
-            content: "📚";
-            font-size: 1.9rem;
-            background: none;
-            -webkit-background-clip: unset;
-            color: #c1b3ff;
-        }
-
-        .subhead {
-            text-align: center;
-            color: #a7a9c0;
-            font-size: 0.8rem;
-            margin-bottom: 1.8rem;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-            display: inline-block;
-            width: auto;
-            margin-left: auto;
-            margin-right: auto;
-            padding-bottom: 6px;
-        }
-
-        label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #e2e4ff;
-            margin-top: 1.2rem;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        label::before {
-            content: "✨";
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        /* Different icons per label using pseudo class nth-of-type */
-        label:nth-of-type(1)::before { content: "📖"; }
-        label:nth-of-type(2)::before { content: "📑"; }
-        label:nth-of-type(3)::before { content: "🎯"; }
-        label:nth-of-type(4)::before { content: "🔖"; }
-        label:nth-of-type(5)::before { content: "📝"; }
-
-        select, textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(10, 10, 20, 0.6);
-            color: #f0f0ff;
-            outline: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            backdrop-filter: blur(4px);
-            cursor: pointer;
-        }
-
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b9b3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1rem;
-        }
-
-        textarea {
-            resize: vertical;
-            font-family: 'Menlo', 'Fira Code', monospace;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            background: rgba(8, 8, 16, 0.7);
-        }
-
-        select:hover, textarea:hover {
-            border-color: rgba(130, 110, 255, 0.7);
-            background: rgba(20, 18, 38, 0.8);
-        }
-
-        select:focus, textarea:focus {
-            border-color: #7c6eff;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.3);
-            background: #14122b;
-        }
-
-        button {
-            width: 100%;
-            margin-top: 28px;
-            padding: 14px 0;
-            border: none;
-            border-radius: 40px;
-            background: linear-gradient(95deg, #5f4bdb, #8b6ef0);
-            color: white;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 20px -6px rgba(90, 60, 200, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        button:hover {
-            background: linear-gradient(95deg, #6e58f0, #9c80ff);
-            transform: translateY(-2px);
-            box-shadow: 0 14px 26px -8px rgba(100, 70, 230, 0.5);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .success {
-            color: #b3ffcf;
-            background: rgba(39, 174, 96, 0.18);
-            padding: 12px 16px;
-            border-radius: 60px;
-            text-align: center;
-            margin-bottom: 18px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(70, 230, 130, 0.3);
-            letter-spacing: 0.2px;
-        }
-
-        .error {
-            color: #ffb4b4;
-            background: rgba(220, 53, 69, 0.18);
-            padding: 12px 16px;
-            border-radius: 60px;
-            text-align: center;
-            margin-bottom: 18px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 80, 80, 0.3);
-        }
-
-        /* custom placeholder style */
-        textarea::placeholder {
-            color: #6d6c8a;
-            font-weight: 400;
-            font-family: 'Inter', monospace;
-            font-size: 0.8rem;
-        }
-
-        /* subtle spinner while loading? not needed, but adds micro-interaction */
-        select:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* responsive + mobile improvements */
-        @media (max-width: 550px) {
-            .container {
-                padding: 1.5rem 1.2rem;
-                border-radius: 1.5rem;
-            }
-
-            h2 {
-                font-size: 1.5rem;
-            }
-
-            h2::before {
-                font-size: 1.5rem;
-            }
-
-            button {
-                padding: 12px 0;
-                font-size: 0.9rem;
-            }
-
-            label {
-                font-size: 0.78rem;
-            }
-
-            select, textarea {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-            }
-        }
-
-        /* custom card inner spacing */
-        .form-group {
-            margin-bottom: 0.2rem;
-        }
-
-        /* add micro-animation for select dropdowns */
-        select, textarea, button {
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        }
-
-        /* subtle glass scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1e1e2a;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #6b5bce;
-            border-radius: 10px;
+        .error-list {
+            max-height: 300px;
+            overflow-y: auto;
         }
     </style>
 </head>
+<body class="bg-gray-100 font-sans antialiased">
 
-<body>
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-indigo-600 px-6 py-4">
+            <h1 class="text-2xl font-bold text-white">📚 Bulk MCQ Upload System</h1>
+            <p class="text-indigo-100 text-sm">Upload multiple MCQs at once with JSON format</p>
+        </div>
 
-<div class="container">
-    <h2>Upload MCQs</h2>
-    <div style="text-align: center;">
-        <div class="subhead">JSON based · smart upload</div>
+        <div class="p-6">
+            <!-- Notification Area -->
+            <div id="notification" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+            <!-- Default Hierarchy Selectors -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-indigo-200">
+                <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <span class="text-indigo-600">📌</span> Default Hierarchy (applies to all MCQs unless overridden)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block font-semibold mb-1 text-gray-700">Default Subject <span class="text-red-500">*</span></label>
+                        <select id="bulkSubjectSelect" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+                            <option value="">-- Select Subject --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1 text-gray-700">Default Chapter</label>
+                        <select id="bulkChapterSelect" disabled class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                            <option value="">-- No Chapter --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1 text-gray-700">Default Lesson</label>
+                        <select id="bulkLessonSelect" disabled class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                            <option value="">-- No Lesson --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1 text-gray-700">Default Sub Lesson</label>
+                        <select id="bulkSubLessonSelect" disabled class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                            <option value="">-- No SubLesson --</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                    <span class="text-indigo-500">💡</span> 
+                    JSON objects can override defaults by including their own <code class="bg-gray-200 px-1 rounded">subject_id</code>, <code class="bg-gray-200 px-1 rounded">chapter_id</code>, etc.
+                </p>
+            </div>
+
+            <!-- JSON Input Area -->
+            <div class="mb-6">
+                <label class="block font-semibold mb-2 text-gray-700">📝 Paste JSON Array of MCQs</label>
+                <textarea id="bulkJson" rows="14" class="json-area w-full border-2 rounded-lg px-4 py-3 font-mono text-sm" placeholder='[
+  {
+    "question": "What is Django?",
+    "option_1": "Framework",
+    "option_2": "Language",
+    "option_3": "Database",
+    "option_4": "Server",
+    "correct_answer": 1,
+    "previous_year": "2023",
+    "explanation": "Django is a web framework."
+  },
+  {
+    "subject_id": 2,
+    "chapter_id": 5,
+    "question": "What is the capital of France?",
+    "option_1": "Berlin",
+    "option_2": "Madrid",
+    "option_3": "Paris",
+    "option_4": "Lisbon",
+    "correct_answer": 3,
+    "previous_year": "UPSC 2022",
+    "explanation": "Paris is the capital of France."
+  }
+]'></textarea>
+                <div class="flex justify-between items-center mt-2">
+                    <p class="text-xs text-gray-500">
+                        <span class="text-green-600">✓</span> Required: question, option_1-4, correct_answer (1-4)
+                        <br>
+                        <span class="text-blue-600">⟳</span> Optional: subject_id, chapter_id, lesson_id, sub_lesson_id, previous_year, explanation
+                    </p>
+                    <button id="formatJsonBtn" type="button" class="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">Format JSON</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mb-6">
+                <button id="bulkUploadBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200 shadow-md">
+                    🚀 Upload All MCQs
+                </button>
+                <button id="clearBulkBtn" type="button" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg transition">
+                    🗑️ Clear
+                </button>
+                <button id="validateJsonBtn" type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                    ✓ Validate JSON
+                </button>
+            </div>
+
+            <!-- Results Area -->
+            <div id="bulkResult" class="mt-6 hidden"></div>
+            
+            <!-- Example Format -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <details>
+                    <summary class="cursor-pointer font-semibold text-gray-600">📖 Click to see JSON format example</summary>
+                    <pre class="mt-3 text-xs bg-gray-900 text-green-400 p-3 rounded overflow-x-auto">
+[
+  {
+    "subject_id": 1,
+    "chapter_id": 2,
+    "lesson_id": 3,
+    "sub_lesson_id": 4,
+    "question": "What is Python?",
+    "option_1": "Programming Language",
+    "option_2": "Snake",
+    "option_3": "Framework",
+    "option_4": "Database",
+    "correct_answer": 1,
+    "previous_year": "HSC 2020",
+    "explanation": "Python is a high-level programming language."
+  },
+  {
+    "question": "Simple MCQ without hierarchy (uses defaults)",
+    "option_1": "Answer 1",
+    "option_2": "Answer 2", 
+    "option_3": "Answer 3",
+    "option_4": "Answer 4",
+    "correct_answer": 2
+  }
+]</pre>
+                </details>
+            </div>
+        </div>
     </div>
-
-    {% if success %}
-    <p class="success">✓ {{ success }}</p>
-    {% endif %}
-
-    {% if error %}
-    <p class="error">⚠ {{ error }}</p>
-    {% endif %}
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <!-- Subject -->
-        <label>Subject</label>
-        <select id="subject">
-            <option value="">Select Subject</option>
-            {% for s in subjects %}
-            <option value="{{ s.id }}">{{ s.name }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Chapter -->
-        <label>Chapter</label>
-        <select id="chapter">
-            <option value="">-- first select subject --</option>
-        </select>
-
-        <!-- Lesson -->
-        <label>Lesson</label>
-        <select id="lesson">
-            <option value="">-- first select chapter --</option>
-        </select>
-
-        <!-- SubLesson -->
-        <label>Sub Lesson</label>
-        <select id="sub_lesson" name="sub_lesson">
-            <option value="">-- first select lesson --</option>
-        </select>
-
-        <!-- JSON -->
-        <label>Paste JSON</label>
-        <textarea name="json_data" rows="8" placeholder='Example: [{"question": "What is Django?", "options": ["A", "B", "C"], "answer": "A"}]'></textarea>
-
-        <button type="submit">
-            <span>🚀</span> Upload MCQs
-        </button>
-    </form>
 </div>
 
 <script>
-/* Load Chapters */
-document.getElementById("subject").addEventListener("change", function() {
-    let subjectId = this.value;
-    let chapterSelect = document.getElementById("chapter");
-    let lessonSelect = document.getElementById("lesson");
-    let subLessonSelect = document.getElementById("sub_lesson");
-    
-    // reset downstream selects
-    lessonSelect.innerHTML = '<option value="">-- first select chapter --</option>';
-    subLessonSelect.innerHTML = '<option value="">-- first select lesson --</option>';
-    
-    if (!subjectId) {
-        chapterSelect.innerHTML = '<option value="">Select Subject first</option>';
-        return;
-    }
-    
-    fetch(`/get-chapters/${subjectId}/`)
-    .then(res => res.json())
-    .then(data => {
-        chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
-        if (data.length === 0) {
-            chapterSelect.innerHTML += '<option disabled>No chapters available</option>';
+    // ---------- CSRF TOKEN ----------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-        data.forEach(c => {
-            chapterSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-        });
-    })
-    .catch(err => {
-        console.warn("Error fetching chapters", err);
-        chapterSelect.innerHTML = '<option value="">Error loading chapters</option>';
-    });
-});
-
-/* Load Lessons */
-document.getElementById("chapter").addEventListener("change", function() {
-    let chapterId = this.value;
-    let lessonSelect = document.getElementById("lesson");
-    let subLessonSelect = document.getElementById("sub_lesson");
-    
-    subLessonSelect.innerHTML = '<option value="">-- first select lesson --</option>';
-    
-    if (!chapterId) {
-        lessonSelect.innerHTML = '<option value="">-- first select chapter --</option>';
-        return;
+        return cookieValue;
     }
+    const csrftoken = getCookie('csrftoken');
+
+    // DOM Elements
+    const notifDiv = document.getElementById('notification');
+    const bulkJsonArea = document.getElementById('bulkJson');
+    const bulkUploadBtn = document.getElementById('bulkUploadBtn');
+    const bulkResultDiv = document.getElementById('bulkResult');
+    const clearBulkBtn = document.getElementById('clearBulkBtn');
+    const formatJsonBtn = document.getElementById('formatJsonBtn');
+    const validateJsonBtn = document.getElementById('validateJsonBtn');
     
-    fetch(`/get-lessons/${chapterId}/`)
-    .then(res => res.json())
-    .then(data => {
-        lessonSelect.innerHTML = '<option value="">Select Lesson</option>';
-        if (data.length === 0) {
-            lessonSelect.innerHTML += '<option disabled>No lessons found</option>';
+    const bulkSubjectSelect = document.getElementById('bulkSubjectSelect');
+    const bulkChapterSelect = document.getElementById('bulkChapterSelect');
+    const bulkLessonSelect = document.getElementById('bulkLessonSelect');
+    const bulkSubLessonSelect = document.getElementById('bulkSubLessonSelect');
+
+    // Helper: Show notification with color
+    function showNotification(msg, type = 'success') {
+        notifDiv.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+        if (type === 'success') {
+            notifDiv.classList.add('bg-green-100', 'text-green-800');
+        } else if (type === 'error') {
+            notifDiv.classList.add('bg-red-100', 'text-red-800');
+        } else if (type === 'warning') {
+            notifDiv.classList.add('bg-yellow-100', 'text-yellow-800');
         }
-        data.forEach(l => {
-            lessonSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
-        });
-    })
-    .catch(err => {
-        console.warn("Lessons fetch error", err);
-        lessonSelect.innerHTML = '<option value="">Failed to load lessons</option>';
-    });
-});
-
-/* Load SubLessons */
-document.getElementById("lesson").addEventListener("change", function() {
-    let lessonId = this.value;
-    let subSelect = document.getElementById("sub_lesson");
-    
-    if (!lessonId) {
-        subSelect.innerHTML = '<option value="">-- first select lesson --</option>';
-        return;
+        notifDiv.innerHTML = msg;
+        setTimeout(() => notifDiv.classList.add('hidden'), 8000);
     }
-    
-    fetch(`/get-sub-lessons/${lessonId}/`)
-    .then(res => res.json())
-    .then(data => {
-        subSelect.innerHTML = '<option value="">Select SubLesson</option>';
-        if (data.length === 0) {
-            subSelect.innerHTML += '<option disabled>No sub-lessons available</option>';
+
+    // Helper: Remove JSON error styling
+    function removeJsonError() {
+        bulkJsonArea.classList.remove('json-error');
+    }
+
+    // Helper: Add JSON error styling
+    function addJsonError() {
+        bulkJsonArea.classList.add('json-error');
+    }
+
+    // ========== LOAD HIERARCHY DATA ==========
+    async function loadBulkSubjects() {
+        try {
+            const res = await fetch('/api/subjects/upload/');
+            if (!res.ok) throw new Error('Failed to load subjects');
+            const subjects = await res.json();
+            bulkSubjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+            subjects.forEach(s => { 
+                bulkSubjectSelect.appendChild(new Option(s.name, s.id)); 
+            });
+        } catch (err) {
+            showNotification('Failed to load subjects: ' + err.message, 'error');
         }
-        data.forEach(s => {
-            subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-        });
-    })
-    .catch(err => {
-        console.warn("SubLessons error", err);
-        subSelect.innerHTML = '<option value="">Error loading sub lessons</option>';
-    });
-});
+    }
+    
+    async function loadBulkChapters(subjectId) {
+        if (!subjectId) { 
+            bulkChapterSelect.disabled = true; 
+            bulkChapterSelect.innerHTML = '<option value="">-- No Chapter --</option>'; 
+            resetBulkLessons(); 
+            return; 
+        }
+        try {
+            const res = await fetch(`/api/chapters/upload/?subject_id=${subjectId}`);
+            const chapters = await res.json();
+            bulkChapterSelect.disabled = false; 
+            bulkChapterSelect.innerHTML = '<option value="">-- No Chapter --</option>';
+            chapters.forEach(c => { bulkChapterSelect.appendChild(new Option(c.name, c.id)); });
+            resetBulkLessons();
+        } catch (err) {
+            showNotification('Failed to load chapters', 'error');
+        }
+    }
+    
+    async function loadBulkLessons(chapterId) {
+        if (!chapterId) { 
+            bulkLessonSelect.disabled = true; 
+            bulkLessonSelect.innerHTML = '<option value="">-- No Lesson --</option>'; 
+            resetBulkSubLessons(); 
+            return; 
+        }
+        try {
+            const res = await fetch(`/api/lessons/upload/?chapter_id=${chapterId}`);
+            const lessons = await res.json();
+            bulkLessonSelect.disabled = false; 
+            bulkLessonSelect.innerHTML = '<option value="">-- No Lesson --</option>';
+            lessons.forEach(l => { bulkLessonSelect.appendChild(new Option(l.name, l.id)); });
+            resetBulkSubLessons();
+        } catch (err) {
+            showNotification('Failed to load lessons', 'error');
+        }
+    }
+    
+    async function loadBulkSubLessons(lessonId) {
+        if (!lessonId) { 
+            bulkSubLessonSelect.disabled = true; 
+            bulkSubLessonSelect.innerHTML = '<option value="">-- No SubLesson --</option>'; 
+            return; 
+        }
+        try {
+            const res = await fetch(`/api/sub_lessons/upload/?lesson_id=${lessonId}`);
+            const subs = await res.json();
+            bulkSubLessonSelect.disabled = false; 
+            bulkSubLessonSelect.innerHTML = '<option value="">-- No SubLesson --</option>';
+            subs.forEach(sl => { bulkSubLessonSelect.appendChild(new Option(sl.name, sl.id)); });
+        } catch (err) {
+            showNotification('Failed to load sub lessons', 'error');
+        }
+    }
+    
+    function resetBulkLessons() { 
+        bulkLessonSelect.disabled = true; 
+        bulkLessonSelect.innerHTML = '<option value="">-- No Lesson --</option>'; 
+        resetBulkSubLessons(); 
+    }
+    
+    function resetBulkSubLessons() { 
+        bulkSubLessonSelect.disabled = true; 
+        bulkSubLessonSelect.innerHTML = '<option value="">-- No SubLesson --</option>'; 
+    }
 
-// Optional: if any pre-selected values (e.g., form errors) we keep behavior intact.
-// Also ensure that if subject is pre-filled from backend, we trigger loading? 
-// but original logic doesn't require that, but we add for consistency: 
-// when page loads, if subject has a value, trigger its change event manually (if needed)
-document.addEventListener("DOMContentLoaded", function() {
-    let subjectEl = document.getElementById("subject");
-    if (subjectEl && subjectEl.value) {
-        // trigger change event to populate chapters dynamically
-        let changeEvent = new Event('change', { bubbles: true });
-        subjectEl.dispatchEvent(changeEvent);
+    bulkSubjectSelect.addEventListener('change', e => loadBulkChapters(e.target.value));
+    bulkChapterSelect.addEventListener('change', e => loadBulkLessons(e.target.value));
+    bulkLessonSelect.addEventListener('change', e => loadBulkSubLessons(e.target.value));
+
+    // ========== VALIDATE JSON FUNCTION ==========
+    function validateJSON(jsonText) {
+        const errors = [];
+        let parsedData = null;
+        
+        // Check if empty
+        if (!jsonText.trim()) {
+            errors.push('JSON cannot be empty');
+            return { valid: false, errors, data: null };
+        }
+        
+        // Parse JSON
+        try {
+            parsedData = JSON.parse(jsonText);
+        } catch (e) {
+            errors.push(`Invalid JSON format: ${e.message}`);
+            return { valid: false, errors, data: null };
+        }
+        
+        // Check if array
+        if (!Array.isArray(parsedData)) {
+            errors.push('Root must be a JSON array');
+            return { valid: false, errors, data: null };
+        }
+        
+        // Check if empty array
+        if (parsedData.length === 0) {
+            errors.push('Array is empty');
+            return { valid: false, errors, data: null };
+        }
+        
+        // Validate each MCQ
+        for (let i = 0; i < parsedData.length; i++) {
+            const item = parsedData[i];
+            const rowNum = i + 1;
+            
+            // Check required fields
+            if (!item.question || typeof item.question !== 'string' || !item.question.trim()) {
+                errors.push(`Row ${rowNum}: Missing or invalid 'question' field`);
+            }
+            if (!item.option_1 || typeof item.option_1 !== 'string') {
+                errors.push(`Row ${rowNum}: Missing 'option_1'`);
+            }
+            if (!item.option_2 || typeof item.option_2 !== 'string') {
+                errors.push(`Row ${rowNum}: Missing 'option_2'`);
+            }
+            if (!item.option_3 || typeof item.option_3 !== 'string') {
+                errors.push(`Row ${rowNum}: Missing 'option_3'`);
+            }
+            if (!item.option_4 || typeof item.option_4 !== 'string') {
+                errors.push(`Row ${rowNum}: Missing 'option_4'`);
+            }
+            if (!item.correct_answer || ![1, 2, 3, 4].includes(item.correct_answer)) {
+                errors.push(`Row ${rowNum}: 'correct_answer' must be 1, 2, 3, or 4`);
+            }
+        }
+        
+        return { valid: errors.length === 0, errors, data: parsedData };
     }
-    
-    // additional check: if chapter already pre-filled (due to form re-render)
-    let chapterEl = document.getElementById("chapter");
-    if (chapterEl && chapterEl.value && subjectEl.value) {
-        let chapEvent = new Event('change', { bubbles: true });
-        chapterEl.dispatchEvent(chapEvent);
-    }
-    
-    let lessonEl = document.getElementById("lesson");
-    if (lessonEl && lessonEl.value && chapterEl && chapterEl.value) {
-        let lessonEvent = new Event('change', { bubbles: true });
-        lessonEl.dispatchEvent(lessonEvent);
-    }
-});
+
+    // ========== FORMAT JSON ==========
+    formatJsonBtn.addEventListener('click', () => {
+        const jsonText = bulkJsonArea.value.trim();
+        if (!jsonText) {
+            showNotification('Nothing to format', 'warning');
+            return;
+        }
+        
+        try {
+            const parsed = JSON.parse(jsonText);
+            const formatted = JSON.stringify(parsed, null, 2);
+            bulkJsonArea.value = formatted;
+            removeJsonError();
+            showNotification('JSON formatted successfully', 'success');
+        } catch (e) {
+            addJsonError();
+            showNotification(`Cannot format: ${e.message}`, 'error');
+        }
+    });
+
+    // ========== VALIDATE JSON ==========
+    validateJsonBtn.addEventListener('click', () => {
+        const jsonText = bulkJsonArea.value;
+        const result = validateJSON(jsonText);
+        
+        if (result.valid) {
+            removeJsonError();
+            showNotification(`✅ JSON is valid! Found ${result.data.length} MCQ(s) ready to upload.`, 'success');
+            
+            // Show quick summary in result area
+            bulkResultDiv.classList.remove('hidden');
+            bulkResultDiv.innerHTML = `
+                <div class="validation-success rounded-lg p-4">
+                    <strong class="text-green-700">✓ Validation Passed</strong><br>
+                    <span class="text-sm">Found ${result.data.length} valid MCQ(s)</span>
+                    <div class="mt-2 text-xs text-gray-600">
+                        <strong>Summary:</strong>
+                        <ul class="list-disc pl-5 mt-1">
+                            <li>All questions have required fields</li>
+                            <li>Correct answers are valid (1-4)</li>
+                            <li>Ready for upload</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        } else {
+            addJsonError();
+            let errorHtml = `<div class="validation-error rounded-lg p-4"><strong class="text-red-700">❌ Validation Failed</strong><br>`;
+            errorHtml += `<div class="error-list mt-2"><ul class="list-disc pl-5 text-sm text-red-600">`;
+            result.errors.forEach(err => {
+                errorHtml += `<li>${err}</li>`;
+            });
+            errorHtml += `</ul></div></div>`;
+            bulkResultDiv.innerHTML = errorHtml;
+            bulkResultDiv.classList.remove('hidden');
+            showNotification(`Found ${result.errors.length} validation error(s). Check details below.`, 'error');
+        }
+    });
+
+    // ========== CLEAR ==========
+    clearBulkBtn.addEventListener('click', () => { 
+        bulkJsonArea.value = ''; 
+        bulkResultDiv.classList.add('hidden');
+        removeJsonError();
+        showNotification('Cleared', 'success');
+    });
+
+    // ========== BULK UPLOAD ==========
+    bulkUploadBtn.addEventListener('click', async () => {
+        const jsonText = bulkJsonArea.value.trim();
+        
+        // Validate first
+        const validation = validateJSON(jsonText);
+        if (!validation.valid) {
+            addJsonError();
+            let errorHtml = `<div class="validation-error rounded-lg p-4"><strong class="text-red-700">❌ Cannot Upload - Validation Failed</strong><br>`;
+            errorHtml += `<div class="error-list mt-2"><ul class="list-disc pl-5 text-sm text-red-600">`;
+            validation.errors.slice(0, 10).forEach(err => {
+                errorHtml += `<li>${err}</li>`;
+            });
+            if (validation.errors.length > 10) {
+                errorHtml += `<li>... and ${validation.errors.length - 10} more errors</li>`;
+            }
+            errorHtml += `</ul></div></div>`;
+            bulkResultDiv.innerHTML = errorHtml;
+            bulkResultDiv.classList.remove('hidden');
+            showNotification(`Please fix ${validation.errors.length} validation error(s) before uploading`, 'error');
+            return;
+        }
+        
+        removeJsonError();
+        
+        // Get default hierarchy values
+        const defaults = {
+            subject_id: bulkSubjectSelect.value ? parseInt(bulkSubjectSelect.value) : null,
+            chapter_id: bulkChapterSelect.value ? parseInt(bulkChapterSelect.value) : null,
+            lesson_id: bulkLessonSelect.value ? parseInt(bulkLessonSelect.value) : null,
+            sub_lesson_id: bulkSubLessonSelect.value ? parseInt(bulkSubLessonSelect.value) : null,
+        };
+
+        // Validate default subject
+        if (!defaults.subject_id) {
+            let hasSubjectId = validation.data.some(item => item.subject_id && item.subject_id !== null);
+            if (!hasSubjectId) {
+                showNotification('Either select a default Subject OR provide subject_id in each JSON object', 'error');
+                return;
+            }
+        }
+
+        // Show uploading state
+        bulkUploadBtn.disabled = true;
+        bulkUploadBtn.innerHTML = '<span class="animate-pulse">⏳ Uploading...</span>';
+        
+        try {
+            const response = await fetch('/api/bulk-upload/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ mcqs: validation.data, defaults: defaults })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                let html = `<div class="rounded-lg p-4 ${result.created === result.total_submitted ? 'bg-green-50 border border-green-300' : 'bg-yellow-50 border border-yellow-300'}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-2xl">${result.created === result.total_submitted ? '✅' : '⚠️'}</span>
+                        <strong class="text-lg">Bulk Upload Completed</strong>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+                        <div class="bg-white rounded p-2 text-center">
+                            <div class="text-2xl font-bold text-green-600">${result.created}</div>
+                            <div class="text-xs text-gray-500">Successfully Created</div>
+                        </div>
+                        <div class="bg-white rounded p-2 text-center">
+                            <div class="text-2xl font-bold text-red-600">${result.errors.length}</div>
+                            <div class="text-xs text-gray-500">Failed</div>
+                        </div>
+                    </div>`;
+                
+                if (result.errors.length > 0) {
+                    html += `<div class="mt-3">
+                        <details class="cursor-pointer">
+                            <summary class="font-semibold text-red-600">❌ View ${result.errors.length} Error(s)</summary>
+                            <div class="error-list mt-2 bg-red-50 rounded p-3">
+                                <ul class="list-disc pl-5 text-sm text-red-700">`;
+                    result.errors.forEach(err => {
+                        html += `<li class="mb-1">${err}</li>`;
+                    });
+                    html += `</ul></div></details></div>`;
+                }
+                
+                html += `<div class="mt-3 text-xs text-gray-500">Total submitted: ${result.total_submitted}</div>`;
+                html += `</div>`;
+                
+                bulkResultDiv.innerHTML = html;
+                bulkResultDiv.classList.remove('hidden');
+                
+                if (result.created > 0) {
+                    showNotification(`✅ Successfully uploaded ${result.created} MCQ(s)! ${result.errors.length} failed.`, result.errors.length > 0 ? 'warning' : 'success');
+                    // Clear on success only if all succeeded
+                    if (result.errors.length === 0) {
+                        bulkJsonArea.value = '';
+                    }
+                } else {
+                    showNotification(`Upload failed: ${result.errors[0] || 'Unknown error'}`, 'error');
+                }
+            } else {
+                bulkResultDiv.innerHTML = `<div class="validation-error rounded-lg p-4">
+                    <strong class="text-red-700">❌ Server Error</strong><br>
+                    <span class="text-sm">${result.error || 'Something went wrong'}</span>
+                </div>`;
+                bulkResultDiv.classList.remove('hidden');
+                showNotification(`Server error: ${result.error || 'Upload failed'}`, 'error');
+            }
+        } catch (err) {
+            showNotification(`Network error: ${err.message}`, 'error');
+            bulkResultDiv.innerHTML = `<div class="validation-error rounded-lg p-4">
+                <strong class="text-red-700">❌ Network Error</strong><br>
+                <span class="text-sm">${err.message}</span>
+            </div>`;
+            bulkResultDiv.classList.remove('hidden');
+        } finally {
+            bulkUploadBtn.disabled = false;
+            bulkUploadBtn.innerHTML = '🚀 Upload All MCQs';
+        }
+    });
+
+    // Real-time validation as user types (optional - removes error border when typing)
+    bulkJsonArea.addEventListener('input', () => {
+        removeJsonError();
+    });
+
+    // Initial load
+    loadBulkSubjects();
 </script>
-
 </body>
 </html>
